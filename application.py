@@ -7,6 +7,10 @@ application = Flask(__name__)
 def hello_world():
     return render_template('index.html')
 
+# @application.errorhandler(404)
+# def quatrozeroquatro(e):
+#     return render_template('404.html')
+
 
 if __name__ == '__main__':
     application.run()
