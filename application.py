@@ -30,6 +30,7 @@ def updateData():
     for row in data:
         writer.writerow(row)
 
+@application.route('/dashboard')
 @application.route('/')
 def hello_world():
     return render_template('dashboard.html')
@@ -38,9 +39,9 @@ def hello_world():
 def table():
     return render_template('table.html')
 
-# @application.errorhandler(404)
-# def quatrozeroquatro(e):
-#     return render_template('404.html')
+@application.errorhandler(404)
+def not_found(e):
+     return render_template('404.html')
 
 if __name__ == '__main__':
     application.run()
