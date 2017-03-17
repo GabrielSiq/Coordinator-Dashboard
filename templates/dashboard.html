@@ -4,22 +4,41 @@
     <div class="row">
         <div class="col-md-4">
             <div class="card">
-                <div class="content">
-                    {{ df|safe }}
-{#                    <table>#}
-{#                        {% for matricula, periodo, disciplina, credito, turma, grau, sit, professor in df %}#}
-{#                            <tr>#}
-{#                                <td>{{ matricula|e }}</td>#}
-{#                                <td>{{ periodo|e }}</td>#}
-{#                                <td>{{ disciplina|e }}</td>#}
-{#                                <td>{{ credito|e }}</td>#}
-{#                                <td>{{ turma|e }}</td>#}
-{#                                <td>{{ grau|e }}</td>#}
-{#                                <td>{{ sit|e }}</td>#}
-{#                                <td>{{ professor|e }}</td>#}
-{#                            </tr>#}
-{#                        {% endfor %}#}
-{#                    </table>#}
+                <div class="header">
+                    <h4 class="title">Cancelamento <span class="glyphicon glyphicon-triangle-bottom"></h4>
+                    <p class="category">Disciplinas com <span style="color: green; font-weight: bold">menor</span> taxa de cancelamento.</p>
+                </div>
+                <div class="content table-responsive table-full-width">
+                    <table class="table table-hover table-striped">
+                        <tbody>
+                            {% for row in canc.iteritems() %}
+                                <tr>
+                                    <td>{{ row[0] }}</td>
+                                    <td>{{ (row[1] * 100)|round(1) }}%</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="header">
+                    <h4 class="title">Cancelamento <span class="glyphicon glyphicon-triangle-top"></h4>
+                    <p class="category">Disciplinas com <span style="color: red; font-weight: bold">maior</span> taxa de cancelamento<span class="glyphicon glyphicon-triangle-top"></span>.</p>
+                </div>
+                <div class="content table-responsive table-full-width">
+                    <table class="table table-hover table-striped">
+                        <tbody>
+                            {% for row in canc2.iteritems() %}
+                                <tr>
+                                    <td>{{ row[0] }}</td>
+                                    <td>{{ (row[1] * 100)|round(1) }}%</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
