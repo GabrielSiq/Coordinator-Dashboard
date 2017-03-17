@@ -1,6 +1,6 @@
 branch-defaults:
   master:
-    environment: null
+    environment: dashboard-env
     group_suffix: null
 global:
   application_name: dashboard-prototype
