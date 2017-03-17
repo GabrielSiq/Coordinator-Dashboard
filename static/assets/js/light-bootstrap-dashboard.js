@@ -50,6 +50,10 @@ $(document).ready(function(){
     }).on("blur", function(){
         $(this).parent(".input-group").removeClass("input-group-focus");
     });
+
+    //      Sets active class for menu
+    $('.nav a[href^="/' + location.pathname.split("/")[1] + '"]').parent('li').addClass('active');
+
       
 });
 

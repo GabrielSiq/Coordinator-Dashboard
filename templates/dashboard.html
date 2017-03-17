@@ -2,6 +2,29 @@
 
 {% block content %}
     <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="content">
+                    {{ df|safe }}
+{#                    <table>#}
+{#                        {% for matricula, periodo, disciplina, credito, turma, grau, sit, professor in df %}#}
+{#                            <tr>#}
+{#                                <td>{{ matricula|e }}</td>#}
+{#                                <td>{{ periodo|e }}</td>#}
+{#                                <td>{{ disciplina|e }}</td>#}
+{#                                <td>{{ credito|e }}</td>#}
+{#                                <td>{{ turma|e }}</td>#}
+{#                                <td>{{ grau|e }}</td>#}
+{#                                <td>{{ sit|e }}</td>#}
+{#                                <td>{{ professor|e }}</td>#}
+{#                            </tr>#}
+{#                        {% endfor %}#}
+{#                    </table>#}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
         <div class="col-md-2">
             <div class="card">
                 <div class="header">
