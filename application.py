@@ -1,6 +1,6 @@
 #coding: utf-8
 
-from flask import Flask, render_template, flash
+from flask import Flask, render_template, flash, redirect, url_for
 from urllib2 import urlopen
 import csv
 import os
@@ -43,8 +43,11 @@ def loadData():
     DATA_SOURCE = pd.read_csv(csv_url, encoding="utf-8")
     DATA_SOURCE.columns = ['matricula', 'periodo', 'disciplina', 'creditos', 'turma', 'grau', 'situacao', 'professor']
 
-@application.route('/dashboard')
 @application.route('/')
+def index():
+    return redirect(url_for('dashboard'))
+
+@application.route('/dashboard')
 def dashboard():
     global DATA_SOURCE
 
@@ -73,4 +76,4 @@ def server_error(error):
 
 if __name__ == '__main__':
     application.secret_key = 'some secret key'
-    #application.run()
+    application.run()
