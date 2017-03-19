@@ -67,6 +67,10 @@ def not_found(error):
 def server_error(error):
     return render_template('503.html')
 
+@application.errorhandler(503)
+def server_error(error):
+    return render_template('503.html')
+
 if __name__ == '__main__':
     application.secret_key = 'some secret key'
-    application.run()
+    #application.run()
