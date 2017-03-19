@@ -37,7 +37,10 @@ $(document).ready(function(){
     });
 
     //      Sets active class for menu
-    $('.nav a[href^="/' + location.pathname.split("/")[1] + '"]').parent('li').addClass('active');
+    var location = location.pathname.split("/")[1]
+    if(location != "") {
+        $('.nav a[href^="/' + location.pathname.split("/")[1] + '"]').parent('li').addClass('active');
+    }
 
       
 });
