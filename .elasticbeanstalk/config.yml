@@ -1,9 +1,9 @@
 branch-defaults:
   master:
-    environment: dashboard-env
+    environment: null
     group_suffix: null
 global:
-  application_name: dashboard-prototype
+  application_name: prototype-app
   branch: null
   default_ec2_keyname: null
   default_platform: python2.7
