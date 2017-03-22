@@ -102,13 +102,16 @@
                     </ul>
 
                     <ul class="nav navbar-nav navbar-right">
-                        <li>
-                           <a href="">
-                               Logout
-                            </a>
-                        </li>
-
-
+                        {% if current_user.is_authenticated %}
+                            <li>
+                                <div>Hi {{ current_user.name }}!</div>
+                            </li>
+                            <li>
+                               <a href="/logout">
+                                   Logout
+                                </a>
+                            </li>
+                        {% endif %}
                     </ul>
                 </div>
             </div>
