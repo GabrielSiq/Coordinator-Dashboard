@@ -6,12 +6,17 @@ from wtforms import StringField, PasswordField, validators
 from flask_wtf import FlaskForm
 from urlparse import urlparse, urljoin
 from urllib2 import urlopen
+from flask_sqlalchemy import SQLAlchemy
+from flask_user import SQLAlchemyAdapter, UserManager
 import csv
 import os
 from apscheduler.schedulers.background import BackgroundScheduler
 import pandas as pd
 
 application = Flask(__name__)
+application.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://postgres:database@localhost:5432/prototype"
+application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(application)
 
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 
@@ -25,17 +30,54 @@ class LoginForm(FlaskForm):
     username = StringField('Username', [validators.Length(min=4, max=25)])
     password = PasswordField('Password', [validators.DataRequired()])
 
+class AcademicData(db.Model):
+    __tablename__ = 'academic_data'
 
-# silly user model
-class User(UserMixin):
-    def __init__(self, id):
-        self.id = id
-        self.name = "user" + str(id)
-        self.password = self.name + "_secret"
+    matricula = db.Column(db.Integer(), primary_key=True)
+    periodo = db.Column(db.SmallInteger())
+    disciplina = db.Column(db.String(7), primary_key=True)
+    creditos = db.Column(db.SmallInteger())
+    turma = db.Column(db.String(3))
+    grau = db.Column(db.Float())
+    situacao = db.Column(db.String(2))
+    professor = db.Column(db.String(70))
+
+    def __init__(self, matricula, periodo, disciplina, creditos, turma, situacao, professor, grau = None):
+        self.matricula = matricula
+        self.periodo = periodo
+        self.disciplina = disciplina
+        self.creditos = creditos
+        self.turma = turma
+        self.situacao = situacao
+        self.professor = professor
+        self.grau = grau
+
+    def __repr__(self):
+        return '<matr {} peri{} disc {} turm {}>'.format(self.matricula, self.periodo, self.disciplina, self.turma)
 
 
-# create some users with ids 1 to 20
-users = [User(id) for id in range(1, 21)]
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+
+    # User Authentication information
+    username = db.Column(db.String(50), nullable=False, unique=True)
+    password = db.Column(db.String(255), nullable=False, default='')
+
+    # User Email information
+    email = db.Column(db.String(255), nullable=False, unique=True)
+    confirmed_at = db.Column(db.DateTime())
+
+    # User information
+    is_enabled = db.Column(db.Boolean(), nullable=False, default=False)
+    first_name = db.Column(db.String(50), nullable=False, default='')
+    last_name = db.Column(db.String(50), nullable=False, default='')
+
+    def is_active(self):
+      return self.is_enabled
+
+# Setup Flask-User
+db_adapter = SQLAlchemyAdapter(db, User)        # Register the User model
+user_manager = UserManager(db_adapter, application)     # Initialize Flask-User
 
 
 @login_manager.user_loader
@@ -114,6 +156,12 @@ def loadData():
     global DATA_SOURCE
     DATA_SOURCE = pd.read_csv(csv_url, encoding="utf-8")
     DATA_SOURCE.columns = ['matricula', 'periodo', 'disciplina', 'creditos', 'turma', 'grau', 'situacao', 'professor']
+    for index, row in DATA_SOURCE.iterrows():
+        if row.matricula.isdigit():
+            db_row = AcademicData(row.matricula, row.periodo, row.disciplina, row.creditos, row.turma, row.situacao, row.professor, row.grau)
+            db.session.add(db_row)
+    db.session.commit()
+
 
 @application.route('/')
 def index():
@@ -124,10 +172,10 @@ def index():
 def dashboard():
     global DATA_SOURCE
 
-    cancelation = DATA_SOURCE[DATA_SOURCE['situacao'].isin(['CA', 'CD', 'CL', 'DT', 'LT'])]
+    cancellation = DATA_SOURCE[DATA_SOURCE['situacao'].isin(['CA', 'CD', 'CL', 'DT', 'LT'])]
     course_count = DATA_SOURCE.groupby('disciplina').size()
-    cancelation = cancelation.groupby('disciplina').size()
-    canc_rate = (cancelation / course_count).dropna()
+    cancellation = cancellation.groupby('disciplina').size()
+    canc_rate = (cancellation / course_count).dropna()
     return render_template('dashboard.html', df = DATA_SOURCE.head(10).to_dict(), canc = canc_rate.sort_values().head(10), canc2 = canc_rate.sort_values(ascending=False).head(10))
 
 @application.route('/table')
