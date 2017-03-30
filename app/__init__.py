@@ -1,7 +1,7 @@
 #coding: utf-8
 
-from flask import Flask, render_template, flash, redirect, url_for, request, abort, Response
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
+from flask import Flask, flash, request
+from flask_login import LoginManager
 from urlparse import urlparse, urljoin
 from urllib2 import urlopen
 from flask_user import SQLAlchemyAdapter, UserManager
@@ -32,6 +32,18 @@ with application.app_context():
     db_adapter = SQLAlchemyAdapter(db, User)        # Register the User model
     user_manager = UserManager(db_adapter, application)     # Initialize Flask-User
 
+
+@application.before_first_request
+def initialize():
+    """
+    Initializes our Flask app. Downloads student data and sets up a scheduler to re-download every day.
+    """
+    #updateData()
+    loadData()
+    #loadDB()
+    scheduler = BackgroundScheduler()
+    scheduler.start()
+    scheduler.add_job(updateData, trigger = "interval", days = 1)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -73,10 +85,15 @@ def loadData():
     global DATA_SOURCE
     DATA_SOURCE = pd.read_csv(csv_url, encoding="utf-8")
     DATA_SOURCE.columns = ['matricula', 'periodo', 'disciplina', 'creditos', 'turma', 'grau', 'situacao', 'professor']
+
+
+def loadDB():
+    global DATA_SOURCE
     for index, row in DATA_SOURCE.iterrows():
         if row.matricula.isdigit():
             db_row = AcademicData(row.matricula, row.periodo, row.disciplina, row.creditos, row.turma, row.situacao, row.professor, row.grau)
             db.session.add(db_row)
     db.session.commit()
+
 
 import members.views

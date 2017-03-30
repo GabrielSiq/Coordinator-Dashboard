@@ -1,7 +1,10 @@
 from flask import flash, redirect, url_for, render_template, abort, request
 from app.members.models import LoginForm, User
 from flask_login import login_user, login_required, logout_user
-from app import application, is_safe_url, DATA_SOURCE
+from app import application, is_safe_url
+import app
+
+#TODO: load data from database
 
 @application.route('/login', methods=['GET', 'POST'])
 def login_func():
@@ -34,7 +37,7 @@ def index():
 @application.route('/dashboard')
 #@login_required
 def dashboard():
-    global DATA_SOURCE
+    DATA_SOURCE = app.DATA_SOURCE
 
     cancellation = DATA_SOURCE[DATA_SOURCE['situacao'].isin(['CA', 'CD', 'CL', 'DT', 'LT'])]
     course_count = DATA_SOURCE.groupby('disciplina').size()
@@ -44,7 +47,7 @@ def dashboard():
 
 @application.route('/table')
 def table():
-    global DATA_SOURCE
+    DATA_SOURCE = app.DATA_SOURCE
     return render_template('table.html', df = DATA_SOURCE.head(50))
 
 @application.errorhandler(404)
