@@ -52,7 +52,13 @@ class User(db.Model, UserMixin):
     def is_active(self):
       return self.is_enabled
 
+class Query(db.Model):
+    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
+    visualization_id = db.Column(db.String(50), nullable=False)
+    query_data = db.Column(db.JSON, nullable=False)
 
+    queries = db.relationship('User', backref=db.backref('users', lazy='dynamic'))
 
 # Define Role model
 class Role(db.Model):
