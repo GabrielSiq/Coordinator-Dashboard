@@ -102,7 +102,7 @@ def injectDataTable():
                     ascending = False
                 else:
                     ascending = True
-                return canc_rate.sort_values(ascending=ascending).head(10)
+                return dict(sort = param.query_data['sort'], data = canc_rate.sort_values(ascending=ascending).head(10))
     return dict(getDataTable = getDataTable)
 
 

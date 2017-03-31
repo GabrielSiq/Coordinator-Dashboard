@@ -43,16 +43,18 @@
             </div>
         </div>
         <div class="col-md-4">
+            {% set canc3 = getDataTable(1) %}
             <div class="card">
                 <div class="header">
-                    <h4 class="title">Drop Rate <span class="glyphicon glyphicon-triangle-top"></h4>
-                    <p class="category">Courses with <span style="color: red; font-weight: bold">largest</span> drop rate.</p>
+                    <h4 class="title">Drop Rate <span class="glyphicon glyphicon-triangle-top"/></h4>
+                    {# TODO: Dynamic styles for smalles/largest tags #}
+                    <p class="category">Courses with <span style="color: red; font-weight: bold">{{ canc3.sort }}</span> drop rate.</p>
                 </div>
                 <div class="content table-responsive table-full-width">
                     <table class="table table-hover table-striped">
                         <tbody>
-                            {% set canc3 = getDataTable(1) %}
-                            {% for row in canc3.iteritems() %}
+
+                            {% for row in canc3['data'].iteritems() %}
                                 <tr>
                                     <td>{{ row[0] }}</td>
                                     <td>{{ (row[1] * 100)|round(1) }}%</td>
