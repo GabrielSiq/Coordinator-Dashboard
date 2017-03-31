@@ -3,12 +3,12 @@
 from flask import Flask, flash, request
 from urlparse import urlparse, urljoin
 from urllib2 import urlopen
-from flask_user import SQLAlchemyAdapter, UserManager
+from flask_user import SQLAlchemyAdapter, UserManager, current_user
 import csv
 import os
 from apscheduler.schedulers.background import BackgroundScheduler
 import pandas as pd
-from app.members.models import db, User, AcademicData, Role, UserRoles
+from app.members.models import db, User, AcademicData, Role, UserRoles, Query
 
 application = Flask(__name__)
 application.config.from_object("app.config.Config")
@@ -84,6 +84,26 @@ def loadDB():
             db_row = AcademicData(row.matricula, row.periodo, row.disciplina, row.creditos, row.turma, row.situacao, row.professor, row.grau)
             db.session.add(db_row)
     db.session.commit()
+
+@application.context_processor
+def injectDataTable():
+    def getDataTable(id):
+        if id == 1:
+            cancellation = DATA_SOURCE[DATA_SOURCE['situacao'].isin(['CA', 'CD', 'CL', 'DT', 'LT'])]
+            course_count = DATA_SOURCE.groupby('disciplina').size()
+            cancellation = cancellation.groupby('disciplina').size()
+            canc_rate = (cancellation / course_count).dropna()
+
+            if current_user.is_authenticated:
+                param = Query.query.filter_by(user_id = current_user.id, visualization_id = str(id)).first()
+                if param is None:
+                    return None
+                elif param.query_data['sort'] == 'largest':
+                    ascending = False
+                else:
+                    ascending = True
+                return canc_rate.sort_values(ascending=ascending).head(10)
+    return dict(getDataTable = getDataTable)
 
 
 import members.views

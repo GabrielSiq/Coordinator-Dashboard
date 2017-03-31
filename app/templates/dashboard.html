@@ -42,6 +42,27 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="header">
+                    <h4 class="title">Drop Rate <span class="glyphicon glyphicon-triangle-top"></h4>
+                    <p class="category">Courses with <span style="color: red; font-weight: bold">largest</span> drop rate.</p>
+                </div>
+                <div class="content table-responsive table-full-width">
+                    <table class="table table-hover table-striped">
+                        <tbody>
+                            {% set canc3 = getDataTable(1) %}
+                            {% for row in canc3.iteritems() %}
+                                <tr>
+                                    <td>{{ row[0] }}</td>
+                                    <td>{{ (row[1] * 100)|round(1) }}%</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="row">
         <div class="col-md-2">
@@ -51,7 +72,7 @@
                     <p class="category">Sample sub heading</p>
                 </div>
                 <div class="content">
-                    <p>Sample text</p>
+                    <p>Number of students with </p>
                 </div>
             </div>
         </div>
