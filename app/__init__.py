@@ -8,7 +8,7 @@ import csv
 import os
 from apscheduler.schedulers.background import BackgroundScheduler
 import pandas as pd
-from app.members.models import db, User, AcademicData
+from app.members.models import db, User, AcademicData, Role, UserRoles
 
 application = Flask(__name__)
 application.config.from_object("app.config.Config")
@@ -24,7 +24,7 @@ with application.app_context():
     db.session.query(AcademicData).delete()
     db.create_all()
     db_adapter = SQLAlchemyAdapter(db, User)        # Register the User model
-    user_manager = UserManager(db_adapter, application)     # Initialize Flask-User
+
 
 
 @application.before_first_request
@@ -87,3 +87,5 @@ def loadDB():
 
 
 import members.views
+
+user_manager = UserManager(db_adapter, application,register_view_function = members.views.protected_register)     # Initialize Flask-User

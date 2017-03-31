@@ -1377,7 +1377,7 @@ body > .navbar-collapse[data-color="purple"]:after {
   padding: 15px 15px;
   font-size: 20px;
 }
-.navbar .navbar-nav > li > a {
+.navbar .navbar-nav > li > a, .greeting {
   padding: 10px 15px;
   margin: 10px 3px;
   position: relative;
@@ -1518,7 +1518,7 @@ body > .navbar-collapse[data-color="purple"]:after {
   background-color: rgba(255, 255, 255, 0.96);
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
-.navbar-default .navbar-nav > li > a:not(.btn) {
+.navbar-default .navbar-nav > li > a:not(.btn), div {
   color: #9A9A9A;
 }
 .navbar-default .navbar-nav > .active > a,

@@ -1,8 +1,8 @@
 from flask import flash, redirect, url_for, render_template, request
-from flask_user import login_required
-from flask_login import logout_user
+from flask_user import login_required, roles_required, views as user_views
 from app import application
 import app
+
 
 #TODO: load data from database
 
@@ -38,3 +38,7 @@ def server_error(error):
 @application.errorhandler(503)
 def server_error(error):
     return render_template('503.html')
+
+@roles_required('admin')
+def protected_register():
+    return user_views.register()
