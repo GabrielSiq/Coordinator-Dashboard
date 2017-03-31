@@ -6,13 +6,6 @@ import app
 
 #TODO: load data from database
 
-@application.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    flash("Logged out")
-    return redirect(request.referrer)
-
 @application.route('/')
 def index():
     return redirect(url_for('dashboard'))
@@ -29,6 +22,7 @@ def dashboard():
     return render_template('dashboard.html', df = DATA_SOURCE.head(10).to_dict(), canc = canc_rate.sort_values().head(10), canc2 = canc_rate.sort_values(ascending=False).head(10))
 
 @application.route('/table')
+@login_required
 def table():
     DATA_SOURCE = app.DATA_SOURCE
     return render_template('table.html', df = DATA_SOURCE.head(50))

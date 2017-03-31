@@ -33,10 +33,10 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
     <!-- Animation library for notifications   -->
-    <link href="static/assets/css/animate.min.css" rel="stylesheet" type='text/css'/>
+    <link href="{{ url_for('static', filename='assets/css/animate.min.css')}}" rel="stylesheet" type='text/css'/>
 
     <!--  Light Bootstrap Table core CSS    -->
-    <link href="static/assets/css/light-bootstrap-dashboard.css" rel="stylesheet" type='text/css'/>
+    <link href="{{ url_for('static', filename='assets/css/light-bootstrap-dashboard.css')}}" rel="stylesheet" type='text/css'/>
     {% block css %}{% endblock css %}
 
     <!--     Fonts and icons     -->
@@ -59,7 +59,7 @@
 
     	<div class="sidebar-wrapper">
             <div class="logo">
-                <a target="_blank" href="http://www.puc-rio.br/index.html"><img src="static/assets/img/puc-rio.png" alt=""></a>
+                <a target="_blank" href="http://www.puc-rio.br/index.html"><img src="{{ url_for('static', filename='assets/img/puc-rio.png')}}" alt=""></a>
             </div>
 
             <ul class="nav">
@@ -104,12 +104,14 @@
                     <ul class="nav navbar-nav navbar-right">
                         {% if current_user.is_authenticated %}
                             <li>
-                                <div>Hi {{ current_user.name }}!</div>
+                                <div>Hi {{ current_user.username }}!</div>
                             </li>
                             <li>
-                               <a href="/logout">
-                                   Logout
-                                </a>
+                               <a href="{{ url_for('user.logout') }}">Sign out</a>
+                            </li>
+                        {% else %}
+                            <li>
+                               <a href="{{ url_for('user.login') }}">Sign out</a>
                             </li>
                         {% endif %}
                     </ul>
