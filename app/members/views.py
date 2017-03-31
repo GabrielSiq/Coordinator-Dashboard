@@ -1,27 +1,10 @@
-from flask import flash, redirect, url_for, render_template, abort, request
-from app.members.models import LoginForm, User
-from flask_login import login_user, login_required, logout_user
-from app import application, is_safe_url
+from flask import flash, redirect, url_for, render_template, request
+from flask_user import login_required
+from flask_login import logout_user
+from app import application
 import app
 
 #TODO: load data from database
-
-@application.route('/login', methods=['GET', 'POST'])
-def login_func():
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User(form.username._value())
-
-        login_user(user)
-
-        flash('Logged in successfully.')
-
-        next = request.args.get('next')
-        if not is_safe_url(next):
-            return abort(400)
-
-        return redirect(next or url_for('index'))
-    return render_template('login.html', form=form)
 
 @application.route("/logout")
 @login_required
@@ -35,7 +18,7 @@ def index():
     return redirect(url_for('dashboard'))
 
 @application.route('/dashboard')
-#@login_required
+@login_required
 def dashboard():
     DATA_SOURCE = app.DATA_SOURCE
 

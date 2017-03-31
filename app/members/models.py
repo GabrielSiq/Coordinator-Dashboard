@@ -1,13 +1,7 @@
-from wtforms import StringField, PasswordField, validators
-from flask_wtf import FlaskForm
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import UserMixin
+from flask_user import UserMixin
 
 db = SQLAlchemy()
-
-class LoginForm(FlaskForm):
-    username = StringField('Username', [validators.Length(min=4, max=25)])
-    password = PasswordField('Password', [validators.DataRequired()])
 
 class AcademicData(db.Model):
     __tablename__ = 'academic_data'

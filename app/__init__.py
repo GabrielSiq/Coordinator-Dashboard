@@ -1,7 +1,6 @@
 #coding: utf-8
 
 from flask import Flask, flash, request
-from flask_login import LoginManager
 from urlparse import urlparse, urljoin
 from urllib2 import urlopen
 from flask_user import SQLAlchemyAdapter, UserManager
@@ -19,11 +18,6 @@ db.init_app(application)
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 
 DATA_SOURCE = pd.DataFrame()
-
-login_manager = LoginManager()
-login_manager.init_app(application)
-login_manager.login_view = "login"
-
 
 with application.app_context():
 
@@ -44,10 +38,6 @@ def initialize():
     scheduler = BackgroundScheduler()
     scheduler.start()
     scheduler.add_job(updateData, trigger = "interval", days = 1)
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User(user_id)
 
 def is_safe_url(target):
     ref_url = urlparse(request.host_url)

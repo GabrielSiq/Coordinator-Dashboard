@@ -8,3 +8,4 @@ class Config(object):
     SECRET_KEY = 'this-really-needs-to-be-changed'
     SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres:database@localhost:5432/prototype"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    USER_SEND_REGISTERED_EMAIL = False
