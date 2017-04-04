@@ -1884,6 +1884,15 @@ body > .navbar-collapse[data-color="purple"]:after {
 .card label i {
   font-size: 16px;
 }
+.card .category span{
+  font-weight: bold;
+}
+.card .category span#smallest{
+  color: green;
+}
+.card .category span#largest{
+  color: red;
+}
 .card label {
   font-size: 12px;
   margin-bottom: 5px;
