@@ -1,9 +1,14 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_user import UserMixin
 
+# Initializes SQLALchemy
 db = SQLAlchemy()
 
 class AcademicData(db.Model):
+    """
+    Our transcripts/academic data model.
+    Each row corresponds to a row in the csv file.
+    """
     __tablename__ = 'academic_data'
 
     matricula = db.Column(db.Integer(), primary_key=True)
@@ -30,6 +35,9 @@ class AcademicData(db.Model):
 
 
 class User(db.Model, UserMixin):
+    """
+    Our User model. Stores basic user info.
+    """
     id = db.Column(db.Integer, primary_key=True)
 
     # User Authentication information
@@ -53,6 +61,9 @@ class User(db.Model, UserMixin):
       return self.is_enabled
 
 class Query(db.Model):
+    """
+    First draft model for saving query preferences. Currently links the preferences in json form to a user and a specific element on the dashboard.
+    """
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
     visualization_id = db.Column(db.String(50), nullable=False)
@@ -60,13 +71,19 @@ class Query(db.Model):
 
     queries = db.relationship('User', backref=db.backref('users', lazy='dynamic'))
 
-# Define Role model
+
 class Role(db.Model):
+    """
+    Role model for authorization.
+    """
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(50), unique=True)
 
-# Define UserRoles model
+
 class UserRoles(db.Model):
+    """
+    UserRoles model. Links users and roles.
+    """
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
     role_id = db.Column(db.Integer(), db.ForeignKey('role.id', ondelete='CASCADE'))
