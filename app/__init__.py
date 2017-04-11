@@ -31,32 +31,25 @@ with application.app_context():
     db_adapter = SQLAlchemyAdapter(db, User)        # Register the User model
 
 
-#TODO: Move these auxiliary functions to a different file
-@application.before_first_request
-def initialize():
-    """
-    Initializes our Flask app. Downloads student data and sets up a scheduler to re-download every day.
-    """
-    # Logic that controls data update not fully implement. updateData() and loadDB() should be commented out except for the first execution. OR, you'd have to clear the academic_data table before restarting the app.
-    #updateData()
-    loadData()
-    loadDB()
-    scheduler = BackgroundScheduler()
-    scheduler.start()
-    scheduler.add_job(updateData, trigger = "interval", days = 1)
+#TODO: Move these aux functions to a different file
 
+def create_dummy_users():
     # Test creation of users
     users = list()
-    users.append(User(username="admin", password=bcrypt.hash("password"), email="gabrielsiq@msn.com", confirmed_at= datetime.datetime.now(), is_enabled= True, first_name = "Gabriel", last_name = "Siqueira"))
-    users.append(User(username="simone", password=bcrypt.hash("password"), email="simone@inf.puc-rio.br", confirmed_at= datetime.datetime.now(), is_enabled= True, first_name = "Simone", last_name = "Barbosa"))
-    users.append(User(username="noemi", password=bcrypt.hash("password"), email="noemi@inf.puc-rio.br", confirmed_at= datetime.datetime.now(), is_enabled= True, first_name = "Noemi", last_name = "Rodriguez"))
+    users.append(User(username="admin", password=bcrypt.hash("password"), email="gabrielsiq@msn.com",
+                      confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="Gabriel",
+                      last_name="Siqueira"))
+    users.append(User(username="simone", password=bcrypt.hash("password"), email="simone@inf.puc-rio.br",
+                      confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="Simone", last_name="Barbosa"))
+    users.append(User(username="noemi", password=bcrypt.hash("password"), email="noemi@inf.puc-rio.br",
+                      confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="Noemi", last_name="Rodriguez"))
     for user in users:
         db.session.add(user)
 
     # Test creation of roles
     roles = list()
-    roles.append(Role(name = "admin"))
-    roles.append(Role(name = "base_user"))
+    roles.append(Role(name="admin"))
+    roles.append(Role(name="base_user"))
     for role in roles:
         db.session.add(role)
     db.session.commit()
@@ -82,7 +75,19 @@ def initialize():
         db.session.add(query)
     db.session.commit()
 
+@application.before_first_request
+def initialize():
+    """
+    Initializes our Flask app. Downloads student data and sets up a scheduler to re-download every day.
+    """
 
+    updateData()
+    loadData()
+    loadDB()
+    create_dummy_users()
+    scheduler = BackgroundScheduler()
+    scheduler.start()
+    scheduler.add_job(updateData, trigger = "interval", days = 1)
 
 
 def is_safe_url(target):

@@ -19,3 +19,5 @@ I haven't tried running this project from a different machine/system but it shou
 3. The app should run by running (python runserver.py)
 
 Obs: The app takes a while to start when you restart it because it tries to download new data and load it into the database.
+For development agility, after everything has been created you can comment out from init.py:
+1. Under ```python with application.app_context(): ```, comment out ```python db.drop_all() ```
