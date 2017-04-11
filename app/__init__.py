@@ -33,7 +33,7 @@ with application.app_context():
 
 #TODO: Move these aux functions to a different file
 
-def create_dummy_users():
+def createDummyUsers():
     # Test creation of users
     users = list()
     users.append(User(username="admin", password=bcrypt.hash("password"), email="gabrielsiq@msn.com",
@@ -84,7 +84,7 @@ def initialize():
     updateData()
     loadData()
     loadDB()
-    create_dummy_users()
+    createDummyUsers()
     scheduler = BackgroundScheduler()
     scheduler.start()
     scheduler.add_job(updateData, trigger = "interval", days = 1)
