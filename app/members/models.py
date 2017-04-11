@@ -12,10 +12,10 @@ class AcademicData(db.Model):
     __tablename__ = 'academic_data'
 
     matricula = db.Column(db.Integer(), primary_key=True)
-    periodo = db.Column(db.SmallInteger())
+    periodo = db.Column(db.SmallInteger(), primary_key=True)
     disciplina = db.Column(db.String(7), primary_key=True)
     creditos = db.Column(db.SmallInteger())
-    turma = db.Column(db.String(3))
+    turma = db.Column(db.String(3), primary_key=True)
     grau = db.Column(db.Float())
     situacao = db.Column(db.String(2))
     professor = db.Column(db.String(70))

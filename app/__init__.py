@@ -9,6 +9,9 @@ import os
 from apscheduler.schedulers.background import BackgroundScheduler
 import pandas as pd
 from app.members.models import db, User, AcademicData, Role, UserRoles, Query
+from passlib.hash import bcrypt
+import datetime
+import json
 
 # Initializes application
 application = Flask(__name__)
@@ -23,8 +26,7 @@ DATA_SOURCE = pd.DataFrame()
 
 # Registers user model with db
 with application.app_context():
-
-    db.session.query(AcademicData).delete() #Tries to clear previous data from table. For dev. purposes only TODO: Fix this, not working
+    db.drop_all()
     db.create_all() # Creates tables defined
     db_adapter = SQLAlchemyAdapter(db, User)        # Register the User model
 
@@ -38,10 +40,50 @@ def initialize():
     # Logic that controls data update not fully implement. updateData() and loadDB() should be commented out except for the first execution. OR, you'd have to clear the academic_data table before restarting the app.
     #updateData()
     loadData()
-    #loadDB()
+    loadDB()
     scheduler = BackgroundScheduler()
     scheduler.start()
     scheduler.add_job(updateData, trigger = "interval", days = 1)
+
+    # Test creation of users
+    users = list()
+    users.append(User(username="admin", password=bcrypt.hash("password"), email="gabrielsiq@msn.com", confirmed_at= datetime.datetime.now(), is_enabled= True, first_name = "Gabriel", last_name = "Siqueira"))
+    users.append(User(username="simone", password=bcrypt.hash("password"), email="simone@inf.puc-rio.br", confirmed_at= datetime.datetime.now(), is_enabled= True, first_name = "Simone", last_name = "Barbosa"))
+    users.append(User(username="noemi", password=bcrypt.hash("password"), email="noemi@inf.puc-rio.br", confirmed_at= datetime.datetime.now(), is_enabled= True, first_name = "Noemi", last_name = "Rodriguez"))
+    for user in users:
+        db.session.add(user)
+
+    # Test creation of roles
+    roles = list()
+    roles.append(Role(name = "admin"))
+    roles.append(Role(name = "base_user"))
+    for role in roles:
+        db.session.add(role)
+    db.session.commit()
+
+    # Test creation of user roles
+    user_roles = list()
+    user_roles.append(UserRoles(user_id=1, role_id=1))
+    user_roles.append(UserRoles(user_id=2, role_id=2))
+    user_roles.append(UserRoles(user_id=3, role_id=2))
+    for user_role in user_roles:
+        db.session.add(user_role)
+
+    # Test creation of saved queries
+    queries = list()
+    data = {}
+    data['sort'] = "largest"
+    queries.append(Query(user_id=1, visualization_id=1, query_data=json.dumps(data)))
+    data['sort'] = "smallest"
+    queries.append(Query(user_id=2, visualization_id=1, query_data=json.dumps(data)))
+    queries.append(Query(user_id=3, visualization_id=1, query_data=json.dumps(data)))
+
+    for query in queries:
+        db.session.add(query)
+    db.session.commit()
+
+
+
 
 def is_safe_url(target):
     """
@@ -114,13 +156,14 @@ def injectDataTable():
 
             if current_user.is_authenticated:
                 param = Query.query.filter_by(user_id = current_user.id, visualization_id = str(id)).first()
+                query = json.loads(param.query_data)
                 if param is None:
                     return None
-                elif param.query_data['sort'] == 'largest':
+                elif query['sort'] == 'largest':
                     ascending = False
                 else:
                     ascending = True
-                return dict(sort = param.query_data['sort'], data = canc_rate.sort_values(ascending=ascending).head(10))
+                return dict(sort = query['sort'], data = canc_rate.sort_values(ascending=ascending).head(10))
     return dict(getDataTable = getDataTable)
 
 # Hack for modularization

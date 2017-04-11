@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block css %}
-    <link href="/static/assets/css/404.css" rel="stylesheet" type="text/css"  media="all" />
+    <link href="{{ url_for('static', filename='assets/css/404.css')}}" rel="stylesheet" type="text/css"  media="all" />
 {% endblock css %}
 {% block content %}
     <div class="content">
-        <img src="static/assets/img/error-img.png" title="error" />
+        <img src="{{ url_for('static', filename='assets/img/error-img.png')}}" title="error" />
         <p><span><label>O</label>hh.....</span>You requested a page that is no longer there.</p>
-        <a href="dashboard">Back To Home</a>
+        <a href="{{ url_for("dashboard") }}">Back To Home</a>
     </div>
 {% endblock %}
