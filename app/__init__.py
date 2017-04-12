@@ -4,7 +4,6 @@ from flask import Flask, flash, request
 from urlparse import urlparse, urljoin
 from urllib2 import urlopen
 from flask_user import SQLAlchemyAdapter, UserManager, current_user
-import csv
 import os
 from apscheduler.schedulers.background import BackgroundScheduler
 import pandas as pd
@@ -82,8 +81,7 @@ def initialize():
     """
 
     updateData()
-    loadData()
-    loadDB()
+    #loadData(db = False)
     createDummyUsers()
     scheduler = BackgroundScheduler()
     scheduler.start()
@@ -112,38 +110,36 @@ def flash_errors(form):
 
 def updateData():
     """
-    Updates our student academic transcript data. Currently just grabs the same dummy file for demo purposes. Should be hooked up to an api.
+    Updates our student academic transcript data. Currently just grabs the same dummy file and loads into DB for demo purposes. Should be hooked up to an api.
     """
     response = urlopen("https://gist.githubusercontent.com/GabrielSiq/2a592eb7ab47f604ce53cfba6f8191a8/raw/d2560c36b1c98fd74c03ef4d428aed5d7a950efe/historico_anon.csv")
-    data = list(csv.reader(response))
+    global DATA_SOURCE
+    DATA_SOURCE = pd.read_csv(response)
+    DATA_SOURCE.columns = ['matricula', 'periodo', 'disciplina', 'creditos', 'turma', 'grau', 'situacao', 'professor']
 
-    csv_url = os.path.join(SITE_ROOT, 'static', 'assets', 'data', 'data.csv')
+    for index, row in DATA_SOURCE.iterrows():
+        if row.matricula.isdigit():
+            db_row = AcademicData(row.matricula, row.periodo, row.disciplina, row.creditos, row.turma, row.situacao,
+                                  row.professor, row.grau)
+            db.session.add(db_row)
+    db.session.commit()
 
-    writer = csv.writer(open(csv_url, "w"))
-    for row in data:
-        writer.writerow(row)
-
-def loadData():
+def loadData(db = False):
     """
-        Loads data onto global variable
+        Loads data from stored csv file into global variable and into database. For dev purposes. Not for production.
     """
-    #TODO: Temporary solution. Data access will be done primarily through database connection. Not implemented yet, though.
     csv_url = os.path.join(SITE_ROOT, 'static', 'assets', 'data', 'data.csv')
     global DATA_SOURCE
     DATA_SOURCE = pd.read_csv(csv_url, encoding="utf-8")
     DATA_SOURCE.columns = ['matricula', 'periodo', 'disciplina', 'creditos', 'turma', 'grau', 'situacao', 'professor']
+    if(db == True):
+        for index, row in DATA_SOURCE.iterrows():
+            if row.matricula.isdigit():
+                db_row = AcademicData(row.matricula, row.periodo, row.disciplina, row.creditos, row.turma, row.situacao,
+                                      row.professor, row.grau)
+                db.session.add(db_row)
+        db.session.commit()
 
-
-def loadDB():
-    """
-        Loads academic data onto db
-    """
-    global DATA_SOURCE
-    for index, row in DATA_SOURCE.iterrows():
-        if row.matricula.isdigit():
-            db_row = AcademicData(row.matricula, row.periodo, row.disciplina, row.creditos, row.turma, row.situacao, row.professor, row.grau)
-            db.session.add(db_row)
-    db.session.commit()
 
 @application.context_processor
 def injectDataTable():
