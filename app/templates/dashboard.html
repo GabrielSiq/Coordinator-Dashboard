@@ -78,29 +78,30 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-12">
             <div class="card">
                 <div class="header">
                     <h4 class="title">Empty Card</h4>
                     <p class="category">Sample sub heading</p>
                 </div>
                 <div class="content">
-                    <p>Sample text</p>
+                    <button type="button" class="btn btn-info" id="rand">Info</button>
+                    <form>
+                        <select name="count" class="count">
+                          <option value='AGB1488'>AGB1488</option>
+                          <option value='GNR1825'>GNR1825</option>
+                          <option value='WRC1627'>WRC1627</option>
+                          <option value='HBF1988'>HBF1988</option>
+                          <option value='UAM1180'>UAM1180</option>
+                         </select>
+                    </form>
+                    <div id="ajax">
+
+                    </div>
+                    <div id="chartLine" class="ct-chart"></div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card">
-                <div class="header">
-                    <h4 class="title">Empty Card</h4>
-                    <p class="category">Sample sub heading</p>
-                </div>
-                <div class="content">
-                    <p>Sample text</p>
-                </div>
-            </div>
-        </div>
-    </div>
     <div class="row">
         <div class="col-md-4">
             <div class="card">
@@ -177,3 +178,36 @@
         </div>
     </div>
 {% endblock content %}
+
+{% block scripts %}
+    <script>
+        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+        $("select.count").change(function(e) {
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "/rand",
+                contentType:"application/json",
+                data : JSON.stringify({'course':$(this).val()}),
+                success: function(result) {
+                    var teste = JSON.parse(result)
+                    console.log(teste["labels"]);
+                    console.log(teste['series']);
+                    var data = {
+                      labels: teste['labels'],
+                      series: [teste['series']]
+                    };
+                    var options = {
+                        lineSmooth: false
+                    };
+                    new Chartist.Line('#chartLine', data, options);
+                    //$("div#ajax").html(result)
+                },
+                error: function(result) {
+                    alert('error');
+                }
+            });
+        });
+
+    </script>
+{% endblock scripts %}

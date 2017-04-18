@@ -25,7 +25,7 @@ DATA_SOURCE = pd.DataFrame()
 
 # Registers user model with db
 with application.app_context():
-    db.drop_all()
+    #db.drop_all()
     db.create_all() # Creates tables defined
     db_adapter = SQLAlchemyAdapter(db, User)        # Register the User model
 
@@ -80,9 +80,9 @@ def initialize():
     Initializes our Flask app. Downloads student data and sets up a scheduler to re-download every day.
     """
 
-    updateData()
-    #loadData(db = False)
-    createDummyUsers()
+    #updateData()
+    loadData(db = False)
+    #createDummyUsers()
     scheduler = BackgroundScheduler()
     scheduler.start()
     scheduler.add_job(updateData, trigger = "interval", days = 1)

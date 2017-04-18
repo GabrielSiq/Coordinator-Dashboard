@@ -1,7 +1,9 @@
 from flask import flash, redirect, url_for, render_template, request
 from flask_user import login_required, roles_required, views as user_views
 from app import application
+import json
 import app
+import collections
 
 
 #TODO: load data from database
@@ -52,3 +54,21 @@ def protected_register():
     Registration page is restricted to admins for now. 
     """
     return user_views.register()
+
+
+
+@application.route('/rand', methods=['POST'])
+@login_required
+def rand():
+    """
+    Testing custom plotting via ajax.
+    :return: 
+    """
+    course = request.json['course']
+    DATA_SOURCE = app.DATA_SOURCE
+    filtered = DATA_SOURCE[DATA_SOURCE['disciplina'] == course]['periodo'].value_counts().sort_values()
+    data = {}
+    data['labels'] =  map(str, filtered.index.values.tolist())
+    data['series'] = filtered.values.tolist()
+
+    return json.dumps(data)
