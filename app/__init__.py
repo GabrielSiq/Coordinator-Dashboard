@@ -81,7 +81,7 @@ def initialize():
     """
 
     #updateData()
-    loadData(db = False)
+    loadData(dbOption = False)
     #createDummyUsers()
     scheduler = BackgroundScheduler()
     scheduler.start()
@@ -124,7 +124,7 @@ def updateData():
             db.session.add(db_row)
     db.session.commit()
 
-def loadData(db = False):
+def loadData(dbOption = False):
     """
         Loads data from stored csv file into global variable and into database. For dev purposes. Not for production.
     """
@@ -132,7 +132,7 @@ def loadData(db = False):
     global DATA_SOURCE
     DATA_SOURCE = pd.read_csv(csv_url, encoding="utf-8")
     DATA_SOURCE.columns = ['matricula', 'periodo', 'disciplina', 'creditos', 'turma', 'grau', 'situacao', 'professor']
-    if(db == True):
+    if(dbOption == True):
         for index, row in DATA_SOURCE.iterrows():
             if row.matricula.isdigit():
                 db_row = AcademicData(row.matricula, row.periodo, row.disciplina, row.creditos, row.turma, row.situacao,
