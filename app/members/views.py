@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0, "/app/members")
+sys.path.insert(0, "/opt/python/current/app/app/members")
 
 from flask import flash, redirect, url_for, render_template, request
 from flask_user import login_required, roles_required, views as user_views
