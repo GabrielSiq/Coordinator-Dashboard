@@ -12,7 +12,7 @@ DATA = pd.read_csv(csv_url, encoding="utf-8")
 DATA.columns = ['matricula', 'periodo', 'disciplina', 'creditos', 'turma', 'grau', 'situacao', 'professor']
 
 @application.route('/')
-def indice():
+def index():
     """
     Index view. Currently the dashboard.
     :return: 
