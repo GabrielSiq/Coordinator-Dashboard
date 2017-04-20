@@ -1,9 +1,10 @@
 from flask import redirect, url_for, render_template, request
 from flask_user import login_required, roles_required, views as user_views
-from app import application, SITE_ROOT
+from app import application, SITE_ROOT, current_user
 import json
 import os
 import pandas as pd
+from models import Query
 
 #TODO: load data from database
 
@@ -83,14 +84,15 @@ def savedQueries():
     Testing custom plotting via ajax.
     :return: 
     """
-    data = {}
+    data_list = []
     id = request.json['view_id']
-    if(id == "enrollment"):
-        data['name'] =  "Exemplo"
-        data['id'] = "1"
-        data['data'] = {"matr" : "HBF1988"}
-    elif(id == "enrollment-2"):
-        data['name'] = "Exemplo 2"
-        data['id'] = "2"
-        data['data'] = {"matr": "GNR1825"}
-    return json.dumps(data)
+
+    queries =  Query.query.filter_by(user_id = current_user.id, visualization_id = id).all()
+    for query in queries:
+        data = {}
+        data['name'] = query.name
+        data['id'] = query.id
+        data['data'] = query.query_data
+        data_list.append(data)
+
+    return json.dumps(data_list)

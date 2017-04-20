@@ -280,9 +280,9 @@
     </script>
     <script>
         $(document).ready(function(){
-            $("div.query-controls").each(function() {
+            // Load saved configs into dropdown
+            $(".query-controls").each(function() {
                 var controls = $(this);
-                var comboBox;
                 $.ajax({
                     type: "POST",
                     url: "/savedQueries",
@@ -290,31 +290,29 @@
                     data: JSON.stringify({'view_id': controls.parent().attr("id")}),
                     success: function(resultJSON) {
 
-                        var savedQuery = JSON.parse(resultJSON);
+                        var savedQueries = JSON.parse(resultJSON);
                         var queryName = controls.find("select[name='queryName']");
-                        queryName.append($('<option>', {
-                            value: savedQuery.id,
-                            text: savedQuery.name
+                        for(var i in savedQueries){
+                            queryName.append($('<option>', {
+                            value: savedQueries[i].id,
+                            text: savedQueries[i].name
                         }));
-                        queryName.val(savedQuery.id);
-                        $.each(savedQuery["data"], function(field, value){
-                            comboBox = controls.parent().find(".content select#" + field);
-                            comboBox.val(value);
-                        });
-
-                        updateChart(comboBox.val(), comboBox.parent().siblings("div.ct-chart").attr("id"))
+                        }
                     },
                     error: function(){
                         alert("error");
                     }
                 });
             });
+
+           $(".query-controls select[name='queryName']").change(function(){
+               console.log("mudou");
+           });
         });
     </script>
     <script>
-        $("select.combobox").change(function(e) {
-            e.preventDefault();
-            updateChart($(this).value, $(this).parent().siblings("div.chart-ct").attr("id") );
+        $("select.combobox").change(function() {
+            updateChart($(this).val(), $(this).parent().siblings("div.ct-chart").attr("id") );
         });
 
     </script>

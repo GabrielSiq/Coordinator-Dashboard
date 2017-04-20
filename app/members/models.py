@@ -68,8 +68,12 @@ class Query(db.Model):
     user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
     visualization_id = db.Column(db.String(50), nullable=False)
     query_data = db.Column(db.JSON, nullable=False)
+    name = db.Column(db.String(50), nullable=False)
 
     queries = db.relationship('User', backref=db.backref('users', lazy='dynamic'))
+
+    # Unique names for saved queries from a certain user in a certain visualization
+    __table_args__ = (db.UniqueConstraint('user_id', 'visualization_id', 'name', name="_query_uc"),)
 
 
 class Role(db.Model):

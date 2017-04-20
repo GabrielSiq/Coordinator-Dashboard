@@ -25,7 +25,7 @@ DATA_SOURCE = pd.DataFrame()
 
 # Registers user model with db
 with application.app_context():
-    #db.drop_all()
+    db.drop_all()
     db.create_all() # Creates tables defined
     db_adapter = SQLAlchemyAdapter(db, User)        # Register the User model
 
@@ -65,10 +65,21 @@ def createDummyUsers():
     queries = list()
     data = {}
     data['sort'] = "largest"
-    queries.append(Query(user_id=1, visualization_id=1, query_data=json.dumps(data)))
+    queries.append(Query(user_id=1, visualization_id=1, query_data=json.dumps(data), name="abc"))
     data['sort'] = "smallest"
-    queries.append(Query(user_id=2, visualization_id=1, query_data=json.dumps(data)))
-    queries.append(Query(user_id=3, visualization_id=1, query_data=json.dumps(data)))
+    queries.append(Query(user_id=2, visualization_id=1, query_data=json.dumps(data), name="abc"))
+    queries.append(Query(user_id=3, visualization_id=1, query_data=json.dumps(data), name="abc"))
+
+    data = {}
+    data['matr'] = "HBF1988"
+    queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Exemplo"))
+    data['matr'] = "UAM1180"
+    queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Exemplo 3"))
+    data['matr'] = "AGB1488"
+    queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Exemplo 4"))
+    queries.append(Query(user_id=1, visualization_id="enrollment-2", query_data=json.dumps(data), name="Exemplo 5"))
+    data['matr'] = "GNR1825"
+    queries.append(Query(user_id=1, visualization_id="enrollment-2", query_data=json.dumps(data), name="Exemplo 2"))
 
     for query in queries:
         db.session.add(query)
@@ -82,7 +93,7 @@ def initialize():
 
     #updateData()
     loadData(dbOption = False)
-    #createDummyUsers()
+    createDummyUsers()
     scheduler = BackgroundScheduler()
     scheduler.start()
     scheduler.add_job(updateData, trigger = "interval", days = 1)
