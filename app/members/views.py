@@ -75,3 +75,22 @@ def rand():
     data['series'] = filtered.values.tolist()
 
     return json.dumps(data)
+
+@application.route('/savedQueries', methods=['POST'])
+@login_required
+def savedQueries():
+    """
+    Testing custom plotting via ajax.
+    :return: 
+    """
+    data = {}
+    id = request.json['view_id']
+    if(id == "enrollment"):
+        data['name'] =  "Exemplo"
+        data['id'] = "1"
+        data['data'] = {"matr" : "HBF1988"}
+    elif(id == "enrollment-2"):
+        data['name'] = "Exemplo 2"
+        data['id'] = "2"
+        data['data'] = {"matr": "GNR1825"}
+    return json.dumps(data)
