@@ -126,12 +126,7 @@
                             </select>
                         </div>
                     </form>
-                    <div id="chartLine" class="ct-chart">
-
-                    </div>
-                    <div class="message">
-
-                    </div>
+                    <div id="chartLine" class="ct-chart"></div>
                 </div>
             </div>
         </div>
@@ -188,12 +183,7 @@
                             </select>
                         </div>
                     </form>
-                    <div id="chartLine2" class="ct-chart">
-
-                    </div>
-                    <div class="message">
-
-                    </div>
+                    <div id="chartLine2" class="ct-chart"></div>
                 </div>
             </div>
         </div>
@@ -336,14 +326,11 @@
                         lineSmooth: false
                     };
                     if(result['labels'].length !== 0) {
-                        message.hide();
+                        chart.html("");
                         new Chartist.Line("#" + chartId, data, options);
-                        chart.show();
                     }
                     else{
-                        chart.hide();
-                        message.show();
-                        message.html('<p>No data found for given parameters.</p>');
+                        chart.html("<p style='text-align:center; vertical-align:middle'>No data found for given parameters.</p>");
                     }
                 },
                 error: function() {
