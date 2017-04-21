@@ -107,7 +107,7 @@
                         <div class="form-group">
                             <label for="text">Course</label>
                             <select id="course" class="form-control combobox">
-                                <option></option>
+                                <option value=""></option>
                                 <option value='AGB1488'>AGB1488</option>
                                 <option value='GNR1825'>GNR1825</option>
                                 <option value='WRC1627'>WRC1627</option>
@@ -118,7 +118,7 @@
                         <div class="form-group">
                             <label for="text">Situation</label>
                             <select id="situation" class="form-control combobox">
-                                <option></option>
+                                <option value=""></option>
                                 <option value='AP'>Approved</option>
                                 <option value='EA'>In Progress</option>
                                 <option value='CA'>Dropped</option>
@@ -126,10 +126,10 @@
                             </select>
                         </div>
                     </form>
-                    <div id="ajax">
+                    <div id="chartLine" class="ct-chart">
 
                     </div>
-                    <div id="chartLine" class="ct-chart">
+                    <div class="message">
 
                     </div>
                 </div>
@@ -169,7 +169,7 @@
                         <div class="form-group">
                             <label for="text">Course</label>
                             <select id="course" class="form-control combobox">
-                                <option></option>
+                                <option value=""></option>
                                 <option value='AGB1488'>AGB1488</option>
                                 <option value='GNR1825'>GNR1825</option>
                                 <option value='WRC1627'>WRC1627</option>
@@ -180,7 +180,7 @@
                         <div class="form-group">
                             <label for="text">Situation</label>
                             <select id="situation" class="form-control combobox">
-                                <option></option>
+                                <option value=""></option>
                                 <option value='AP'>Approved</option>
                                 <option value='EA'>In Progress</option>
                                 <option value='CA'>Dropped</option>
@@ -188,10 +188,10 @@
                             </select>
                         </div>
                     </form>
-                    <div id="ajax">
+                    <div id="chartLine2" class="ct-chart">
 
                     </div>
-                    <div id="chartLine2" class="ct-chart">
+                    <div class="message">
 
                     </div>
                 </div>
@@ -313,26 +313,38 @@
 {#      });#}
 {#    </script>#}
     <script>
-        function updateChart(content, chartId) {
+        function updateChart(content) {
             item = {};
             content.find("select.form-control").each(function(){
                 item[$(this).attr("id")] = $(this).val();
             });
+            var chart = content.find(".ct-chart");
+            var chartId = chart.attr("id");
+            var message = chart.siblings("div.message");
             $.ajax({
                 type: "POST",
                 url: "/rand",
                 contentType:"application/json",
                 data : JSON.stringify(item),
                 success: function(resultJSON) {
-                    var teste = JSON.parse(resultJSON)
+                    var result = JSON.parse(resultJSON);
                     var data = {
-                      labels: teste['labels'],
-                      series: [teste['series']]
+                      labels: result['labels'],
+                      series: [result['series']]
                     };
                     var options = {
                         lineSmooth: false
                     };
-                    new Chartist.Line("#" + chartId, data, options);
+                    if(result['labels'].length !== 0) {
+                        message.hide();
+                        new Chartist.Line("#" + chartId, data, options);
+                        chart.show();
+                    }
+                    else{
+                        chart.hide();
+                        message.show();
+                        message.html('<p>No data found for given parameters.</p>');
+                    }
                 },
                 error: function() {
                     alert('error');
@@ -371,18 +383,19 @@
            $(".query-controls select[name='queryName']").change(function(){
                var select = $(this);
                var card = select.closest("div.card");
-               var queryData = JSON.parse(JSON.parse(dataStore[card.attr("id")])[select.val().toString()]['query_data']);
-               console.log(queryData);
-               for(var key in queryData){
-                   card.find("select#" + key).val(queryData[key]);
+               if (select.val()) {
+                   var queryData = JSON.parse(JSON.parse(dataStore[card.attr("id")])[select.val().toString()]['query_data']);
+                   for (var key in queryData) {
+                       card.find("select#" + key).val(queryData[key]);
+                   }
+                   updateChart(card.find(".content"))
                }
-               updateChart(card.find(".content"), card.find("div.ct-chart").attr("id"))
            });
         });
     </script>
     <script>
         $("select.combobox").change(function() {
-            updateChart($(this).closest(".content"), $(this).closest('form').siblings("div.ct-chart").attr("id") );
+            updateChart($(this).closest(".content"));
         });
 
     </script>
