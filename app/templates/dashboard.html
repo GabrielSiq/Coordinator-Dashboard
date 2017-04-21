@@ -281,22 +281,24 @@
     <script>
         $(document).ready(function(){
             // Load saved configs into dropdown
+            var dataStore = {};
             $(".query-controls").each(function() {
                 var controls = $(this);
+                var parent_id = controls.parent().attr("id");
                 $.ajax({
                     type: "POST",
                     url: "/savedQueries",
                     contentType: "application/json",
                     data: JSON.stringify({'view_id': controls.parent().attr("id")}),
                     success: function(resultJSON) {
-
+                        dataStore[parent_id] = resultJSON;
                         var savedQueries = JSON.parse(resultJSON);
                         var queryName = controls.find("select[name='queryName']");
-                        for(var i in savedQueries){
+                        for (var key in savedQueries) {
                             queryName.append($('<option>', {
-                            value: savedQueries[i].id,
-                            text: savedQueries[i].name
-                        }));
+                                value: key,
+                                text: savedQueries[key].name
+                            }));
                         }
                     },
                     error: function(){
@@ -304,9 +306,14 @@
                     }
                 });
             });
-
            $(".query-controls select[name='queryName']").change(function(){
-               console.log("mudou");
+               var select = $(this);
+               var card = select.closest("div.card");
+               var queryData = JSON.parse(JSON.parse(dataStore[card.attr("id")])[select.val().toString()]['query_data']);
+               for(var key in queryData){
+                   card.find("select#" + key).val(queryData[key]);
+               }
+               updateChart(card.find("select#" + key).val(), card.find("div.ct-chart").attr("id"))
            });
         });
     </script>
@@ -317,3 +324,4 @@
 
     </script>
 {% endblock scripts %}
+

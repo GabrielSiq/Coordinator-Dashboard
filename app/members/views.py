@@ -84,15 +84,14 @@ def savedQueries():
     Testing custom plotting via ajax.
     :return: 
     """
-    data_list = []
+    data_list = {}
     id = request.json['view_id']
 
     queries =  Query.query.filter_by(user_id = current_user.id, visualization_id = id).all()
     for query in queries:
         data = {}
         data['name'] = query.name
-        data['id'] = query.id
-        data['data'] = query.query_data
-        data_list.append(data)
+        data['query_data'] = query.query_data
+        data_list[query.id] = data
 
     return json.dumps(data_list)
