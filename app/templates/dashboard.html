@@ -372,6 +372,7 @@
                var select = $(this);
                var card = select.closest("div.card");
                var queryData = JSON.parse(JSON.parse(dataStore[card.attr("id")])[select.val().toString()]['query_data']);
+               console.log(queryData);
                for(var key in queryData){
                    card.find("select#" + key).val(queryData[key]);
                }

@@ -71,14 +71,16 @@ def createDummyUsers():
     queries.append(Query(user_id=3, visualization_id=1, query_data=json.dumps(data), name="abc"))
 
     data = {}
-    data['matr'] = "HBF1988"
+    data['disciplina'] = "HBF1988"
     queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Exemplo"))
-    data['matr'] = "UAM1180"
+    data['disciplina'] = "UAM1180"
+    data['situacao'] = 'EA'
     queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Exemplo 3"))
-    data['matr'] = "AGB1488"
+    data['disciplina'] = "AGB1488"
+    data['situacao'] = 'RM'
     queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Exemplo 4"))
     queries.append(Query(user_id=1, visualization_id="enrollment-2", query_data=json.dumps(data), name="Exemplo 5"))
-    data['matr'] = "GNR1825"
+    data['disciplina'] = "GNR1825"
     queries.append(Query(user_id=1, visualization_id="enrollment-2", query_data=json.dumps(data), name="Exemplo 2"))
 
     for query in queries:
