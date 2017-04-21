@@ -71,16 +71,16 @@ def createDummyUsers():
     queries.append(Query(user_id=3, visualization_id=1, query_data=json.dumps(data), name="abc"))
 
     data = {}
-    data['disciplina'] = "HBF1988"
+    data['course'] = "HBF1988"
     queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Exemplo"))
-    data['disciplina'] = "UAM1180"
-    data['situacao'] = 'EA'
+    data['course'] = "UAM1180"
+    data['situation'] = 'EA'
     queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Exemplo 3"))
-    data['disciplina'] = "AGB1488"
-    data['situacao'] = 'RM'
+    data['course'] = "AGB1488"
+    data['situation'] = 'RM'
     queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Exemplo 4"))
     queries.append(Query(user_id=1, visualization_id="enrollment-2", query_data=json.dumps(data), name="Exemplo 5"))
-    data['disciplina'] = "GNR1825"
+    data['course'] = "GNR1825"
     queries.append(Query(user_id=1, visualization_id="enrollment-2", query_data=json.dumps(data), name="Exemplo 2"))
 
     for query in queries:
@@ -144,7 +144,7 @@ def loadData(dbOption = False):
     csv_url = os.path.join(SITE_ROOT, 'static', 'assets', 'data', 'data.csv')
     global DATA_SOURCE
     DATA_SOURCE = pd.read_csv(csv_url, encoding="utf-8")
-    DATA_SOURCE.columns = ['matricula', 'periodo', 'disciplina', 'creditos', 'turma', 'grau', 'situacao', 'professor']
+    DATA_SOURCE.columns = ['student_id', 'semester', 'course', 'units', 'section', 'grade', 'situation', 'professor']
     if(dbOption == True):
         for index, row in DATA_SOURCE.iterrows():
             if row.matricula.isdigit():
@@ -163,9 +163,9 @@ def injectDataTable():
     """
     def getDataTable(id):
         if id == 1:
-            cancellation = DATA_SOURCE[DATA_SOURCE['situacao'].isin(['CA', 'CD', 'CL', 'DT', 'LT'])]
-            course_count = DATA_SOURCE.groupby('disciplina').size()
-            cancellation = cancellation.groupby('disciplina').size()
+            cancellation = DATA_SOURCE[DATA_SOURCE['situation'].isin(['CA', 'CD', 'CL', 'DT', 'LT'])]
+            course_count = DATA_SOURCE.groupby('course').size()
+            cancellation = cancellation.groupby('course').size()
             canc_rate = (cancellation / course_count).dropna()
 
             if current_user.is_authenticated:

@@ -11,27 +11,27 @@ class AcademicData(db.Model):
     """
     __tablename__ = 'academic_data'
 
-    matricula = db.Column(db.Integer(), primary_key=True)
-    periodo = db.Column(db.SmallInteger(), primary_key=True)
-    disciplina = db.Column(db.String(7), primary_key=True)
-    creditos = db.Column(db.SmallInteger())
-    turma = db.Column(db.String(3), primary_key=True)
-    grau = db.Column(db.Float())
-    situacao = db.Column(db.String(2))
+    student_id = db.Column(db.Integer(), primary_key=True)
+    semester = db.Column(db.SmallInteger(), primary_key=True)
+    course = db.Column(db.String(7), primary_key=True)
+    units = db.Column(db.SmallInteger())
+    section = db.Column(db.String(3), primary_key=True)
+    grade = db.Column(db.Float())
+    situation = db.Column(db.String(2))
     professor = db.Column(db.String(70))
 
-    def __init__(self, matricula, periodo, disciplina, creditos, turma, situacao, professor, grau = None):
-        self.matricula = matricula
-        self.periodo = periodo
-        self.disciplina = disciplina
-        self.creditos = creditos
-        self.turma = turma
-        self.situacao = situacao
+    def __init__(self, student_id, semester, course, units, section, situation, professor, grade = None):
+        self.student_id = student_id
+        self.semester = semester
+        self.course = course
+        self.units = units
+        self.section = section
+        self.situation = situation
         self.professor = professor
-        self.grau = grau
+        self.grade = grade
 
     def __repr__(self):
-        return '<matr {} peri{} disc {} turm {}>'.format(self.matricula, self.periodo, self.disciplina, self.turma)
+        return '<matr {} peri{} disc {} turm {}>'.format(self.student_id, self.semester, self.course, self.section)
 
 
 class User(db.Model, UserMixin):
