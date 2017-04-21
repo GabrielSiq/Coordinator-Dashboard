@@ -94,21 +94,37 @@
                 </div>
                 <div class="query-controls">
                     <form>
-                        <select name="queryName" class="form-control">
-                            <option>No saved query</option>
-                        </select>
+                         <div class="form-group">
+                            <label for="text">Saved Query</label>
+                            <select name="queryName" class="form-control">
+                                <option value="">No saved query</option>
+                            </select>
+                        </div>
                     </form>
                 </div>
                 <div class="content">
                     <form>
-                        <select id="matr" class="form-control combobox">
-                            <option></option>
-                            <option value='AGB1488'>AGB1488</option>
-                            <option value='GNR1825'>GNR1825</option>
-                            <option value='WRC1627'>WRC1627</option>
-                            <option value='HBF1988'>HBF1988</option>
-                            <option value='UAM1180'>UAM1180</option>
-                         </select>
+                        <div class="form-group">
+                            <label for="text">Course</label>
+                            <select id="disciplina" class="form-control combobox">
+                                <option></option>
+                                <option value='AGB1488'>AGB1488</option>
+                                <option value='GNR1825'>GNR1825</option>
+                                <option value='WRC1627'>WRC1627</option>
+                                <option value='HBF1988'>HBF1988</option>
+                                <option value='UAM1180'>UAM1180</option>
+                             </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="text">Situation</label>
+                            <select id="situacao" class="form-control combobox">
+                                <option></option>
+                                <option value='AP'>Approved</option>
+                                <option value='EA'>In Progress</option>
+                                <option value='CA'>Dropped</option>
+                                <option value='RM'>Failed</option>
+                            </select>
+                        </div>
                     </form>
                     <div id="ajax">
 
@@ -140,21 +156,37 @@
                 </div>
                 <div class="query-controls">
                     <form>
-                        <select name="queryName" class="form-control">
-                            <option value="">No saved query</option>
-                        </select>
+                        <div class="form-group">
+                            <label for="text">Saved Query</label>
+                            <select name="queryName" class="form-control">
+                                <option value="">No saved query</option>
+                            </select>
+                        </div>
                     </form>
                 </div>
                 <div class="content">
                     <form>
-                        <select id="matr" class="form-control combobox">
-                            <option></option>
-                            <option value='AGB1488'>AGB1488</option>
-                            <option value='GNR1825'>GNR1825</option>
-                            <option value='WRC1627'>WRC1627</option>
-                            <option value='HBF1988'>HBF1988</option>
-                            <option value='UAM1180'>UAM1180</option>
-                         </select>
+                        <div class="form-group">
+                            <label for="text">Course</label>
+                            <select id="course" class="form-control combobox">
+                                <option></option>
+                                <option value='AGB1488'>AGB1488</option>
+                                <option value='GNR1825'>GNR1825</option>
+                                <option value='WRC1627'>WRC1627</option>
+                                <option value='HBF1988'>HBF1988</option>
+                                <option value='UAM1180'>UAM1180</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="text">Situation</label>
+                            <select id="situation" class="form-control combobox">
+                                <option></option>
+                                <option value='AP'>Approved</option>
+                                <option value='EA'>In Progress</option>
+                                <option value='CA'>Dropped</option>
+                                <option value='RM'>Failed</option>
+                            </select>
+                        </div>
                     </form>
                     <div id="ajax">
 
@@ -281,14 +313,16 @@
 {#      });#}
 {#    </script>#}
     <script>
-        function updateChart(val, chartId) {
-            console.log(val);
-            console.log(chartId);
-             $.ajax({
+        function updateChart(content, chartId) {
+            item = {};
+            content.find("select.form-control").each(function(){
+                item[$(this).attr("id")] = $(this).val();
+            });
+            $.ajax({
                 type: "POST",
                 url: "/rand",
                 contentType:"application/json",
-                data : JSON.stringify({'course': val}),
+                data : JSON.stringify(item),
                 success: function(resultJSON) {
                     var teste = JSON.parse(resultJSON)
                     var data = {
@@ -341,13 +375,13 @@
                for(var key in queryData){
                    card.find("select#" + key).val(queryData[key]);
                }
-               updateChart(card.find("select#" + key).val(), card.find("div.ct-chart").attr("id"))
+               updateChart(card.find(".content"), card.find("div.ct-chart").attr("id"))
            });
         });
     </script>
     <script>
         $("select.combobox").change(function() {
-            updateChart($(this).val(), $(this).parent().siblings("div.ct-chart").attr("id") );
+            updateChart($(this).closest(".content"), $(this).closest('form').siblings("div.ct-chart").attr("id") );
         });
 
     </script>

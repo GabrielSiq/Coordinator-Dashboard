@@ -68,9 +68,13 @@ def rand():
     Testing custom plotting via ajax.
     :return: 
     """
-    course = request.json['course']
     global DATA
-    filtered = DATA[DATA['disciplina'] == course]['periodo'].value_counts().sort_values()
+    filtered = DATA
+    for key in request.json:
+        if request.json[key] != "":
+            filtered = filtered[filtered[key] == request.json[key]]
+
+    filtered = filtered['periodo'].value_counts().sort_values()
     data = {}
     data['labels'] =  map(str, filtered.index.values.tolist())
     data['series'] = filtered.values.tolist()
