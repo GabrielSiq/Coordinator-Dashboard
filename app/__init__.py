@@ -25,7 +25,7 @@ DATA_SOURCE = pd.DataFrame()
 
 # Registers user model with db
 with application.app_context():
-    db.drop_all()
+    #db.drop_all()
     db.create_all() # Creates tables defined
     db_adapter = SQLAlchemyAdapter(db, User)        # Register the User model
 
@@ -96,8 +96,8 @@ def initialize():
     """
 
     #updateData()
-    loadData(dbOption = True)
-    createDummyUsers()
+    loadData(dbOption = False)
+    #createDummyUsers()
     scheduler = BackgroundScheduler()
     scheduler.start()
     scheduler.add_job(updateData, trigger = "interval", days = 1)
