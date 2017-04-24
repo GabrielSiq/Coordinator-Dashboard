@@ -96,7 +96,7 @@ def initialize():
     """
 
     #updateData()
-    loadData(dbOption = False)
+    loadData(dbOption = True)
     createDummyUsers()
     scheduler = BackgroundScheduler()
     scheduler.start()
@@ -149,9 +149,9 @@ def loadData(dbOption = False):
     DATA_SOURCE.columns = ['student_id', 'semester', 'course', 'units', 'section', 'grade', 'situation', 'professor']
     if(dbOption == True):
         for index, row in DATA_SOURCE.iterrows():
-            if row.matricula.isdigit():
-                db_row = AcademicData(row.matricula, row.periodo, row.disciplina, row.creditos, row.turma, row.situacao,
-                                      row.professor, row.grau)
+            if row.student_id.isdigit():
+                db_row = AcademicData(row.student_id, row.semester, row.course, row.units, row.section, row.situation,
+                                      row.professor, row.grade)
                 db.session.add(db_row)
         db.session.commit()
 
