@@ -7,7 +7,7 @@ class Config(object):
     """
     Flask Configs
     """
-    #TODO: Change secret key (should be in enrivonment variable)
+    #TODO: Change secret key (should be in enrivonment variables)
     DEBUG = False
     TESTING = False
     CSRF_ENABLED = True
@@ -15,8 +15,10 @@ class Config(object):
     """
     SQLALCHEMY CONFIGS
     """
-    #SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres:database@localhost:5432/prototype"
-    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres:postgres@ebdb.chmuay6n3r4k.sa-east-1.rds.amazonaws.com/ebdb"
+    # Local DB
+    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres:database@localhost:5432/prototype"
+    # RDS (AWS) DB
+    #SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres:postgres@ebdb.chmuay6n3r4k.sa-east-1.rds.amazonaws.com/ebdb"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     """
     FLASK-USER CONFIGS
