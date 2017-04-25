@@ -59,30 +59,41 @@ def protected_register():
     """
     return user_views.register()
 
-
-
-@application.route('/getChartData', methods=['POST'])
+@application.route('/getEnrollmentData', methods=['POST'])
 @login_required
-def getChartData():
-    """
-    Testing custom plotting via ajax. More focused on the mechanics than the semantics.
-    """
+def getEnrollmentData(requestParams):
     global DATA
     filtered = DATA
 
     # Applies all filters from the request to our data
-    for key in request.json:
-        if request.json[key] != "":
-            filtered = filtered[filtered[key] == request.json[key]]
+    for key in requestParams:
+        if requestParams[key] != "":
+            filtered = filtered[filtered[key] == requestParams[key]]
 
     # Counts number of rows per semester. Outputs in asc order.
     filtered = filtered.groupby('semester').size()
 
     # Formats the data to return in a dict and converts to json
     data = {}
-    data['labels'] =  map(str, filtered.index.values.tolist())
+    data['labels'] = map(str, filtered.index.values.tolist())
     data['series'] = filtered.values.tolist()
     return json.dumps(data)
+
+@application.route('/getChartData', methods=['POST'])
+@login_required
+def getChartData():
+    """
+    Receives request for data, parses the type of view and routes to the correct function.
+    """
+    if not all(x in request.json for x in ["chartId", "requestParams"]):
+        return ""
+    chartId = request.json['chartId']
+    print chartId
+    if chartId in ["enrollment", "enrollment-2"]:
+        return getEnrollmentData(request.json['requestParams'])
+    else:
+        return ""
+
 
 @application.route('/savedQueries', methods=['POST'])
 @login_required

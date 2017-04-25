@@ -7,7 +7,7 @@
 {% block content %}
     <div class="row">
         <div class="col-md-4">
-            <div class="card">
+            <div class="card" id="cancellation">
                 <div class="header">
                     <h4 class="title">Drop Rate <span class="glyphicon glyphicon-triangle-bottom"/></h4>
                     <p class="category">Courses with <span style="color: green; font-weight: bold">smallest</span> drop rate. (Client-side rendering)</p>
@@ -34,12 +34,7 @@
                     </form>
                     <table class="table table-hover table-striped">
                         <tbody>
-                            {% for row in canc.iteritems() %}
-                                <tr>
-                                    <td>{{ row[0] }}</td>
-                                    <td>{{ (row[1] * 100)|round(1) }}%</td>
-                                </tr>
-                            {% endfor %}
+
                         </tbody>
                     </table>
                 </div>
@@ -323,33 +318,39 @@
 {#    </script>#}
     <script>
         function updateChart(content) {
-            item = {};
+            var params = {};
             content.find("select.form-control").each(function(){
-                item[$(this).attr("id")] = $(this).val();
+                params[$(this).attr("id")] = $(this).val();
             });
-            var chart = content.find(".ct-chart");
+            var requestJSON = {"chartId" : content.parent().attr("id"), "requestParams" : params};
+            var chart = content.find(".ct-chart, .table-striped");
             var chartId = chart.attr("id");
             var message = chart.siblings("div.message");
             $.ajax({
                 type: "POST",
                 url: "/getChartData",
                 contentType:"application/json",
-                data : JSON.stringify(item),
+                data : JSON.stringify(requestJSON),
                 success: function(resultJSON) {
-                    var result = JSON.parse(resultJSON);
-                    var data = {
-                      labels: result['labels'],
-                      series: [result['series']]
-                    };
-                    var options = {
-                        lineSmooth: false
-                    };
-                    if(result['labels'].length !== 0) {
-                        chart.html("");
-                        new Chartist.Line("#" + chartId, data, options);
+                    if($.trim(resultJSON)) {
+                        var result = JSON.parse(resultJSON);
+                        var data = {
+                            labels: result['labels'],
+                            series: [result['series']]
+                        };
+                        var options = {
+                            lineSmooth: false
+                        };
+                        if (result['labels'].length !== 0) {
+                            chart.html("");
+                            new Chartist.Line("#" + chartId, data, options);
+                        }
+                        else {
+                            chart.html("<p style='text-align:center; vertical-align:middle'>No data found for given parameters.</p>");
+                        }
                     }
-                    else{
-                        chart.html("<p style='text-align:center; vertical-align:middle'>No data found for given parameters.</p>");
+                    else {
+                        chart.html("<p style='text-align:center; vertical-align:middle'>Query submission error.</p>");
                     }
                 },
                 error: function() {
