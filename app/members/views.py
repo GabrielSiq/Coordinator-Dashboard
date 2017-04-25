@@ -61,24 +61,27 @@ def protected_register():
 
 
 
-@application.route('/rand', methods=['POST'])
+@application.route('/getChartData', methods=['POST'])
 @login_required
-def rand():
+def getChartData():
     """
-    Testing custom plotting via ajax.
-    :return: 
+    Testing custom plotting via ajax. More focused on the mechanics than the semantics.
     """
     global DATA
     filtered = DATA
+
+    # Applies all filters from the request to our data
     for key in request.json:
         if request.json[key] != "":
             filtered = filtered[filtered[key] == request.json[key]]
 
-    filtered = filtered['semester'].value_counts().sort_values()
+    # Counts number of rows per semester. Outputs in asc order.
+    filtered = filtered.groupby('semester').size()
+
+    # Formats the data to return in a dict and converts to json
     data = {}
     data['labels'] =  map(str, filtered.index.values.tolist())
     data['series'] = filtered.values.tolist()
-
     return json.dumps(data)
 
 @application.route('/savedQueries', methods=['POST'])

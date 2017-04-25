@@ -10,9 +10,28 @@
             <div class="card">
                 <div class="header">
                     <h4 class="title">Drop Rate <span class="glyphicon glyphicon-triangle-bottom"/></h4>
-                    <p class="category">Courses with <span style="color: green; font-weight: bold">smallest</span> drop rate.</p>
+                    <p class="category">Courses with <span style="color: green; font-weight: bold">smallest</span> drop rate. (Client-side rendering)</p>
                 </div>
+                <div class="query-controls">
+                        <form>
+                             <div class="form-group">
+                                <label for="queryName">Saved Query</label>
+                                <select name="queryName" class="form-control">
+                                    <option value="">No saved query</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
                 <div class="content table-responsive table-full-width">
+                    <form>
+                        <div class="form-group">
+                            <label for="sort">Sort by:</label>
+                            <select id="sort" class="form-control combobox">
+                                <option value="largest">largest</option>
+                                <option value='smallest'>smallest</option>
+                             </select>
+                        </div>
+                    </form>
                     <table class="table table-hover table-striped">
                         <tbody>
                             {% for row in canc.iteritems() %}
@@ -30,7 +49,7 @@
             <div class="card">
                 <div class="header">
                     <h4 class="title">Drop Rate <span class="glyphicon glyphicon-triangle-top"/></h4>
-                    <p class="category">Courses with <span style="color: red; font-weight: bold">largest</span> drop rate.</p>
+                    <p class="category">Courses with <span style="color: red; font-weight: bold">largest</span> drop rate. (Fixed)</p>
                 </div>
                 <div class="content table-responsive table-full-width">
                     <table class="table table-hover table-striped">
@@ -52,7 +71,7 @@
                 <div class="header">
                     <h4 class="title">Drop Rate <span class="glyphicon glyphicon-triangle-top"/></h4>
                     {# TODO: Dynamic styles for smalles/largest tags #}
-                    <p class="category">Courses with <span id="{{ canc3.sort }}">{{ canc3.sort }}</span> drop rate.</p>
+                    <p class="category">Courses with <span id="{{ canc3.sort }}">{{ canc3.sort }}</span> drop rate. (Server-side rendering)</p>
                 </div>
                 <div class="content table-responsive table-full-width">
                     <table class="table table-hover table-striped">
@@ -95,7 +114,7 @@
                 <div class="query-controls">
                     <form>
                          <div class="form-group">
-                            <label for="text">Saved Query</label>
+                            <label for="queryName">Saved Query</label>
                             <select name="queryName" class="form-control">
                                 <option value="">No saved query</option>
                             </select>
@@ -105,7 +124,7 @@
                 <div class="content">
                     <form>
                         <div class="form-group">
-                            <label for="text">Course</label>
+                            <label for="course">Course</label>
                             <select id="course" class="form-control combobox">
                                 <option value=""></option>
                                 <option value='AGB1488'>AGB1488</option>
@@ -116,7 +135,7 @@
                              </select>
                         </div>
                         <div class="form-group">
-                            <label for="text">Situation</label>
+                            <label for="situation">Situation</label>
                             <select id="situation" class="form-control combobox">
                                 <option value=""></option>
                                 <option value='AP'>Approved</option>
@@ -152,7 +171,7 @@
                 <div class="query-controls">
                     <form>
                         <div class="form-group">
-                            <label for="text">Saved Query</label>
+                            <label for="queryName">Saved Query</label>
                             <select name="queryName" class="form-control">
                                 <option value="">No saved query</option>
                             </select>
@@ -162,7 +181,7 @@
                 <div class="content">
                     <form>
                         <div class="form-group">
-                            <label for="text">Course</label>
+                            <label for="course">Course</label>
                             <select id="course" class="form-control combobox">
                                 <option value=""></option>
                                 <option value='AGB1488'>AGB1488</option>
@@ -173,7 +192,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="text">Situation</label>
+                            <label for="situation">Situation</label>
                             <select id="situation" class="form-control combobox">
                                 <option value=""></option>
                                 <option value='AP'>Approved</option>
@@ -313,7 +332,7 @@
             var message = chart.siblings("div.message");
             $.ajax({
                 type: "POST",
-                url: "/rand",
+                url: "/getChartData",
                 contentType:"application/json",
                 data : JSON.stringify(item),
                 success: function(resultJSON) {
