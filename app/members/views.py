@@ -79,6 +79,25 @@ def getEnrollmentData(requestParams):
     data['series'] = filtered.values.tolist()
     return json.dumps(data)
 
+@application.route('/getCancellationData', methods=['POST'])
+@login_required
+def getCancellationData(requestParams):
+    global DATA
+    filtered = DATA
+
+    if("sort" not in requestParams):
+        return ""
+
+    cancellation = filtered[filtered['situation'].isin(['CA', 'CD', 'CL', 'DT', 'LT'])]
+    course_count = DATA.groupby('course').size()
+    cancellation = cancellation.groupby('course').size()
+    canc_rate = (cancellation / course_count).dropna()
+
+    return canc_rate.sort_values(ascending=(requestParams['sort'] == "smallest")).head(10).to_json()
+
+
+
+
 @application.route('/getChartData', methods=['POST'])
 @login_required
 def getChartData():
@@ -88,9 +107,13 @@ def getChartData():
     if not all(x in request.json for x in ["chartId", "requestParams"]):
         return ""
     chartId = request.json['chartId']
+    requestParams = request.json['requestParams']
     print chartId
+
     if chartId in ["enrollment", "enrollment-2"]:
-        return getEnrollmentData(request.json['requestParams'])
+        return getEnrollmentData(requestParams)
+    elif chartId in ["cancellation"]:
+        return getCancellationData(requestParams)
     else:
         return ""
 
