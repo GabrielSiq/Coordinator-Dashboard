@@ -47,8 +47,8 @@ def createDummyUsers():
 
     # Test creation of roles
     roles = list()
-    roles.append(Role(name="admin"))
-    roles.append(Role(name="base_user"))
+    roles.append(Role(name="Admin"))
+    roles.append(Role(name="Base User"))
     for role in roles:
         db.session.add(role)
     db.session.commit()
@@ -185,4 +185,4 @@ def injectDataTable():
 import members.views
 
 # Initialize flask-user
-user_manager = UserManager(db_adapter, application,register_view_function = members.views.protected_register)
+user_manager = UserManager(db_adapter, application,register_view_function = members.views.protectedRegister)

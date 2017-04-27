@@ -1,5 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_user import UserMixin
+from flask_wtf import FlaskForm
+from wtforms import SelectField, StringField
+from wtforms.validators import DataRequired
 
 # Initializes SQLALchemy
 db = SQLAlchemy()
@@ -91,3 +94,10 @@ class UserRoles(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
     role_id = db.Column(db.Integer(), db.ForeignKey('role.id', ondelete='CASCADE'))
+
+# Forms
+
+class MyForm(FlaskForm):
+    first_name = StringField('first_name', validators=[DataRequired()])
+    last_name = StringField('last_name', validators=[DataRequired()])
+    role = SelectField('role', coerce=int, validators=[DataRequired()])

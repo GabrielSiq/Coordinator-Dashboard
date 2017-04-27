@@ -24,3 +24,5 @@ class Config(object):
     FLASK-USER CONFIGS
     """
     USER_SEND_REGISTERED_EMAIL = False
+    USER_AUTO_LOGIN_AFTER_REGISTER = False
+    USER_AFTER_REGISTER_ENDPOINT = 'extraInformation'
