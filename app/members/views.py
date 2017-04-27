@@ -8,8 +8,8 @@ from models import Query
 
 #TODO: load data from database
 
-csv_url = os.path.join(SITE_ROOT, 'static', 'assets', 'data', 'data.csv')
-DATA = pd.read_csv(csv_url, encoding="utf-8")
+csv_url = os.path.join(SITE_ROOT, 'static', 'assets', 'data', 'student_academic_data.csv')
+DATA = pd.read_csv(csv_url)
 DATA.columns = ['student_id', 'semester', 'course', 'units', 'section', 'grade', 'situation', 'professor']
 
 @application.route('/')
@@ -28,11 +28,17 @@ def dashboard():
     """
     global DATA
 
+    course_codes = DATA['course'].unique()
+    course_codes.sort()
+
+    situation_codes = DATA['situation'].unique()
+    situation_codes.sort()
+
     cancellation = DATA[DATA['situation'].isin(['CA', 'CD', 'CL', 'DT', 'LT'])]
     course_count = DATA.groupby('course').size()
     cancellation = cancellation.groupby('course').size()
     canc_rate = (cancellation / course_count).dropna()
-    return render_template('dashboard.html', df = DATA.head(10).to_dict(), canc = canc_rate.sort_values().head(10), canc2 = canc_rate.sort_values(ascending=False).head(10))
+    return render_template('dashboard.html', df = DATA.head(10).to_dict(), canc = canc_rate.sort_values().head(10), canc2 = canc_rate.sort_values(ascending=False).head(10), course_codes=course_codes, situation_codes=situation_codes)
 
 @application.route('/table')
 @login_required

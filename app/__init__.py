@@ -25,7 +25,7 @@ DATA_SOURCE = pd.DataFrame()
 
 # Registers user model with db
 with application.app_context():
-    #db.drop_all()
+    db.drop_all()
     db.create_all() # Creates tables defined
     db_adapter = SQLAlchemyAdapter(db, User)        # Register the User model
 
@@ -71,12 +71,12 @@ def createDummyUsers():
     queries.append(Query(user_id=3, visualization_id=1, query_data=json.dumps(data), name="abc"))
 
     data = {}
-    data['course'] = "HBF1988"
-    data['situation'] = ''
-    queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Exemplo"))
-    data['course'] = "UAM1180"
+    data['course'] = "INF1007"
+    data['situation'] = 'AP'
+    queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Prog 2 - Aprovados"))
+    data['course'] = "INF1005"
     data['situation'] = 'EA'
-    queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Exemplo 3"))
+    queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Prog 1 - Cursando"))
     data['course'] = "AGB1488"
     data['situation'] = 'RM'
     queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Exemplo 4"))
@@ -96,8 +96,8 @@ def initialize():
     """
 
     #updateData()
-    loadData(dbOption = False)
-    #createDummyUsers()
+    loadData(dbOption = True)
+    createDummyUsers()
     scheduler = BackgroundScheduler()
     scheduler.start()
     scheduler.add_job(updateData, trigger = "interval", days = 1)
@@ -143,16 +143,15 @@ def loadData(dbOption = False):
     """
         Loads data from stored csv file into global variable and into database. For dev purposes. Not for production.
     """
-    csv_url = os.path.join(SITE_ROOT, 'static', 'assets', 'data', 'data.csv')
+    csv_url = os.path.join(SITE_ROOT, 'static', 'assets', 'data', 'student_academic_data.csv')
     global DATA_SOURCE
-    DATA_SOURCE = pd.read_csv(csv_url, encoding="utf-8")
+    DATA_SOURCE = pd.read_csv(csv_url)
     DATA_SOURCE.columns = ['student_id', 'semester', 'course', 'units', 'section', 'grade', 'situation', 'professor']
     if(dbOption == True):
         for index, row in DATA_SOURCE.iterrows():
-            if row.student_id.isdigit():
-                db_row = AcademicData(row.student_id, row.semester, row.course, row.units, row.section, row.situation,
-                                      row.professor, row.grade)
-                db.session.add(db_row)
+            db_row = AcademicData(row.student_id, row.semester, row.course, row.units, row.section, row.situation,
+                                  row.professor, row.grade)
+            db.session.add(db_row)
         db.session.commit()
 
 

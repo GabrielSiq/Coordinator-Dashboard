@@ -9,6 +9,7 @@ class AcademicData(db.Model):
     Our transcripts/academic data model.
     Each row corresponds to a row in the csv file.
     """
+    #TODO: Check if primary key is really consistent. Study possibility of using artificially created ID. (what for?)
     __tablename__ = 'academic_data'
 
     student_id = db.Column(db.Integer(), primary_key=True)
@@ -17,8 +18,7 @@ class AcademicData(db.Model):
     units = db.Column(db.SmallInteger())
     section = db.Column(db.String(3), primary_key=True)
     grade = db.Column(db.Float())
-    situation = db.Column(db.String(2))
-    professor = db.Column(db.String(70))
+    situation = db.Column(db.String(2), primary_key=True)
 
     def __init__(self, student_id, semester, course, units, section, situation, professor, grade = None):
         self.student_id = student_id
