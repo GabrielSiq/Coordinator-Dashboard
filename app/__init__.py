@@ -73,17 +73,17 @@ def createDummyUsers():
     data = {}
     data['course'] = "INF1007"
     data['situation'] = 'AP'
-    queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Prog 2 - Aprovados"))
+    queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Prog 2 - Approved"))
     data['course'] = "INF1005"
-    data['situation'] = 'EA'
-    queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Prog 1 - Cursando"))
-    data['course'] = "AGB1488"
     data['situation'] = 'RM'
-    queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Exemplo 4"))
-    queries.append(Query(user_id=1, visualization_id="enrollment-2", query_data=json.dumps(data), name="Exemplo 5"))
-    data['course'] = "GNR1825"
+    queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Prog 1 - Failed (grade)"))
+    data['course'] = "INF1403"
+    data['situation'] = 'RF'
+    queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="HCI - Failed (attendance)"))
+    queries.append(Query(user_id=1, visualization_id="enrollment-2", query_data=json.dumps(data), name="HCI - Failed (attendance)"))
+    data['course'] = "INF1009"
     data['situation'] = ''
-    queries.append(Query(user_id=1, visualization_id="enrollment-2", query_data=json.dumps(data), name="Exemplo 2"))
+    queries.append(Query(user_id=1, visualization_id="enrollment-2", query_data=json.dumps(data), name="Logics - All"))
 
     for query in queries:
         db.session.add(query)
@@ -96,7 +96,7 @@ def initialize():
     """
 
     #updateData()
-    loadData(dbOption = True)
+    loadData(dbOption = False)
     createDummyUsers()
     scheduler = BackgroundScheduler()
     scheduler.start()
