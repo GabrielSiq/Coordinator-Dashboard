@@ -76,15 +76,21 @@ def extraInformation(userId):
             flash('All fields are required.')
             return render_template('extra.html', form=form)
         else:
-            user = User.query.filter_by(id=userId).one()
-            user.first_name = form.first_name.data
-            user.last_name = form.last_name.data
-            user.confirmed_at = datetime.now()
+            try:
+                user = User.query.filter_by(id=userId).one()
+                user.first_name = form.first_name.data
+                user.last_name = form.last_name.data
+                user.confirmed_at = datetime.now()
 
-            user_role = UserRoles(user_id=userId, role_id=form.role.data)
+                user_role = UserRoles(user_id=userId, role_id=form.role.data)
 
-            db.session.add(user_role)
-            db.session.commit()
+                db.session.add(user_role)
+                db.session.commit()
+
+            except:
+                flash("Error while processing form.")
+                return render_template('extra.html', form=form)
+
             return redirect(url_for('index'))
     elif request.method == 'GET':
         return render_template('extra.html', form=form)
