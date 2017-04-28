@@ -63,11 +63,7 @@ def server_error(error):
 @application.route('/user/extra/<userId>', methods = ['GET', 'POST'])
 @roles_required('Admin')
 def extraInformation(userId):
-    print userId
     roles = Role.query.all()
-    for role in roles:
-        print role.id
-        print role.name
     form = ExtraInfo()
     form.role.choices = [(role.id, role.name) for role in roles]
 
@@ -91,6 +87,8 @@ def extraInformation(userId):
                 flash("Error while processing form.")
                 return render_template('extra.html', form=form)
 
+            message = "User " + user.username + " successfully registered."
+            flash(message.encode('ascii'))
             return redirect(url_for('index'))
     elif request.method == 'GET':
         return render_template('extra.html', form=form)

@@ -98,6 +98,6 @@ class UserRoles(db.Model):
 # Forms
 
 class ExtraInfo(FlaskForm):
-    first_name = StringField('first_name', validators=[DataRequired()])
-    last_name = StringField('last_name', validators=[DataRequired()])
-    role = SelectField('role', coerce=int, validators=[DataRequired()])
+    first_name = StringField('First Name', validators=[DataRequired()])
+    last_name = StringField('Last Name', validators=[DataRequired()])
+    role = SelectField('User Role', coerce=int, validators=[DataRequired()])
