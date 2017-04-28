@@ -288,8 +288,6 @@ def getEnrollmentData(requestParams):
     for row in rowData:
         fullRow = []
         for label in allLabels:
-            print label
-            print rowData[row]['labels']
             if label in rowData[row]['labels']:
                 fullRow.append(rowData[row]['series'][rowData[row]['labels'].index(label)])
             else:
@@ -327,7 +325,6 @@ def getChartData():
         return ""
     chartId = request.json['chartId']
     requestParams = request.json['requestParams']
-    print chartId
 
     if chartId in ["enrollment", "enrollment-2"]:
         return getEnrollmentData(requestParams)

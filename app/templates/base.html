@@ -21,7 +21,7 @@
     <meta name="viewport" content="width=device-width" />
 
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
 
     <!-- Bootstrap core CSS     -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
@@ -168,8 +168,8 @@
 	<script src="{{ url_for('static', filename='assets/js/bootstrap-checkbox-radio-switch.js')}}"></script>
 
 	<!--  Charts Plugin -->
-	<script src="{{ url_for('static', filename='assets/js//chartist.min.js')}}"></script>
-
+{#	<script src="{{ url_for('static', filename='assets/js//chartist.min.js')}}"></script>#}
+    <script src="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
     <!--  Notifications Plugin    -->
     <script src="{{ url_for('static', filename='assets/js/bootstrap-notify.js')}}"></script>
 
@@ -185,10 +185,9 @@
             <script>
             $(document).ready(function(){
                 var messages = {{ messages | safe }};
+                demo.initChartist();
                 for (var i=0; i<messages.length; i++) {
 
-
-                        demo.initChartist();
 
                         $.notify({
                             icon: 'pe-7s-smile',

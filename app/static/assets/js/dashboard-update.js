@@ -17,7 +17,7 @@ function updateChart(content) {
         paramSet[$(this).attr("id")] = params;
     });
     var requestJSON = {"chartId" : content.parent().attr("id"), "requestParams" : paramSet};
-    var chart = content.find(".ct-chart, .table-striped");
+    var chart = content.find(".ct-chart");
     var chartId = chart.attr("id");
     var message = chart.siblings("div.message");
     console.log(labels);
@@ -39,13 +39,15 @@ function updateChart(content) {
                     };
                     if (result['labels'].length !== 0) {
                         chart.html("");
-                        new Chartist.Line("#" + chartId, data, options, {
-                            plugins: [
-                                Chartist.plugins.legend({
-                                    legendNames: labels
-                                })
-                            ]
-                        });
+                        chart.get(0).__chartist__.update(data);
+                        //chart.html("");
+                        // new Chartist.Line("#" + chartId, data, options, {
+                        //     plugins: [
+                        //         Chartist.plugins.legend({
+                        //             legendNames: labels
+                        //         })
+                        //     ]
+                        // });
                     }
                     else {
                         chart.html("<p style='text-align:center; vertical-align:middle'>No data found for given parameters.</p>");
@@ -68,6 +70,10 @@ function updateChart(content) {
 
 $(document).ready(function(){
     // Load saved configs into dropdown
+
+    $(".ct-chart").each(function () {
+       new Chartist.Line('.ct-chart', {labels : [], series: [[]]}, {lineSmooth: Chartist.Interpolation.none({fillHoles: true})});
+    });
     var dataStore = {};
     $(".query-controls").each(function() {
         var controls = $(this);
