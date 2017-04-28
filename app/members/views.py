@@ -262,9 +262,10 @@ def protectedRegister():
 def getEnrollmentData(requestParams):
     global DATA
 
-    data = {}
+    rowData = {}
+    allLabels = []
     for row in requestParams:
-        print row
+        rowData[row] = {}
         filtered = DATA
         # Applies all filters from the request to our data
         rowParams = requestParams[row]
@@ -276,10 +277,24 @@ def getEnrollmentData(requestParams):
         filtered = filtered.groupby('semester').size()
 
         # Formats the data to return in a dict and converts to json
-        rowData = {}
-        rowData['labels'] = map(str, filtered.index.values.tolist())
-        rowData['series'] = filtered.values.tolist()
-        data[row] = rowData
+
+        rowData[row]['labels'] = map(str, filtered.index.values.tolist())
+
+        rowData[row]['series'] = filtered.values.tolist()
+        allLabels += list(set(rowData[row]['labels']) - set(allLabels))
+
+    allLabels.sort()
+    data = {'labels' : allLabels, 'series' : []}
+    for row in rowData:
+        fullRow = []
+        for label in allLabels:
+            print label
+            print rowData[row]['labels']
+            if label in rowData[row]['labels']:
+                fullRow.append(rowData[row]['series'][rowData[row]['labels'].index(label)])
+            else:
+                fullRow.append(None)
+        data['series'].append(fullRow)
 
     return json.dumps(data)
 

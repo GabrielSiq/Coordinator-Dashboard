@@ -1,21 +1,26 @@
-
 function updateChart(content) {
     var paramSet = {};
     var hasAny = false;
+    var labels = [];
     content.find(".row.param").each(function () {
         var params = {};
+        var label = "";
         $(this).find("select.form-control").each(function () {
-            params[$(this).attr("id")] = $(this).val();
+            var value = $(this).val()
+            params[$(this).attr("id")] = value;
+            label += label === "" ? value : (" " + value);
             if(hasAny === false && $(this).val() !== ""){
                 hasAny = true;
             }
-       });
+        });
+        labels.push(label);
         paramSet[$(this).attr("id")] = params;
     });
     var requestJSON = {"chartId" : content.parent().attr("id"), "requestParams" : paramSet};
     var chart = content.find(".ct-chart, .table-striped");
     var chartId = chart.attr("id");
     var message = chart.siblings("div.message");
+    console.log(labels);
     if(hasAny){
         $.ajax({
             type: "POST",
@@ -25,19 +30,22 @@ function updateChart(content) {
             success: function(resultJSON) {
                 if($.trim(resultJSON)) {
                     var result = JSON.parse(resultJSON);
-                    for(var key in result){
-
-                    }
                     var data = {
                         labels: result['labels'],
-                        series: [result['series']]
+                        series: result['series']
                     };
                     var options = {
                         lineSmooth: false
                     };
                     if (result['labels'].length !== 0) {
                         chart.html("");
-                        new Chartist.Line("#" + chartId, data, options);
+                        new Chartist.Line("#" + chartId, data, options, {
+                            plugins: [
+                                Chartist.plugins.legend({
+                                    legendNames: labels
+                                })
+                            ]
+                        });
                     }
                     else {
                         chart.html("<p style='text-align:center; vertical-align:middle'>No data found for given parameters.</p>");
@@ -85,6 +93,9 @@ $(document).ready(function(){
             }
         });
     });
+    $(".card form").on('change',  'select.combobox', function () {
+        updateChart($(this).closest(".content"));
+    });
     $(".query-controls select[name='queryName']").change(function(){
         var select = $(this);
         var card = select.closest("div.card");
@@ -95,9 +106,6 @@ $(document).ready(function(){
             }
             updateChart(card.find(".content"))
         }
-    });
-    $("select.combobox").change(function() {
-        updateChart($(this).closest(".content"));
     });
     $(".card form").on('click', 'div.row button.clear', function () {
         var row = $(this).closest('.row');
@@ -110,7 +118,7 @@ $(document).ready(function(){
                 $(this).val("");
             });
         }
-        updateChart($(this).closest('.content'));
+        updateChart(form.closest('.content'));
     });
     $(".card form button.add").click(function () {
         var prevRow = $(this).closest('.row').prev();

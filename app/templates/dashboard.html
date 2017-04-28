@@ -2,6 +2,8 @@
 
 {% block css %}
     <link href="{{ url_for('static', filename='assets/css/bootstrap-combobox.css')}}" rel="stylesheet" type='text/css'/>
+    <link href="{{ url_for('static', filename='assets/css/chartist-plugin-legend.css')}}" rel="stylesheet" type='text/css'/>
+
 {% endblock css %}
 
 {% block content %}
@@ -325,6 +327,7 @@
 {% endblock modals %}
 
 {% block scripts %}
+    <script src="{{ url_for('static', filename='assets/js/chartist-plugin-legend.js')}}"></script>
     <script src="{{ url_for('static', filename='assets/js/dashboard-update.js')}}"></script>
 {% endblock scripts %}
 
