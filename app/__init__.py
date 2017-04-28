@@ -11,6 +11,7 @@ from app.members.models import db, User, AcademicData, Role, UserRoles, Query
 from passlib.hash import bcrypt
 import datetime
 import json
+from wtforms import ValidationError
 
 # Initializes application
 application = Flask(__name__)
@@ -181,8 +182,13 @@ def injectDataTable():
                 return dict(sort = query['sort'], data = canc_rate.sort_values(ascending=ascending).head(10))
     return dict(getDataTable = getDataTable)
 
+def my_password_validator(form, field):
+    password = field.data
+    if len(password) < 3:
+        raise ValidationError(_('Password must have at least 8 characters'))
+
 # Hack for modularization
 import members.views
 
 # Initialize flask-user
-user_manager = UserManager(db_adapter, application,register_view_function = members.views.protectedRegister)
+user_manager = UserManager(db_adapter, application,register_view_function = members.views.protectedRegister, password_validator=my_password_validator)

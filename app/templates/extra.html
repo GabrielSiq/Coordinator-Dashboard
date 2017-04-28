@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>{%trans%}Supplemental Information{%endtrans%}</h2>
+    <h2>Supplemental Information</h2>
 
-<form action="" method="POST" class="form" role="form">
-{#    {{ form.hidden_tag() }}#}
-
-    <select name="role" id="role">
-        <option value=""></option>
-        {% for role in roles %}
-            <option value="{{ role.id }}">{{ role.name }}</option>
-        {% endfor %}
-    </select>
-</form>
+    <form action="" method="POST" class="form" role="form">
+        {{ form.csrf_token }}
+        {{ form.first_name.label }}
+        {{ form.first_name(class_="form-control") }}
+        {{ form.last_name.label }}
+        {{ form.last_name(class_="form-control") }}
+        {{ form.role.label }}
+        {{ form.role(class_="form-control") }}
+        <input type="submit" value="Submit" class="form-control">
+    </form>
 {% endblock content %}

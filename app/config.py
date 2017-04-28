@@ -25,4 +25,4 @@ class Config(object):
     """
     USER_SEND_REGISTERED_EMAIL = False
     USER_AUTO_LOGIN_AFTER_REGISTER = False
-    USER_AFTER_REGISTER_ENDPOINT = 'extraInformation'
+    USER_AFTER_REGISTER_ENDPOINT =  ''#'extraInformation'

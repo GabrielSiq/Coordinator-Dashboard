@@ -70,7 +70,7 @@
                     </a>
                 </li>
 
-                {% if current_user.is_authenticated and current_user.has_roles('admin') %}
+                {% if current_user.is_authenticated and current_user.has_roles('Admin') %}
                     <li>
                         <a href="{{ url_for("user.register") }}">
                             <i class="pe-7s-users"></i>

@@ -5,7 +5,7 @@ from app import application, SITE_ROOT, current_user
 import json
 import os
 import pandas as pd
-from models import Query, Role
+from models import *
 from datetime import datetime
 
 #TODO: load data from database
@@ -60,11 +60,35 @@ def not_found(error):
 def server_error(error):
     return render_template('503.html')
 
-@application.route('/user/extra')
+@application.route('/user/extra/<userId>', methods = ['GET', 'POST'])
 @roles_required('Admin')
-def extraInformation():
+def extraInformation(userId):
+    print userId
     roles = Role.query.all()
-    return render_template('extra.html', roles = roles)
+    for role in roles:
+        print role.id
+        print role.name
+    form = ExtraInfo()
+    form.role.choices = [(role.id, role.name) for role in roles]
+
+    if request.method == 'POST':
+        if form.validate() == False:
+            flash('All fields are required.')
+            return render_template('extra.html', form=form)
+        else:
+            user = User.query.filter_by(id=userId).one()
+            user.first_name = form.first_name.data
+            user.last_name = form.last_name.data
+            user.confirmed_at = datetime.now()
+
+            user_role = UserRoles(user_id=userId, role_id=form.role.data)
+
+            db.session.add(user_role)
+            db.session.commit()
+            return redirect(url_for('index'))
+    elif request.method == 'GET':
+        return render_template('extra.html', form=form)
+
 
 @roles_required('Admin')
 def protectedRegister():
@@ -210,7 +234,7 @@ def protectedRegister():
         # Redirect if USER_ENABLE_CONFIRM_EMAIL is set
         if user_manager.enable_confirm_email and require_email_confirmation:
             safe_reg_next = user_manager.make_safe_url_function(register_form.reg_next.data)
-            return redirect(safe_reg_next)
+            return redirect(url_for('extraInformation', userId = user.id))
 
         # Auto-login after register or redirect to login page
         if 'reg_next' in request.args:
@@ -221,6 +245,7 @@ def protectedRegister():
             return _do_login_user(user, safe_reg_next)  # auto-login
         else:
             return redirect(url_for('user.login') + '?next=' + quote(safe_reg_next))  # redirect to login page
+
 
     # Process GET or invalid POST
     return render(user_manager.register_template,
