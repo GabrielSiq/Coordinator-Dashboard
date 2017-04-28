@@ -261,20 +261,26 @@ def protectedRegister():
 @login_required
 def getEnrollmentData(requestParams):
     global DATA
-    filtered = DATA
 
-    # Applies all filters from the request to our data
-    for key in requestParams:
-        if requestParams[key] != "":
-            filtered = filtered[filtered[key] == requestParams[key]]
-
-    # Counts number of rows per semester. Outputs in asc order.
-    filtered = filtered.groupby('semester').size()
-
-    # Formats the data to return in a dict and converts to json
     data = {}
-    data['labels'] = map(str, filtered.index.values.tolist())
-    data['series'] = filtered.values.tolist()
+    for row in requestParams:
+        print row
+        filtered = DATA
+        # Applies all filters from the request to our data
+        rowParams = requestParams[row]
+        for key in rowParams:
+            if rowParams[key] != "":
+                filtered = filtered[filtered[key] == rowParams[key]]
+
+        # Counts number of rows per semester. Outputs in asc order.
+        filtered = filtered.groupby('semester').size()
+
+        # Formats the data to return in a dict and converts to json
+        rowData = {}
+        rowData['labels'] = map(str, filtered.index.values.tolist())
+        rowData['series'] = filtered.values.tolist()
+        data[row] = rowData
+
     return json.dumps(data)
 
 @application.route('/getCancellationData', methods=['POST'])

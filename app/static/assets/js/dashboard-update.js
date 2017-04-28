@@ -1,14 +1,18 @@
 
 function updateChart(content) {
-    var params = {};
+    var paramSet = {};
     var hasAny = false;
-    content.find("select.form-control").each(function(){
-        params[$(this).attr("id")] = $(this).val();
-        if($(this).val() !== ""){
-            hasAny = true;
-        }
+    content.find(".row.param").each(function () {
+        var params = {};
+        $(this).find("select.form-control").each(function () {
+            params[$(this).attr("id")] = $(this).val();
+            if(hasAny === false && $(this).val() !== ""){
+                hasAny = true;
+            }
+       });
+        paramSet[$(this).attr("id")] = params;
     });
-    var requestJSON = {"chartId" : content.parent().attr("id"), "requestParams" : params};
+    var requestJSON = {"chartId" : content.parent().attr("id"), "requestParams" : paramSet};
     var chart = content.find(".ct-chart, .table-striped");
     var chartId = chart.attr("id");
     var message = chart.siblings("div.message");
@@ -21,6 +25,9 @@ function updateChart(content) {
             success: function(resultJSON) {
                 if($.trim(resultJSON)) {
                     var result = JSON.parse(resultJSON);
+                    for(var key in result){
+
+                    }
                     var data = {
                         labels: result['labels'],
                         series: [result['series']]
