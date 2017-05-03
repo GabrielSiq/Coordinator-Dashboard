@@ -66,35 +66,32 @@ function updateChart(content) {
 
 }
 
-function populateDropdowns(dataStore) {
-    $(".query-controls").each(function() {
-        var controls = $(this);
-        var parent_id = controls.parent().attr("id");
-        $.ajax({
-            type: "POST",
-            url: "/savedQueries",
-            contentType: "application/json",
-            data: JSON.stringify({'view_id': controls.parent().attr("id")}),
-            success: function(resultJSON) {
-                dataStore[parent_id] = resultJSON;
-                var savedQueries = JSON.parse(resultJSON);
-                var queryName = controls.find("select[name='queryName']");
-                queryName.find('option').remove();
+function populateDropdowns(dataStore, controls) {
+    var parent_id = controls.parent().attr("id");
+    $.ajax({
+        type: "POST",
+        url: "/savedQueries",
+        contentType: "application/json",
+        data: JSON.stringify({'view_id': controls.parent().attr("id")}),
+        success: function(resultJSON) {
+            dataStore[parent_id] = resultJSON;
+            var savedQueries = JSON.parse(resultJSON);
+            var queryName = controls.find("select[name='queryName']");
+            queryName.find('option').remove();
+            queryName.append($('<option>', {
+                    value: "",
+                    text: "No saved queries"
+                }));
+            for (var key in savedQueries) {
                 queryName.append($('<option>', {
-                        value: "",
-                        text: "No saved queries"
-                    }));
-                for (var key in savedQueries) {
-                    queryName.append($('<option>', {
-                        value: key,
-                        text: savedQueries[key].name
-                    }));
-                }
-            },
-            error: function(){
-                alert("error");
+                    value: key,
+                    text: savedQueries[key].name
+                }));
             }
-        });
+        },
+        error: function(){
+            alert("error");
+        }
     });
 }
 
@@ -121,7 +118,9 @@ $(document).ready(function(){
     });
     // Populates the saved queries
     var dataStore = {};
-    populateDropdowns(dataStore);
+    $('.query-controls').each(function () {
+        populateDropdowns(dataStore, $(this));
+    });
     $(".card form").on('change',  'select.combobox', function () {
         updateChart($(this).closest(".content"));
     });
@@ -183,10 +182,8 @@ $(document).ready(function(){
       content.find(".row.param").each(function () {
           var row = {};
           $(this).find("select.form-control").each(function () {
-              console.log($(this).attr("id"));
               row[$(this).attr("id")] = $(this).val();
           });
-          console.log(row);
           data["row"+ rowId++] = row;//$.extend( {}, row );
       });
       $(this).find("input[name='_queryData']").val(JSON.stringify(data));
@@ -194,13 +191,20 @@ $(document).ready(function(){
     });
     $('#myModal button.btn-primary').on('click', function () {
        var modal = $(this).closest("#myModal");
+       var visualizationId = modal.find("input[name='_visualizationId']").val();
+       var queryName =  modal.find("input#name").val();
+
         $.ajax({
             type: "POST",
             url: "/saveQuery",
             contentType: "application/json",
-            data: JSON.stringify({'view_id': modal.find("input[name='_visualizationId']").val(), "query_name" : modal.find("input#name").val(), "query_data" : modal.find("input[name='_queryData']").val() }),
-            success: function(resultJSON) {
-                populateDropdowns(dataStore);
+            data: JSON.stringify({'view_id': visualizationId, "query_name" : queryName, "query_data" : modal.find("input[name='_queryData']").val() }),
+            success: function() {
+                targetControls = $("html").find("#" + modal.find("input[name='_visualizationId']").val() + " .query-controls");
+                populateDropdowns(dataStore, targetControls);
+                // Set the value of the dropdown to the value just created
+                //TODO: make this work
+                targetControls.find("select[name='queryName']").eq(0).val(queryName);
             },
             error: function(){
                 //
