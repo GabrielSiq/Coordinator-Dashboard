@@ -66,10 +66,42 @@ function updateChart(content) {
 
 }
 
-$(document).ready(function(){
-    // Load saved configs into dropdown
+function populateDropdowns(dataStore) {
+    $(".query-controls").each(function() {
+        var controls = $(this);
+        var parent_id = controls.parent().attr("id");
+        $.ajax({
+            type: "POST",
+            url: "/savedQueries",
+            contentType: "application/json",
+            data: JSON.stringify({'view_id': controls.parent().attr("id")}),
+            success: function(resultJSON) {
+                dataStore[parent_id] = resultJSON;
+                var savedQueries = JSON.parse(resultJSON);
+                var queryName = controls.find("select[name='queryName']");
+                queryName.find('option').remove();
+                queryName.append($('<option>', {
+                        value: "",
+                        text: "No saved queries"
+                    }));
+                for (var key in savedQueries) {
+                    queryName.append($('<option>', {
+                        value: key,
+                        text: savedQueries[key].name
+                    }));
+                }
+            },
+            error: function(){
+                alert("error");
+            }
+        });
+    });
+}
 
+$(document).ready(function(){
+    // Initializes charts
     $(".ct-chart").each(function () {
+
         var data = {
                         labels: [],
                         series:[[]]
@@ -84,45 +116,42 @@ $(document).ready(function(){
                                 })
                             ]
                     };
-        new Chartist.Line('.ct-chart', data, options);
+        console.log($(this));
+        new Chartist.Line('#' + $(this).attr("id"), data, options);
     });
+    // Populates the saved queries
     var dataStore = {};
-    $(".query-controls").each(function() {
-        var controls = $(this);
-        var parent_id = controls.parent().attr("id");
-        $.ajax({
-            type: "POST",
-            url: "/savedQueries",
-            contentType: "application/json",
-            data: JSON.stringify({'view_id': controls.parent().attr("id")}),
-            success: function(resultJSON) {
-                dataStore[parent_id] = resultJSON;
-                var savedQueries = JSON.parse(resultJSON);
-                var queryName = controls.find("select[name='queryName']");
-                for (var key in savedQueries) {
-                    queryName.append($('<option>', {
-                        value: key,
-                        text: savedQueries[key].name
-                    }));
-                }
-            },
-            error: function(){
-                alert("error");
-            }
-        });
-    });
+    populateDropdowns(dataStore);
     $(".card form").on('change',  'select.combobox', function () {
         updateChart($(this).closest(".content"));
     });
     $(".query-controls select[name='queryName']").change(function(){
         var select = $(this);
-        var card = select.closest("div.card");
         if (select.val()) {
+            var card = select.closest("div.card");
+            var firstRow = card.find('.row.param').first();
+            firstRow.attr("id", "row0");
+            card.find('.row.param').remove();
             var queryData = JSON.parse(JSON.parse(dataStore[card.attr("id")])[select.val().toString()]['query_data']);
-            for (var key in queryData) {
-                card.find("select#" + key).val(queryData[key]);
+            var content = card.find('.content').eq(0);
+            for(var row in queryData){
+                var rowData = queryData[row];
+                var lastRow = content.find('.row.param').last();
+                var newRow;
+                if (lastRow.length === 0){
+                    newRow =  firstRow.clone();
+                }
+                else{
+                    newRow = lastRow.clone()
+                    var rowId = parseInt(newRow.attr("id").slice(3)) + 1;
+                newRow.attr("id", "row" + rowId);
+                }
+                for (var key in rowData) {
+                    newRow.find("select#" + key).val(rowData[key]);
+                }
+                newRow.insertBefore(content.find(".row.add"));
             }
-            updateChart(card.find(".content"))
+            updateChart(content)
         }
     });
     $(".card form").on('click', 'div.row button.clear', function () {
@@ -141,10 +170,44 @@ $(document).ready(function(){
     $(".card form button.add").click(function () {
         var prevRow = $(this).closest('.row').prev();
         var newRow = prevRow.clone();
-        rowId = parseInt(newRow.attr("id").slice(3)) + 1;
+        var rowId = parseInt(newRow.attr("id").slice(3)) + 1;
         newRow.attr("id", "row" + rowId);
         newRow.insertAfter(prevRow);
     });
+    $('#myModal').on('show.bs.modal', function (e) {
+      var card = $(e.relatedTarget).closest(".card");
+      var data = {};
+      var visualizationId = card.attr("id");
+      var content = card.find(".content");
+      var rowId = 0;
+      content.find(".row.param").each(function () {
+          var row = {};
+          $(this).find("select.form-control").each(function () {
+              console.log($(this).attr("id"));
+              row[$(this).attr("id")] = $(this).val();
+          });
+          console.log(row);
+          data["row"+ rowId++] = row;//$.extend( {}, row );
+      });
+      $(this).find("input[name='_queryData']").val(JSON.stringify(data));
+      $(this).find("input[name='_visualizationId']").val(visualizationId);
+    });
+    $('#myModal button.btn-primary').on('click', function () {
+       var modal = $(this).closest("#myModal");
+        $.ajax({
+            type: "POST",
+            url: "/saveQuery",
+            contentType: "application/json",
+            data: JSON.stringify({'view_id': modal.find("input[name='_visualizationId']").val(), "query_name" : modal.find("input#name").val(), "query_data" : modal.find("input[name='_queryData']").val() }),
+            success: function(resultJSON) {
+                populateDropdowns(dataStore);
+            },
+            error: function(){
+                //
+            }
+       });
+    });
+
 });
 
 

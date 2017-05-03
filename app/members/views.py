@@ -352,3 +352,20 @@ def savedQueries():
         data_list[query.id] = data
 
     return json.dumps(data_list)
+
+@application.route('/saveQuery', methods=['POST'])
+@login_required
+def saveQuery():
+    try:
+        visualizationId = request.json['view_id']
+        queryName = request.json['query_name']
+        queryData = request.json['query_data']
+    except:
+        return ""
+    try:
+        query = Query(user_id= current_user.id, visualization_id = visualizationId, name = queryName, query_data = queryData)
+        db.session.add(query)
+        db.session.commit()
+    except:
+        return ""
+    return "success"
