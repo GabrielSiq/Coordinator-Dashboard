@@ -177,13 +177,15 @@ def injectDataTable():
 
             if current_user.is_authenticated:
                 param = Query.query.filter_by(user_id = current_user.id, visualization_id = str(id)).first()
-                query = json.loads(param.query_data)
+
                 if param is None:
                     return None
-                elif query['sort'] == 'largest':
-                    ascending = False
                 else:
-                    ascending = True
+                    query = json.loads(param.query_data)
+                    if query['sort'] == 'largest':
+                        ascending = False
+                    else:
+                        ascending = True
                 return dict(sort = query['sort'], data = canc_rate.sort_values(ascending=ascending).head(10))
     return dict(getDataTable = getDataTable)
 
