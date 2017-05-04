@@ -301,8 +301,8 @@ def getEnrollmentData(requestParams):
 def getCancellationData(requestParams):
     global DATA
     filtered = DATA
-
-    if("sort" not in requestParams):
+    onlyRow = requestParams['row0']
+    if("sort" not in onlyRow):
         return ""
 
     cancellation = filtered[filtered['situation'].isin(['CA', 'CD', 'CL', 'DT', 'LT'])]
@@ -310,7 +310,7 @@ def getCancellationData(requestParams):
     cancellation = cancellation.groupby('course').size()
     canc_rate = (cancellation / course_count).dropna()
 
-    return canc_rate.sort_values(ascending=(requestParams['sort'] == "smallest")).head(10).to_json()
+    return canc_rate.sort_values(ascending=(onlyRow['sort'] == "smallest")).head(10).to_json()
 
 
 

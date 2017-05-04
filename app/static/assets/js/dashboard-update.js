@@ -1,3 +1,62 @@
+function updateTable(content) {
+    // TODO: Merge this part before ajax across all update functions
+
+    var paramSet = {};
+    var hasAny = false;
+    //var labels = [];
+
+    content.find(".row.param").each(function () {
+        var params = {};
+        //var label = "";
+        $(this).find("select.form-control").each(function () {
+            var value = $(this).val()
+            params[$(this).attr("id")] = value;
+            //label += label === "" ? value : (" " + value);
+            if(hasAny === false && $(this).val() !== ""){
+                hasAny = true;
+            }
+        });
+        //labels.push(label);
+        paramSet[$(this).attr("id")] = params;
+    });
+    var requestJSON = {"chartId" : content.parent().attr("id"), "requestParams" : paramSet};
+    var chart = content.find(".ct-chart.line");
+    var message = chart.siblings("div.message");
+    //console.log(labels);
+    if(hasAny){
+        $.ajax({
+            type: "POST",
+            url: "/getChartData",
+            contentType:"application/json",
+            data : JSON.stringify(requestJSON),
+            success: function(resultJSON) {
+                if($.trim(resultJSON)) {
+                    // If response isn't empty
+                    var result = JSON.parse(resultJSON);
+                    console.log(result);
+
+                    if (!$.isEmptyObject(result)) {
+                        chart.html("");
+                        chart.get(0).__chartist__.update(data, options);
+                    }
+                    else {
+                        chart.html("<p style='text-align:center; vertical-align:middle'>No data found for given parameters.</p>");
+                    }
+                }
+                else {
+                    chart.html("<p style='text-align:center; vertical-align:middle'>Query submission error.</p>");
+                }
+            },
+            error: function() {
+                alert('error');
+            }
+        });
+    }
+    else{
+        chart.html("");
+    }
+}
+
 // Updates a line chart based on the currently selected filters
 function updateChart(content) {
     var paramSet = {};
@@ -41,12 +100,13 @@ function updateChart(content) {
                         plugins: [
                                 Chartist.plugins.legend({
                                     legendNames: labels
-                                })
+                                }),
+                                Chartist.plugins.tooltip()
                             ]
                     };
                     if (result['labels'].length !== 0) {
                         chart.html("");
-                        chart.get(0).__chartist__.update(data, options);
+                        new Chartist.Line('#' + chart.attr("id"),data, options);
                     }
                     else {
                         chart.html("<p style='text-align:center; vertical-align:middle'>No data found for given parameters.</p>");
@@ -63,6 +123,19 @@ function updateChart(content) {
     }
     else{
         chart.html("");
+    }
+}
+
+function updateView(viewType, content){
+    switch(viewType){
+        case "line-chart-view":
+            updateChart(content);
+            break;
+        case "table-view":
+            updateTable(content);
+            break;
+        default:
+            //
     }
 }
 
@@ -102,8 +175,8 @@ $(document).ready(function(){
     $(".ct-chart.line").each(function () {
 
         var data = {
-                        labels: [],
-                        series:[[]]
+                        labels: ["a", "b", "c"],
+                        series:[[1, 2, 3]]
                     };
         var options = {
                         lineSmooth: Chartist.Interpolation.none({
@@ -111,9 +184,11 @@ $(document).ready(function(){
                         }),
                         plugins: [
                                 Chartist.plugins.legend({
-                                    legendNames: []
-                                })
+                                    legendNames: ['Banana']
+                                }),
+                                Chartist.plugins.tooltip()
                             ]
+
                     };
         new Chartist.Line('#' + $(this).attr("id"), data, options);
     });
@@ -125,10 +200,11 @@ $(document).ready(function(){
     // Updates charts whenever a filter is changed
     var forms = $(".card form");
     forms.on('change',  'select.combobox', function () {
-        updateChart($(this).closest(".content"));
+        updateView($(this).closest(".card").attr("type"), $(this).closest(".content"));
     });
     // Updates filters and chart whenever the selected saved query is changed
     $(".query-controls select[name='queryName']").change(function(){
+        // TODO: Remove dependence on ".row .add"
         var select = $(this);
         if (select.val()) {
             var card = select.closest("div.card");
@@ -154,7 +230,7 @@ $(document).ready(function(){
                 }
                 newRow.insertBefore(content.find(".row.add"));
             }
-            updateChart(content)
+            updateView(card.attr("type"), content);
         }
     });
     // Deletes a row of filters (a new series) for charts
@@ -169,7 +245,7 @@ $(document).ready(function(){
                 $(this).val("");
             });
         }
-        updateChart(form.closest('.content'));
+        updateView(form.closest(".card").attr("type"), form.closest('.content'));
     });
     // Adds a new row of filters (series)
     $(".card form button.add").click(function () {

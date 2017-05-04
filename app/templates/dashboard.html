@@ -2,35 +2,45 @@
 
 {% block css %}
     <link href="{{ url_for('static', filename='assets/css/bootstrap-combobox.css')}}" rel="stylesheet" type='text/css'/>
-    <link href="{{ url_for('static', filename='assets/css/chartist-plugin-legend.css')}}" rel="stylesheet" type='text/css'/>
-
+    <link href="{{ url_for('static', filename='assets/bower_components/chartist-plugin-legend/chartist-plugin-legend.css')}}" rel="stylesheet" type='text/css'/>
+    <link href="{{ url_for('static', filename='assets/bower_components/chartist-plugin-tooltip/dist/chartist-plugin-tooltip.css')}}" rel="stylesheet" type='text/css'/>
 {% endblock css %}
 
 {% block content %}
     <div class="row">
         <div class="col-md-4">
-            <div class="card" id="cancellation">
+            <div class="card" type="table-view" id="cancellation">
                 <div class="header">
                     <h4 class="title">Drop Rate <span class="glyphicon glyphicon-triangle-bottom"/></h4>
                     <p class="category">Courses with <span style="color: green; font-weight: bold">smallest</span> drop rate. (Client-side rendering)</p>
                 </div>
                 <div class="query-controls">
                         <form>
-                             <div class="form-group">
-                                <label for="queryName">Saved Query</label>
-                                <select name="queryName" class="form-control">
-                                </select>
+                             <div class="row">
+                                <div class="form-group col-md-3">
+                                    <label for="queryName">Saved Query</label>
+                                    <select name="queryName" class="form-control">
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-success save-query" data-toggle="modal" data-target="#myModal">Save Config.</button>
+                                </div>
                             </div>
                         </form>
-                    </div>
+                </div>
                 <div class="content table-responsive table-full-width">
                     <form>
-                        <div class="form-group">
-                            <label for="sort">Sort by:</label>
-                            <select id="sort" class="form-control combobox">
-                                <option value="largest">largest</option>
-                                <option value='smallest'>smallest</option>
-                             </select>
+                        <div class="row param" id="row0">
+                            <div class="form-group col-md-3">
+                                <label for="sort">Sort by:</label>
+                                <select id="sort" class="form-control combobox">
+                                    <option value=""></option>
+                                    <option value="largest">largest</option>
+                                    <option value='smallest'>smallest</option>
+                                 </select>
+                            </div>
+                        </div>
+                        <div class="row add">
                         </div>
                     </form>
                     <table class="table table-hover table-striped">
@@ -86,7 +96,7 @@
     </div>
     <div class="row">
         <div class="col-md-10">
-            <div class="card" id="enrollment">
+            <div class="card" type="line-chart-view" id="enrollment">
                 <div class="header">
                     <h4 class="title">Enrollment Numbers</h4>
                     <p class="category">Number of students by course by year</p>
@@ -143,7 +153,7 @@
     </div>
     <div class="row">
         <div class="col-md-10">
-            <div class="card" id="enrollment-2">
+            <div class="card" type="line-chart-view" id="enrollment-2">
                 <div class="header">
                     <h4 class="title">Enrollment Numbers</h4>
                     <p class="category">Number of students by course by year</p>
@@ -309,7 +319,8 @@
 {% endblock modals %}
 
 {% block scripts %}
-    <script src="{{ url_for('static', filename='assets/js/chartist-plugin-legend.js')}}"></script>
+    <script src="{{ url_for('static', filename='assets/bower_components/chartist-plugin-legend/chartist-plugin-legend.js')}}"></script>
+    <script src="{{ url_for('static', filename='assets/bower_components/chartist-plugin-tooltip/dist/chartist-plugin-tooltip.min.js')}}"></script>
     <script src="{{ url_for('static', filename='assets/js/dashboard-update.js')}}"></script>
 {% endblock scripts %}
 

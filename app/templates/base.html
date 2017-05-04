@@ -14,17 +14,16 @@
 	<title>Dashboard Prototype</title>
 
 
-    <!-- TODO: Style and/or remove these flashed messages     -->
-
-
 	<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
     <meta name="viewport" content="width=device-width" />
 
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
+    <!-- JQuery UI CSS     -->
+    <link href="{{ url_for('static', filename='assets/bower_components/jquery-ui/themes/smoothness/jquery-ui.min.css')}}" rel="stylesheet" type='text/css'/>
+    <!-- Chartist CSS     -->
+    <link href="{{ url_for('static', filename='assets/bower_components/chartist/dist/chartist.min.css')}}" rel="stylesheet" type='text/css'/>
 
     <!-- Bootstrap core CSS     -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link href="{{ url_for('static', filename='assets/bower_components/bootstrap/dist/css/bootstrap.min.css')}}" rel="stylesheet" type='text/css'/>
 
     <!-- Animation library for notifications   -->
     <link href="{{ url_for('static', filename='assets/css/animate.min.css')}}" rel="stylesheet" type='text/css'/>
@@ -34,7 +33,7 @@
     {% block css %}{% endblock css %}
 
     <!--     Fonts and icons     -->
-    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='assets/bower_components/components-font-awesome/css/font-awesome.min.css')}}" rel="stylesheet" type='text/css'/>
     <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
     <link href="{{ url_for('static', filename='assets/css/pe-icon-7-stroke.css')}}" rel="stylesheet" />
 
@@ -154,22 +153,13 @@
 </body>
 
     <!--   Core JS Files   -->
-       <script
-      src="https://code.jquery.com/jquery-3.2.1.min.js"
-      integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-      crossorigin="anonymous"></script>
-    <script
-      src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
-      integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
-      crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='assets/bower_components/jquery/dist/jquery.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='assets/bower_components/jquery-ui/jquery-ui.min.js')}}"></script>
 
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-	<!--  Checkbox, Radio & Switch Plugins -->
-	<script src="{{ url_for('static', filename='assets/js/bootstrap-checkbox-radio-switch.js')}}"></script>
+    <script src="{{ url_for('static', filename='assets/bower_components/bootstrap/dist/js/bootstrap.min.js')}}"></script>
 
 	<!--  Charts Plugin -->
-{#	<script src="{{ url_for('static', filename='assets/js//chartist.min.js')}}"></script>#}
-    <script src="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+	<script src="{{ url_for('static', filename='assets/bower_components/chartist/dist/chartist.min.js')}}"></script>
     <!--  Notifications Plugin    -->
     <script src="{{ url_for('static', filename='assets/js/bootstrap-notify.js')}}"></script>
 
