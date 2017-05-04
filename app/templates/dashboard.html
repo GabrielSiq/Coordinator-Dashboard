@@ -96,10 +96,9 @@
                 <div class="query-controls">
                     <form>
                         <div class="row">
-                            <div class="form-group col-md-5">
+                            <div class="form-group col-md-3">
                                 <label for="queryName">Saved Query</label>
                                 <select name="queryName" class="form-control">
-                                    <option value="">No saved query</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -111,7 +110,7 @@
                 <div class="content">
                     <form>
                         <div class="row param" id="row0">
-                            <div class="form-group col-md-5">
+                            <div class="form-group col-md-2">
                                 <label for="course">Course</label>
                                 <select id="course" class="form-control combobox">
                                     <option value=""></option>
@@ -120,7 +119,7 @@
                                     {% endfor %}
                                  </select>
                             </div>
-                            <div class="form-group col-md-5">
+                            <div class="form-group col-md-2">
                                 <label for="situation">Situation</label>
                                 <select id="situation" class="form-control combobox">
                                     <option value=""></option>
@@ -139,13 +138,13 @@
                             </div>
                         </div>
                     </form>
-                    <div id="chartLine" class="ct-chart"></div>
+                    <div id="chartLine" class="ct-chart line"></div>
                 </div>
             </div>
         </div>
     </div>
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-10">
             <div class="card" id="enrollment-2">
                 <div class="header">
                     <h4 class="title">Enrollment Numbers</h4>
@@ -154,10 +153,9 @@
                 <div class="query-controls">
                     <form>
                         <div class="row">
-                            <div class="form-group col-md-5">
+                            <div class="form-group col-md-3">
                                 <label for="queryName">Saved Query</label>
                                 <select name="queryName" class="form-control">
-                                    <option value="">No saved query</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -169,7 +167,7 @@
                 <div class="content">
                     <form>
                         <div class="row param" id="row0">
-                            <div class="form-group col-md-5">
+                            <div class="form-group col-md-2">
                                 <label for="course">Course</label>
                                 <select id="course" class="form-control combobox">
                                     <option value=""></option>
@@ -178,7 +176,7 @@
                                     {% endfor %}
                                  </select>
                             </div>
-                            <div class="form-group col-md-5">
+                            <div class="form-group col-md-2">
                                 <label for="situation">Situation</label>
                                 <select id="situation" class="form-control combobox">
                                     <option value=""></option>
@@ -198,7 +196,7 @@
                         </div>
                     </form>
 
-                    <div id="chartLine2" class="ct-chart"></div>
+                    <div id="chartLine2" class="ct-chart line"></div>
                 </div>
             </div>
         </div>
@@ -286,7 +284,7 @@
 
 {% block modals%}
     <!-- Modal -->
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal fade" id="saveQuery" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">

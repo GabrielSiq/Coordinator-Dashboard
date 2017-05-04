@@ -1,3 +1,4 @@
+// Updates a line chart based on the currently selected filters
 function updateChart(content) {
     var paramSet = {};
     var hasAny = false;
@@ -17,7 +18,7 @@ function updateChart(content) {
         paramSet[$(this).attr("id")] = params;
     });
     var requestJSON = {"chartId" : content.parent().attr("id"), "requestParams" : paramSet};
-    var chart = content.find(".ct-chart");
+    var chart = content.find(".ct-chart.line");
     var message = chart.siblings("div.message");
     console.log(labels);
     if(hasAny){
@@ -63,10 +64,10 @@ function updateChart(content) {
     else{
         chart.html("");
     }
-
 }
 
-function populateDropdowns(dataStore, controls) {
+// Populates a saved query dropdown for the given object
+function populateSavedQuery(dataStore, controls) {
     var parent_id = controls.parent().attr("id");
     $.ajax({
         type: "POST",
@@ -96,8 +97,9 @@ function populateDropdowns(dataStore, controls) {
 }
 
 $(document).ready(function(){
-    // Initializes charts
-    $(".ct-chart").each(function () {
+
+    // Initializes line charts
+    $(".ct-chart.line").each(function () {
 
         var data = {
                         labels: [],
@@ -113,17 +115,19 @@ $(document).ready(function(){
                                 })
                             ]
                     };
-        console.log($(this));
         new Chartist.Line('#' + $(this).attr("id"), data, options);
     });
-    // Populates the saved queries
+    // Populates the saved queries for all cards
     var dataStore = {};
     $('.query-controls').each(function () {
-        populateDropdowns(dataStore, $(this));
+        populateSavedQuery(dataStore, $(this));
     });
-    $(".card form").on('change',  'select.combobox', function () {
+    // Updates charts whenever a filter is changed
+    var forms = $(".card form");
+    forms.on('change',  'select.combobox', function () {
         updateChart($(this).closest(".content"));
     });
+    // Updates filters and chart whenever the selected saved query is changed
     $(".query-controls select[name='queryName']").change(function(){
         var select = $(this);
         if (select.val()) {
@@ -153,7 +157,8 @@ $(document).ready(function(){
             updateChart(content)
         }
     });
-    $(".card form").on('click', 'div.row button.clear', function () {
+    // Deletes a row of filters (a new series) for charts
+    forms.on('click', 'div.row button.clear', function () {
         var row = $(this).closest('.row');
         var form = row.closest('form');
         if(form.children('.row').length > 2){
@@ -166,6 +171,7 @@ $(document).ready(function(){
         }
         updateChart(form.closest('.content'));
     });
+    // Adds a new row of filters (series)
     $(".card form button.add").click(function () {
         var prevRow = $(this).closest('.row').prev();
         var newRow = prevRow.clone();
@@ -173,7 +179,9 @@ $(document).ready(function(){
         newRow.attr("id", "row" + rowId);
         newRow.insertAfter(prevRow);
     });
-    $('#myModal').on('show.bs.modal', function (e) {
+    // Modal to save query data. Gathers all data into the form.
+    var saveModal = $('saveQuery');
+    saveModal.on('show.bs.modal', function (e) {
       var card = $(e.relatedTarget).closest(".card");
       var data = {};
       var visualizationId = card.attr("id");
@@ -189,7 +197,8 @@ $(document).ready(function(){
       $(this).find("input[name='_queryData']").val(JSON.stringify(data));
       $(this).find("input[name='_visualizationId']").val(visualizationId);
     });
-    $('#myModal button.btn-primary').on('click', function () {
+    // Saves query data
+    saveModal.find('button.btn-primary').on('click', function () {
        var modal = $(this).closest("#myModal");
        var visualizationId = modal.find("input[name='_visualizationId']").val();
        var queryName =  modal.find("input#name").val();
