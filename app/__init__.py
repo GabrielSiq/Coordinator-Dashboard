@@ -65,11 +65,15 @@ def createDummyUsers():
     # Test creation of saved queries
     queries = list()
     data = {}
-    data['sort'] = "largest"
-    queries.append(Query(user_id=1, visualization_id=1, query_data=json.dumps(data), name="abc"))
-    data['sort'] = "smallest"
-    queries.append(Query(user_id=2, visualization_id=1, query_data=json.dumps(data), name="abc"))
-    queries.append(Query(user_id=3, visualization_id=1, query_data=json.dumps(data), name="abc"))
+    row = {}
+
+    row['sort'] = "largest"
+    data['row0'] = row.copy()
+    queries.append(Query(user_id=1, visualization_id="cancellation", query_data=json.dumps(data), name="abc"))
+    row['sort'] = "smallest"
+    data['row0'] = row.copy()
+    queries.append(Query(user_id=2, visualization_id="cancellation", query_data=json.dumps(data), name="abc"))
+    queries.append(Query(user_id=3, visualization_id="cancellation", query_data=json.dumps(data), name="abc"))
 
     data = {}
     row = {}
@@ -80,15 +84,18 @@ def createDummyUsers():
     row['situation'] = 'RM'
     data['row1'] = row.copy()
     queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Prog 2 - Approved + Failed"))
-    data['course'] = "INF1005"
-    data['situation'] = 'RM'
+    row['course'] = "INF1005"
+    row['situation'] = 'RM'
+    data['row0'] = row.copy()
     queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Prog 1 - Failed (grade)"))
-    data['course'] = "INF1403"
-    data['situation'] = 'RF'
+    row['course'] = "INF1403"
+    row['situation'] = 'RF'
+    data['row0'] = row.copy()
     queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="HCI - Failed (attendance)"))
     queries.append(Query(user_id=1, visualization_id="enrollment-2", query_data=json.dumps(data), name="HCI - Failed (attendance)"))
-    data['course'] = "INF1009"
-    data['situation'] = ''
+    row['course'] = "INF1009"
+    row['situation'] = ''
+    data['row0'] = row.copy()
     queries.append(Query(user_id=1, visualization_id="enrollment-2", query_data=json.dumps(data), name="Logics - All"))
 
     for query in queries:
@@ -169,7 +176,7 @@ def injectDataTable():
     context_processor wrapper allows this function to be accessed from inside the html file.
     """
     def getDataTable(id):
-        if id == 1:
+        if id == "cancellation":
             cancellation = DATA_SOURCE[DATA_SOURCE['situation'].isin(['CA', 'CD', 'CL', 'DT', 'LT'])]
             course_count = DATA_SOURCE.groupby('course').size()
             cancellation = cancellation.groupby('course').size()
@@ -181,7 +188,7 @@ def injectDataTable():
                 if param is None:
                     return None
                 else:
-                    query = json.loads(param.query_data)
+                    query = json.loads(param.query_data)['row0']
                     if query['sort'] == 'largest':
                         ascending = False
                     else:

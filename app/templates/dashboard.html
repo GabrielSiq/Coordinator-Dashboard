@@ -19,7 +19,6 @@
                              <div class="form-group">
                                 <label for="queryName">Saved Query</label>
                                 <select name="queryName" class="form-control">
-                                    <option value="">No saved query</option>
                                 </select>
                             </div>
                         </form>
@@ -63,7 +62,7 @@
             </div>
         </div>
         <div class="col-md-4">
-            {% set canc3 = getDataTable(1) %}
+            {% set canc3 = getDataTable("cancellation") %}
             <div class="card">
                 <div class="header">
                     <h4 class="title">Drop Rate <span class="glyphicon glyphicon-triangle-top"/></h4>
@@ -73,7 +72,6 @@
                 <div class="content table-responsive table-full-width">
                     <table class="table table-hover table-striped">
                         <tbody>
-
                             {% for row in canc3['data'].iteritems() %}
                                 <tr>
                                     <td>{{ row[0] }}</td>
