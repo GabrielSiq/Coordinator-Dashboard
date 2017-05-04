@@ -20,8 +20,9 @@ function updateTable(content) {
         paramSet[$(this).attr("id")] = params;
     });
     var requestJSON = {"chartId" : content.parent().attr("id"), "requestParams" : paramSet};
-    var chart = content.find(".ct-chart.line");
-    var message = chart.siblings("div.message");
+    //var chart = content.find(".ct-chart.line");
+    var tbody = content.find("tbody");
+    //var tbody = table.children('tbody');
     //console.log(labels);
     if(hasAny){
         $.ajax({
@@ -33,18 +34,20 @@ function updateTable(content) {
                 if($.trim(resultJSON)) {
                     // If response isn't empty
                     var result = JSON.parse(resultJSON);
-                    console.log(result);
 
                     if (!$.isEmptyObject(result)) {
-                        chart.html("");
-                        chart.get(0).__chartist__.update(data, options);
+                        tbody.html("");
+                        for(var course in result){
+                            console.log(typeof result[course]);
+                            tbody.append("<tr><td>"+course+"</td><td>"+(result[course]*100).toFixed(1)+"%</td></tr>>")
+                        }
                     }
                     else {
-                        chart.html("<p style='text-align:center; vertical-align:middle'>No data found for given parameters.</p>");
+                        tbody.html("<p style='text-align:center; vertical-align:middle'>No data found for given parameters.</p>");
                     }
                 }
                 else {
-                    chart.html("<p style='text-align:center; vertical-align:middle'>Query submission error.</p>");
+                    tbody.html("<p style='text-align:center; vertical-align:middle'>Query submission error.</p>");
                 }
             },
             error: function() {
@@ -53,7 +56,7 @@ function updateTable(content) {
         });
     }
     else{
-        chart.html("");
+        tbody.html("");
     }
 }
 
@@ -78,7 +81,6 @@ function updateChart(content) {
     });
     var requestJSON = {"chartId" : content.parent().attr("id"), "requestParams" : paramSet};
     var chart = content.find(".ct-chart.line");
-    var message = chart.siblings("div.message");
     console.log(labels);
     if(hasAny){
         $.ajax({
@@ -140,7 +142,7 @@ function updateView(viewType, content){
 }
 
 // Populates a saved query dropdown for the given object
-function populateSavedQuery(dataStore, controls) {
+function populateSavedQuery(dataStore, controls, _callback) {
     var parent_id = controls.parent().attr("id");
     $.ajax({
         type: "POST",
@@ -154,14 +156,16 @@ function populateSavedQuery(dataStore, controls) {
             queryName.find('option').remove();
             queryName.append($('<option>', {
                     value: "",
-                    text: "No saved queries"
+                    text: ""
                 }));
-            for (var key in savedQueries) {
+            var key;
+            for (key in savedQueries) {
                 queryName.append($('<option>', {
                     value: key,
                     text: savedQueries[key].name
                 }));
             }
+            typeof _callback === 'function' && _callback(key);
         },
         error: function(){
             alert("error");
@@ -175,8 +179,8 @@ $(document).ready(function(){
     $(".ct-chart.line").each(function () {
 
         var data = {
-                        labels: ["a", "b", "c"],
-                        series:[[1, 2, 3]]
+                        labels: [],
+                        series:[[]]
                     };
         var options = {
                         lineSmooth: Chartist.Interpolation.none({
@@ -184,7 +188,7 @@ $(document).ready(function(){
                         }),
                         plugins: [
                                 Chartist.plugins.legend({
-                                    legendNames: ['Banana']
+                                    legendNames: []
                                 }),
                                 Chartist.plugins.tooltip()
                             ]
@@ -200,6 +204,8 @@ $(document).ready(function(){
     // Updates charts whenever a filter is changed
     var forms = $(".card form");
     forms.on('change',  'select.combobox', function () {
+        $(this).closest(".card").find("select[name='queryName']").val("");
+        console.log($(this).closest(".card").find("select[name='queryName']"));
         updateView($(this).closest(".card").attr("type"), $(this).closest(".content"));
     });
     // Updates filters and chart whenever the selected saved query is changed
@@ -256,7 +262,7 @@ $(document).ready(function(){
         newRow.insertAfter(prevRow);
     });
     // Modal to save query data. Gathers all data into the form.
-    var saveModal = $('saveQuery');
+    var saveModal = $('#saveQuery');
     saveModal.on('show.bs.modal', function (e) {
       var card = $(e.relatedTarget).closest(".card");
       var data = {};
@@ -275,10 +281,10 @@ $(document).ready(function(){
     });
     // Saves query data
     saveModal.find('button.btn-primary').on('click', function () {
-       var modal = $(this).closest("#myModal");
+       var modal = $(this).closest("#saveQuery");
        var visualizationId = modal.find("input[name='_visualizationId']").val();
        var queryName =  modal.find("input#name").val();
-
+       console.log("oi");
         $.ajax({
             type: "POST",
             url: "/saveQuery",
@@ -286,10 +292,12 @@ $(document).ready(function(){
             data: JSON.stringify({'view_id': visualizationId, "query_name" : queryName, "query_data" : modal.find("input[name='_queryData']").val() }),
             success: function() {
                 targetControls = $("html").find("#" + modal.find("input[name='_visualizationId']").val() + " .query-controls");
-                populateDropdowns(dataStore, targetControls);
+                populateSavedQuery(dataStore, targetControls, function (id) {
+                    targetControls.find("select[name='queryName']").eq(0).val(id);
+                });
                 // Set the value of the dropdown to the value just created
-                //TODO: make this work
-                targetControls.find("select[name='queryName']").eq(0).val(queryName);
+                //TODO: make this work (problem is with the async ajax call)
+                //targetControls.find("select[name='queryName']").eq(0).val(queryName);
             },
             error: function(){
                 //
