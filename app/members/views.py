@@ -278,12 +278,26 @@ def getEnrollmentData(requestParams):
 
         # Formats the data to return in a dict and converts to json
 
-        rowData[row]['labels'] = map(str, filtered.index.values.tolist())
+        rowData[row]['labels'] = filtered.index.values.tolist()
 
         rowData[row]['series'] = filtered.values.tolist()
         allLabels += list(set(rowData[row]['labels']) - set(allLabels))
 
-    allLabels.sort()
+    if len(allLabels) != 0:
+        allLabels.sort()
+
+        # Now we have to fill in the data with all semesters between the first and last so the year looks full.
+        year =  allLabels[0]
+        while year <= allLabels[-1]:
+            if year not in allLabels:
+                allLabels.append(year)
+            if (year % 10) == 1:
+                year += 1
+            else:
+                year += 9
+        allLabels.sort()
+
+    # We then fill the series with null values to match the labels in length
     data = {'labels' : allLabels, 'series' : []}
     for row in rowData:
         fullRow = []

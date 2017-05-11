@@ -174,7 +174,7 @@ function populateSavedQuery(dataStore, controls, _callback) {
 }
 
 $(document).ready(function(){
-
+    demo.initChartist();
     // Initializes line charts
     $(".ct-chart.line").each(function () {
 
@@ -304,6 +304,21 @@ $(document).ready(function(){
             }
        });
     });
+    $("#sort").change(function () {
+        var card = $(this).closest(".card");
+        var sort = card.find(".category span");
+        var arrow =  card.find(".title span");
+        sort.text($(this).val());
+        if($(this).val() === "largest"){
+            sort.css('color', 'red');
+            arrow.addClass('glyphicon-triangle-bottom');
+        }
+        else{
+            sort.css('color', 'green');
+            arrow.addClass('glyphicon-triangle-top');
+        }
+
+    })
 
 });
 

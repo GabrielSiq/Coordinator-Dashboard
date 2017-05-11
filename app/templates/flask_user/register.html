@@ -1,10 +1,22 @@
 {% extends 'flask_user/public_base.html' %}
 
+{% block css %}
+    <style>
+        form{
+            padding-left: 15px;
+        }
+        input[type=submit]{
+            margin-left: 15px;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
 {% from "flask_user/_macros.html" import render_field, render_submit_field %}
 <h1>{%trans%}Register{%endtrans%}</h1>
 
 <form action="" method="POST" novalidate formnovalidate class="form" role="form">
+    <div class="col-md-8">
     {{ form.hidden_tag() }}
 
     {# Username or Email #}
@@ -35,6 +47,7 @@
     {% endif %}
 
     {{ render_submit_field(form.submit, tabindex=280) }}
+    </div>
 </form>
 
 {% endblock %}
