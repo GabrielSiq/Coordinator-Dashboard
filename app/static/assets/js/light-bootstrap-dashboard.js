@@ -37,9 +37,9 @@ $(document).ready(function(){
     });
 
     //      Sets active class for menu
-    var loc = location.pathname.split("/")[1];
+    var loc = location.pathname.match(/\/(.*)\\?/).pop();
     if(loc != "") {
-        $('.nav a[href^="/' + location.pathname.split("/")[1] + '"]').parent('li').addClass('active');
+        $('.nav a[href^="/' + loc + '"]').parent('li').addClass('active');
     }
 
       

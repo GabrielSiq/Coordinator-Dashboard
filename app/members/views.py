@@ -61,16 +61,19 @@ def not_found(error):
 def server_error(error):
     return render_template('503.html')
 
-@application.route('/user/extra/<userId>', methods = ['GET', 'POST'])
+@application.route('/user/extra', methods = ['GET', 'POST'])
 @roles_required(('Admin', 'Coordinator'))
-def extraInformation(userId):
+def extraInformation():
     roles = Role.query.all()
     form = ExtraInfo()
     form.role.choices = [(role.id, role.name) for role in roles]
 
     if not current_user.has_roles('Admin'):
         del form.role.choices['Admin']
-
+    userId = request.args.get('userId', None)
+    if userId is None:
+        flash("No user specified.", "error")
+        return render_template('404.html')
     if request.method == 'POST':
         if form.validate() == False:
             flash('All fields are required.')
@@ -320,6 +323,7 @@ def getCancellationData(requestParams):
     filtered = DATA
     onlyRow = requestParams['row0']
     if("sort" not in onlyRow):
+        flash("Parameter error.", "error")
         return ""
 
     cancellation = filtered[filtered['situation'].isin(['CA', 'CD', 'CL', 'DT', 'LT'])]
@@ -336,6 +340,7 @@ def getChartData():
     Receives request for data, parses the type of view and routes to the correct function.
     """
     if not all(x in request.json for x in ["chartId", "requestParams"]):
+        flash("Parameter error", "error")
         return ""
     chartId = request.json['chartId']
     requestParams = request.json['requestParams']
@@ -345,6 +350,7 @@ def getChartData():
     elif chartId in ["cancellation"]:
         return getCancellationData(requestParams)
     else:
+        flash("Unknown visualization type.", "error")
         return ""
 
 @application.route('/savedQueries', methods=['POST'])
@@ -375,12 +381,14 @@ def saveQuery():
         queryName = request.json['query_name']
         queryData = request.json['query_data']
     except:
+        flash("Parameter error.", "error")
         return ""
     try:
         query = Query(user_id= current_user.id, visualization_id = visualizationId, name = queryName, query_data = queryData)
         db.session.add(query)
         db.session.commit()
     except:
+        flash("DB error.", "error")
         return ""
     return "success"
 
@@ -391,6 +399,7 @@ def deleteQuery():
         queryId = request.json['query_id']
     except:
         # Parameter not found. Bad request.
+        flash("Parameter error.", "error")
         return ""
     try:
         query = Query.query.filter_by(id=queryId).first()
@@ -398,5 +407,12 @@ def deleteQuery():
         db.session.commit()
     except:
         # Error when trying to delete from db
+        flash("DB error.", "error")
         return ""
     return "success"
+
+@application.route('/user/manage')
+@login_required
+@roles_required('Admin')
+def manageUsers():
+    return render_template("users.html")

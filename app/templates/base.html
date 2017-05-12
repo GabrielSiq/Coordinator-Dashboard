@@ -70,12 +70,19 @@
                         </a>
                     </li>
                 {% endif %}
-
                 {% if current_user.is_authenticated and current_user.has_roles(( 'Admin', 'Coordinator')) %}
                     <li>
                         <a href="{{ url_for("user.register") }}">
-                            <i class="pe-7s-users"></i>
+                            <i class="pe-7s-add-user"></i>
                             <p>Register User</p>
+                        </a>
+                    </li>
+                {% endif %}
+                {% if current_user.is_authenticated and current_user.has_roles('Admin') %}
+                    <li>
+                        <a href="{{ url_for("manageUsers") }}">
+                            <i class="pe-7s-users"></i>
+                            <p>Manage Users</p>
                         </a>
                     </li>
                 {% endif %}
@@ -171,22 +178,39 @@
 	<script src="{{ url_for('static', filename='assets/js/demo.js')}}"></script>
 
 
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(category_filter=["error"]) %}
         {% if messages %}
             <script>
             $(document).ready(function(){
                 var messages = {{ messages | safe }};
                 for (var i=0; i<messages.length; i++) {
+                    $.notify({
+                        icon: 'pe-7s-attention',
+                        message: messages[i]
 
+                    },{
+                        type: 'danger',
+                        timer: 500
+                    });
+                }
+            });
+            </script>
+        {% endif %}
+    {% endwith %}
+    {% with messages = get_flashed_messages(category_filter=["success"]) %}
+        {% if messages %}
+            <script>
+            $(document).ready(function(){
+                var messages = {{ messages | safe }};
+                for (var i=0; i<messages.length; i++) {
+                    $.notify({
+                        icon: 'pe-7s-smile',
+                        message: messages[i]
 
-                        $.notify({
-                            icon: 'pe-7s-smile',
-                            message: messages[i]
-
-                        },{
-                            type: 'info',
-                            timer: 1000
-                        });
+                    },{
+                        type: 'info',
+                        timer: 500
+                    });
                 }
             });
             </script>
