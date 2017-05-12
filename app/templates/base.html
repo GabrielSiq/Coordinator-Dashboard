@@ -142,7 +142,7 @@
                 <nav class="pull-left">
                     <ul>
                         <li>
-                            <a href="#">
+                            <a href="{{ url_for("index") }}">
                                 Home
                             </a>
                         </li>
@@ -190,7 +190,8 @@
 
                     },{
                         type: 'danger',
-                        timer: 500
+                        delay: 2000,
+                        offset: 62
                     });
                 }
             });
@@ -209,7 +210,8 @@
 
                     },{
                         type: 'info',
-                        timer: 500
+                        delay: 2000,
+                        offset: 62
                     });
                 }
             });

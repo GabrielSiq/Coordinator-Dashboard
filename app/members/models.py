@@ -59,6 +59,7 @@ class User(db.Model, UserMixin):
     # Roles info
     roles = db.relationship('Role', secondary='user_roles',
                             backref=db.backref('users', lazy='dynamic'))
+    queries = db.relationship('Query', cascade='delete')
 
     def is_active(self):
       return self.is_enabled
@@ -72,8 +73,6 @@ class Query(db.Model):
     visualization_id = db.Column(db.String(50), nullable=False)
     query_data = db.Column(db.JSON, nullable=False)
     name = db.Column(db.String(50), nullable=False)
-
-    queries = db.relationship('User', backref=db.backref('users', lazy='dynamic'))
 
     # Unique names for saved queries from a certain user in a certain visualization
     __table_args__ = (db.UniqueConstraint('user_id', 'visualization_id', 'name', name="_query_uc"),)

@@ -1,16 +1,40 @@
 {% extends "base.html" %}
 
+{% block css %}
+    <style>
+        .btn-sq-sm {
+            width: 40px !important;
+            height: 40px !important;
+        }
+    </style>
+{% endblock css %}
+
 {% block content %}
     <div class="row">
-        <div class="col-md-4">
-            <div class="card" type="table-view" id="cancellation">
+        <div class="col-md-12">
+            <div class="card" type="table-view" id="userList">
                 <div class="header">
-                    <h4 class="title">Drop Rate <span class="glyphicon"/></h4>
-                    <p class="category">Courses with <span style="font-weight: bold">< ></span> drop rate. (Client-side rendering)</p>
+                    <h3 class="title">Users</h3>
                 </div>
                 <div class="content table-responsive table-full-width">
                     <table class="table table-hover table-striped">
                         <tbody>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Edit</th>
+                                <th>Delete</th>
+                            </tr>
+                            {% for user in users %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>{{ user.name }}</td>
+                                    <td>{{ user.role }}</td>
+                                    <td><div><button type="button" class="btn btn-warning btn-sq-sm delete-query" data-toggle="modal" data-target="#editUser"><span class="glyphicon glyphicon-pencil"></span></button></div></td>
+                                    <td><div><button type="button" class="btn btn-danger btn-sq-sm delete-query"><span class="glyphicon glyphicon-remove" data-toggle="modal" data-target="#deleteUser"></span></button></div></td>
+                                </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -19,3 +43,57 @@
 
     </div>
 {% endblock content %}
+
+{% block modals%}
+    <div class="modal fade" id="editUser" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span>&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Edit User</h4>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <input type="hidden" name="_visualizationId"/>
+                        <input type="hidden" name="_queryData"/>
+                        <div class="form-group">
+                            <label for="text">Saved Query Name:</label>
+                            <input type="text" class="form-control" id="name">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {#  Delete User Modal  #}
+    <div class="modal fade" id="deleteUser" tabindex="-1" role="dialog" aria-labelledby="deleteUserLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span>&times;</span></button>
+                    <h4 class="modal-title" id="deleteUserLabel">Delete User</h4>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{{ url_for('deleteUser') }}">
+                        <input type="hidden" name="_userId"/>
+                    </form>
+                    <p>Do you really want to delete <span id="deleteUserName"></span>?</p>
+                    <p>This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger" data-dismiss="modal">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock modals %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='assets/js/user-management.js')}}"></script>
+{% endblock scripts %}

@@ -53,6 +53,7 @@ def table():
     return render_template('table.html', df = DATA.head(50))
 
 @application.errorhandler(404)
+@application.errorhandler(405)
 def not_found(error):
      return render_template('404.html')
 
@@ -375,7 +376,7 @@ def savedQueries():
 @application.route('/saveQuery', methods=['POST'])
 @login_required
 def saveQuery():
-    #TODO: Handle exceptions on the server and client sides
+    #TODO: Handle exceptions on the server side (Client side is done by flashing)
     try:
         visualizationId = request.json['view_id']
         queryName = request.json['query_name']
@@ -415,4 +416,39 @@ def deleteQuery():
 @login_required
 @roles_required('Admin')
 def manageUsers():
-    return render_template("users.html")
+    allUsers = User.query.all()
+
+    usersList = []
+    for user in allUsers:
+        users = {}
+        users['id'] = user.id
+        users['name'] = user.first_name + " " + user.last_name
+        users['role'] = Role.query.filter_by(id=UserRoles.query.filter_by(user_id=user.id).first().id).first().name
+        usersList.append(users.copy())
+    return render_template("users.html", users = usersList)
+
+@application.route('/user/delete', methods=['POST'])
+@login_required
+@roles_required('Admin')
+def deleteUser():
+    try:
+        userId = request.form['_userId']
+    except:
+        flash("Parameter error.", "error")
+        return redirect(url_for("manageUsers"))
+
+    user = User.query.filter_by(id=userId).first()
+    if user:
+        # Everything related to user is deleted with it (if models are properly set up)
+        try:
+            db.session.delete(user)
+            db.session.commit()
+        except:
+            flash("DB error.", "error")
+            return redirect(url_for("manageUsers"))
+        flash("User succesfully deleted.", "success")
+    else:
+        flash("User not found.", "error")
+
+    return redirect(url_for("manageUsers"))
+
