@@ -93,7 +93,6 @@ def extraInformation(userId):
     elif request.method == 'GET':
         return render_template('extra.html', form=form)
 
-
 @roles_required('Admin')
 def protectedRegister():
     """
@@ -326,9 +325,6 @@ def getCancellationData(requestParams):
 
     return canc_rate.sort_values(ascending=(onlyRow['sort'] == "smallest")).head(10).to_json()
 
-
-
-
 @application.route('/getChartData', methods=['POST'])
 @login_required
 def getChartData():
@@ -346,7 +342,6 @@ def getChartData():
         return getCancellationData(requestParams)
     else:
         return ""
-
 
 @application.route('/savedQueries', methods=['POST'])
 @login_required
@@ -370,6 +365,7 @@ def savedQueries():
 @application.route('/saveQuery', methods=['POST'])
 @login_required
 def saveQuery():
+    #TODO: Handle exceptions on the server and client sides
     try:
         visualizationId = request.json['view_id']
         queryName = request.json['query_name']
@@ -381,5 +377,22 @@ def saveQuery():
         db.session.add(query)
         db.session.commit()
     except:
+        return ""
+    return "success"
+
+@application.route('/deleteQuery', methods=['POST'])
+@login_required
+def deleteQuery():
+    try:
+        queryId = request.json['query_id']
+    except:
+        # Parameter not found. Bad request.
+        return ""
+    try:
+        query = Query.query.filter_by(id=queryId).first()
+        db.session.delete(query)
+        db.session.commit()
+    except:
+        # Error when trying to delete from db
         return ""
     return "success"

@@ -100,11 +100,11 @@ function updateChart(content) {
                             fillHoles: true
                         }),
                         plugins: [
-                                Chartist.plugins.legend({
-                                    legendNames: labels
-                                }),
-                                Chartist.plugins.tooltip()
-                            ]
+                            Chartist.plugins.legend({
+                                legendNames: labels
+                            }),
+                            Chartist.plugins.tooltip()
+                        ]
                     };
                     if (result['labels'].length !== 0) {
                         chart.html("");
@@ -137,7 +137,7 @@ function updateView(viewType, content){
             updateTable(content);
             break;
         default:
-            //
+        //
     }
 }
 
@@ -155,9 +155,9 @@ function populateSavedQuery(dataStore, controls, _callback) {
             var queryName = controls.find("select[name='queryName']");
             queryName.find('option').remove();
             queryName.append($('<option>', {
-                    value: "",
-                    text: ""
-                }));
+                value: "",
+                text: ""
+            }));
             var key;
             for (key in savedQueries) {
                 queryName.append($('<option>', {
@@ -179,21 +179,21 @@ $(document).ready(function(){
     $(".ct-chart.line").each(function () {
 
         var data = {
-                        labels: [],
-                        series:[[]]
-                    };
+            labels: [],
+            series:[[]]
+        };
         var options = {
-                        lineSmooth: Chartist.Interpolation.none({
-                            fillHoles: true
-                        }),
-                        plugins: [
-                                Chartist.plugins.legend({
-                                    legendNames: []
-                                }),
-                                Chartist.plugins.tooltip()
-                            ]
+            lineSmooth: Chartist.Interpolation.none({
+                fillHoles: true
+            }),
+            plugins: [
+                Chartist.plugins.legend({
+                    legendNames: []
+                }),
+                Chartist.plugins.tooltip()
+            ]
 
-                    };
+        };
         new Chartist.Line('#' + $(this).attr("id"), data, options);
     });
     // Populates the saved queries for all cards
@@ -212,8 +212,8 @@ $(document).ready(function(){
     $(".query-controls select[name='queryName']").change(function(){
         // TODO: Remove dependence on ".row .add"
         var select = $(this);
+        var card = select.closest("div.card");
         if (select.val()) {
-            var card = select.closest("div.card");
             var firstRow = card.find('.row.param').first();
             firstRow.attr("id", "row0");
             card.find('.row.param').remove();
@@ -229,7 +229,7 @@ $(document).ready(function(){
                 else{
                     newRow = lastRow.clone()
                     var rowId = parseInt(newRow.attr("id").slice(3)) + 1;
-                newRow.attr("id", "row" + rowId);
+                    newRow.attr("id", "row" + rowId);
                 }
                 for (var key in rowData) {
                     newRow.find("select#" + key).val(rowData[key]);
@@ -237,6 +237,10 @@ $(document).ready(function(){
                 newRow.insertBefore(content.find(".row.add"));
             }
             updateView(card.attr("type"), content);
+            card.find(".query-controls .delete-query").css('visibility','visible');
+        }
+        else{
+            card.find(".query-controls .delete-query").css('visibility','hidden');
         }
     });
     // Deletes a row of filters (a new series) for charts
@@ -264,27 +268,27 @@ $(document).ready(function(){
     // Modal to save query data. Gathers all data into the form.
     var saveModal = $('#saveQuery');
     saveModal.on('show.bs.modal', function (e) {
-      var card = $(e.relatedTarget).closest(".card");
-      var data = {};
-      var visualizationId = card.attr("id");
-      var content = card.find(".content");
-      var rowId = 0;
-      content.find(".row.param").each(function () {
-          var row = {};
-          $(this).find("select.form-control").each(function () {
-              row[$(this).attr("id")] = $(this).val();
-          });
-          data["row"+ rowId++] = row;//$.extend( {}, row );
-      });
-      $(this).find("input[name='_queryData']").val(JSON.stringify(data));
-      $(this).find("input[name='_visualizationId']").val(visualizationId);
+        var card = $(e.relatedTarget).closest(".card");
+        var data = {};
+        var visualizationId = card.attr("id");
+        var content = card.find(".content");
+        var rowId = 0;
+        content.find(".row.param").each(function () {
+            var row = {};
+            $(this).find("select.form-control").each(function () {
+                row[$(this).attr("id")] = $(this).val();
+            });
+            data["row"+ rowId++] = row;//$.extend( {}, row );
+        });
+        $(this).find("input[name='_queryData']").val(JSON.stringify(data));
+        $(this).find("input[name='_visualizationId']").val(visualizationId);
     });
     // Saves query data
     saveModal.find('button.btn-primary').on('click', function () {
-       var modal = $(this).closest("#saveQuery");
-       var visualizationId = modal.find("input[name='_visualizationId']").val();
-       var queryName =  modal.find("input#name").val();
-       console.log("oi");
+        var modal = $(this).closest("#saveQuery");
+        var visualizationId = modal.find("input[name='_visualizationId']").val();
+        var queryName =  modal.find("input#name").val();
+        console.log("oi");
         $.ajax({
             type: "POST",
             url: "/saveQuery",
@@ -295,15 +299,13 @@ $(document).ready(function(){
                 populateSavedQuery(dataStore, targetControls, function (id) {
                     targetControls.find("select[name='queryName']").eq(0).val(id);
                 });
-                // Set the value of the dropdown to the value just created
-                //TODO: make this work (problem is with the async ajax call)
-                //targetControls.find("select[name='queryName']").eq(0).val(queryName);
             },
             error: function(){
-                //
+                console.log("Ajax error");
             }
-       });
+        });
     });
+    // Cosmetic changes for tables
     $("#sort").change(function () {
         var card = $(this).closest(".card");
         var sort = card.find(".category span");
@@ -319,7 +321,22 @@ $(document).ready(function(){
         }
 
     })
-
+    // Deleting saved queries
+    $("button.delete-query").on('click', function () {
+        card = $(this).closest(".card");
+        $.ajax({
+            type: "POST",
+            url: "/deleteQuery",
+            contentType: "application/json",
+            data: JSON.stringify({'query_id': card.find("select[name='queryName']").val()}),
+            success: function() {
+                populateSavedQuery(dataStore, card.find(".query-controls"));
+            },
+            error: function(){
+                //
+            }
+        });
+    });
 });
 
 
