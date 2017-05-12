@@ -97,7 +97,7 @@ def extraInformation():
 
             message = "User " + user.username + " successfully registered."
             flash(message.encode('ascii'))
-            return redirect(url_for('index'))
+            return redirect(url_for('manageUsers'))
     elif request.method == 'GET':
         return render_template('extra.html', form=form)
 
