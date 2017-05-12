@@ -43,13 +43,17 @@ def createDummyUsers():
                       confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="Simone", last_name="Barbosa"))
     users.append(User(username="noemi", password=bcrypt.hash("password"), email="noemi@inf.puc-rio.br",
                       confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="Noemi", last_name="Rodriguez"))
+    users.append(User(username="johhdoe", password=bcrypt.hash("password"), email="john@doe.doe",
+                      confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="John", last_name="Doe"))
     for user in users:
         db.session.add(user)
 
     # Test creation of roles
     roles = list()
     roles.append(Role(name="Admin"))
-    roles.append(Role(name="Base User"))
+    roles.append(Role(name="Coordinator"))
+    roles.append(Role(name="Professor"))
+    roles.append(Role(name="Student"))
     for role in roles:
         db.session.add(role)
     db.session.commit()
@@ -57,8 +61,9 @@ def createDummyUsers():
     # Test creation of user roles
     user_roles = list()
     user_roles.append(UserRoles(user_id=1, role_id=1))
-    user_roles.append(UserRoles(user_id=2, role_id=2))
+    user_roles.append(UserRoles(user_id=2, role_id=3))
     user_roles.append(UserRoles(user_id=3, role_id=2))
+    user_roles.append(UserRoles(user_id=4, role_id=4))
     for user_role in user_roles:
         db.session.add(user_role)
 

@@ -43,6 +43,7 @@ def dashboard():
     return render_template('dashboard.html', df = DATA.head(10).to_dict(), canc = canc_rate.sort_values().head(10), canc2 = canc_rate.sort_values(ascending=False).head(10), course_codes=course_codes, situation_codes=situation_codes)
 
 @application.route('/table')
+@roles_required(('Admin', 'Coordinator'))
 @login_required
 def table():
     """
@@ -61,11 +62,14 @@ def server_error(error):
     return render_template('503.html')
 
 @application.route('/user/extra/<userId>', methods = ['GET', 'POST'])
-@roles_required('Admin')
+@roles_required(('Admin', 'Coordinator'))
 def extraInformation(userId):
     roles = Role.query.all()
     form = ExtraInfo()
     form.role.choices = [(role.id, role.name) for role in roles]
+
+    if not current_user.has_roles('Admin'):
+        del form.role.choices['Admin']
 
     if request.method == 'POST':
         if form.validate() == False:
@@ -93,7 +97,7 @@ def extraInformation(userId):
     elif request.method == 'GET':
         return render_template('extra.html', form=form)
 
-@roles_required('Admin')
+@roles_required(('Admin', 'Coordinator'))
 def protectedRegister():
     """
     Registration page is restricted to admins for now. 

@@ -62,14 +62,16 @@
                         <p>Dashboard</p>
                     </a>
                 </li>
-                <li>
-                    <a href="{{ url_for("table") }}">
-                        <i class="pe-7s-note2"></i>
-                        <p>Raw Data</p>
-                    </a>
-                </li>
+                {% if current_user.is_authenticated and current_user.has_roles(( 'Admin', 'Coordinator')) %}
+                    <li>
+                        <a href="{{ url_for("table") }}">
+                            <i class="pe-7s-note2"></i>
+                            <p>Raw Data</p>
+                        </a>
+                    </li>
+                {% endif %}
 
-                {% if current_user.is_authenticated and current_user.has_roles('Admin') %}
+                {% if current_user.is_authenticated and current_user.has_roles(( 'Admin', 'Coordinator')) %}
                     <li>
                         <a href="{{ url_for("user.register") }}">
                             <i class="pe-7s-users"></i>

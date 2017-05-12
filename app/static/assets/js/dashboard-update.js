@@ -255,6 +255,7 @@ $(document).ready(function(){
                 $(this).val("");
             });
         }
+        form.closest(".card").find("select[name='queryName']").val("");
         updateView(form.closest(".card").attr("type"), form.closest('.content'));
     });
     // Adds a new row of filters (series)
