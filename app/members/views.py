@@ -7,6 +7,7 @@ import os
 import pandas as pd
 from models import *
 from datetime import datetime
+from roles import ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE, STUDENT_ROLE
 
 #TODO: load data from database
 
@@ -43,7 +44,7 @@ def dashboard():
     return render_template('dashboard.html', df = DATA.head(10).to_dict(), canc = canc_rate.sort_values().head(10), canc2 = canc_rate.sort_values(ascending=False).head(10), course_codes=course_codes, situation_codes=situation_codes)
 
 @application.route('/table')
-@roles_required(('Admin', 'Coordinator'))
+@roles_required((ADMIN_ROLE, COORDINATOR_ROLE))
 @login_required
 def table():
     """
@@ -63,7 +64,7 @@ def server_error(error):
     return render_template('503.html')
 
 @application.route('/user/extra', methods = ['GET', 'POST'])
-@roles_required(('Admin', 'Coordinator'))
+@roles_required((ADMIN_ROLE, COORDINATOR_ROLE))
 def extraInformation():
     roles = Role.query.all()
     form = ExtraInfo()
@@ -101,7 +102,7 @@ def extraInformation():
     elif request.method == 'GET':
         return render_template('extra.html', form=form)
 
-@roles_required(('Admin', 'Coordinator'))
+@roles_required((ADMIN_ROLE, COORDINATOR_ROLE))
 def protectedRegister():
     """
     Registration page is restricted to admins for now. 
@@ -414,7 +415,7 @@ def deleteQuery():
 
 @application.route('/user/manage')
 @login_required
-@roles_required('Admin')
+@roles_required(ADMIN_ROLE)
 def manageUsers():
     allUsers = User.query.all()
 
@@ -429,7 +430,7 @@ def manageUsers():
 
 @application.route('/user/delete', methods=['POST'])
 @login_required
-@roles_required('Admin')
+@roles_required(ADMIN_ROLE)
 def deleteUser():
     try:
         userId = request.form['_userId']
@@ -451,4 +452,3 @@ def deleteUser():
         flash("User not found.", "error")
 
     return redirect(url_for("manageUsers"))
-

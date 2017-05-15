@@ -1,4 +1,5 @@
 import os
+from members.roles import ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE, STUDENT_ROLE
 basedir = os.path.abspath(os.path.dirname(__file__))
 """ 
 This files loads all configs for our app
@@ -25,4 +26,13 @@ class Config(object):
     """
     USER_SEND_REGISTERED_EMAIL = False
     USER_AUTO_LOGIN_AFTER_REGISTER = False
-    USER_AFTER_REGISTER_ENDPOINT =  ''#'extraInformation'
+    USER_AFTER_REGISTER_ENDPOINT =  ''
+
+    # User roles for Jinja
+
+    ADMIN_ROLE = ADMIN_ROLE
+    COORDINATOR_ROLE = COORDINATOR_ROLE
+    PROFESSOR_ROLE = PROFESSOR_ROLE
+    STUDENT_ROLE = STUDENT_ROLE
+
+

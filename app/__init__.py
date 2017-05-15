@@ -7,11 +7,12 @@ from flask_user import SQLAlchemyAdapter, UserManager, current_user
 import os
 from apscheduler.schedulers.background import BackgroundScheduler
 import pandas as pd
-from app.members.models import db, User, AcademicData, Role, UserRoles, Query
+from members.models import db, User, AcademicData, Role, UserRoles, Query
 from passlib.hash import bcrypt
 import datetime
 import json
 from wtforms import ValidationError
+from members.roles import ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE, STUDENT_ROLE
 
 # Initializes application
 application = Flask(__name__)
@@ -43,17 +44,17 @@ def createDummyUsers():
                       confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="Simone", last_name="Barbosa"))
     users.append(User(username="noemi", password=bcrypt.hash("password"), email="noemi@inf.puc-rio.br",
                       confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="Noemi", last_name="Rodriguez"))
-    users.append(User(username="johhdoe", password=bcrypt.hash("password"), email="john@doe.doe",
+    users.append(User(username="johndoe", password=bcrypt.hash("password"), email="john@doe.doe",
                       confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="John", last_name="Doe"))
     for user in users:
         db.session.add(user)
 
     # Test creation of roles
     roles = list()
-    roles.append(Role(name="Admin"))
-    roles.append(Role(name="Coordinator"))
-    roles.append(Role(name="Professor"))
-    roles.append(Role(name="Student"))
+    roles.append(Role(name=ADMIN_ROLE))
+    roles.append(Role(name=COORDINATOR_ROLE))
+    roles.append(Role(name=PROFESSOR_ROLE))
+    roles.append(Role(name=STUDENT_ROLE))
     for role in roles:
         db.session.add(role)
     db.session.commit()
