@@ -8,6 +8,9 @@
         input[type=submit]{
             margin-left: 15px;
         }
+        .hidden{
+            display: none;
+        }
     </style>
 {% endblock %}
 
@@ -33,9 +36,31 @@
                 <div class="row col-md-6">
                     {{ form.role.label }}
                 </div>
-                {{ form.role(class_="form-control") }}
+                {{ form.role(class_="form-control", id_="role") }}
+            </div>
+            <div class="form-group hidden" id="department">
+                <div class="row col-md-6">
+                    {{ form.department.label }}
+                </div>
+                {{ form.department(class_="form-control") }}
             </div>
             <input type="submit" value="Submit" class="btn btn-default btn-primary">
         </div>
     </form>
 {% endblock content %}
+
+{% block scripts %}
+    <script>
+        {#   TODO: Adequate this to the new roles model (not use role name directly) #}
+        $(document).ready(function () {
+            $('#role').change(function () {
+                if($(this).val() !== "{{ config['ADMIN_ROLE'] }}"){
+                    $('#department').addClass('hidden');
+                }
+                else{
+                    $('#department').removeClass('hidden');
+                }
+            });
+        });
+    </script>
+{% endblock scripts %}

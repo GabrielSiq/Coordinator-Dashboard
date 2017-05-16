@@ -7,7 +7,7 @@ from flask_user import SQLAlchemyAdapter, UserManager, current_user
 import os
 from apscheduler.schedulers.background import BackgroundScheduler
 import pandas as pd
-from members.models import db, User, AcademicData, Role, UserRoles, Query
+from members.models import db, User, AcademicData, Role, UserRoles, Query, Department, UserDepartments
 from passlib.hash import bcrypt
 import datetime
 import json
@@ -51,12 +51,21 @@ def createDummyUsers():
 
     # Test creation of roles
     roles = list()
-    roles.append(Role(name=ADMIN_ROLE))
-    roles.append(Role(name=COORDINATOR_ROLE))
-    roles.append(Role(name=PROFESSOR_ROLE))
-    roles.append(Role(name=STUDENT_ROLE))
+    roles.append(Role(name = ADMIN_ROLE, access_level = 0))
+    roles.append(Role(name = COORDINATOR_ROLE, access_level = 1))
+    roles.append(Role(name = PROFESSOR_ROLE, access_level = 2))
+    roles.append(Role(name = STUDENT_ROLE, access_level = 5))
     for role in roles:
         db.session.add(role)
+
+    departments = list()
+    departments.append(Department(code="INF", name="Departamento de Informatica"))
+    departments.append(Department(code="MAT", name="Departamento de Matematica"))
+    departments.append(Department(code="ENG"))
+
+    for department in departments:
+        db.session.add(department)
+
     db.session.commit()
 
     # Test creation of user roles
@@ -67,6 +76,14 @@ def createDummyUsers():
     user_roles.append(UserRoles(user_id=4, role_id=4))
     for user_role in user_roles:
         db.session.add(user_role)
+
+    user_departments = list()
+    user_departments.append(UserDepartments(user_id=2, department_id = 1))
+    user_departments.append(UserDepartments(user_id=3, department_id=1))
+    user_departments.append(UserDepartments(user_id=3, department_id=2))
+    user_departments.append(UserDepartments(user_id=4, department_id=1))
+    for user_department in user_departments:
+        db.session.add(user_department)
 
     # Test creation of saved queries
     queries = list()

@@ -56,10 +56,13 @@ class User(db.Model, UserMixin):
     first_name = db.Column(db.String(50), nullable=False, default='')
     last_name = db.Column(db.String(50), nullable=False, default='')
 
-    # Roles info
+    # Relationships
     roles = db.relationship('Role', secondary='user_roles',
                             backref=db.backref('users', lazy='dynamic'))
+    departments = db.relationship('Department', secondary='user_departments',
+                            backref=db.backref('users', lazy='dynamic'))
     queries = db.relationship('Query', cascade='delete')
+
 
     def is_active(self):
       return self.is_enabled
@@ -84,6 +87,7 @@ class Role(db.Model):
     """
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(50), unique=True)
+    access_level = db.Column(db.Integer()) # To control which roles outrank which.
 
 
 class UserRoles(db.Model):
@@ -94,9 +98,27 @@ class UserRoles(db.Model):
     user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
     role_id = db.Column(db.Integer(), db.ForeignKey('role.id', ondelete='CASCADE'))
 
+class Department(db.Model):
+    """
+    All PUC-Rio departments.
+    """
+    id  = db.Column(db.Integer(), primary_key=True)
+    code = db.Column(db.String(3), unique=True)
+    name = db.Column(db.String(50))
+
+class UserDepartments(db.Model):
+    """
+    Links users and departments
+    """
+    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
+    department_id = db.Column(db.Integer(), db.ForeignKey('department.id', ondelete='CASCADE'))
+
 # Forms
 
 class ExtraInfo(FlaskForm):
     first_name = StringField('First Name', validators=[DataRequired()])
     last_name = StringField('Last Name', validators=[DataRequired()])
     role = SelectField('User Role', coerce=int, validators=[DataRequired()])
+    department = SelectField('User Role', coerce=int)
+

@@ -67,18 +67,20 @@ def server_error(error):
 @roles_required((ADMIN_ROLE, COORDINATOR_ROLE))
 def extraInformation():
     roles = Role.query.all()
+    departments = Department.query.all()
     form = ExtraInfo()
     form.role.choices = [(role.id, role.name) for role in roles]
+    form.department.choices = [(department.id, department.code) for department in departments]
 
-    if not current_user.has_roles('Admin'):
-        del form.role.choices['Admin']
+    if not current_user.has_roles(ADMIN_ROLE):
+        del form.role.choices[ADMIN_ROLE]
     userId = request.args.get('userId', None)
     if userId is None:
         flash("No user specified.", "error")
         return render_template('404.html')
     if request.method == 'POST':
         if form.validate() == False:
-            flash('All fields are required.')
+            flash('All fields are required.', "error")
             return render_template('extra.html', form=form)
         else:
             try:
@@ -87,17 +89,21 @@ def extraInformation():
                 user.last_name = form.last_name.data
                 user.confirmed_at = datetime.now()
 
-                user_role = UserRoles(user_id=userId, role_id=form.role.data)
+                userRole = UserRoles(user_id=userId, role_id=form.role.data)
+                db.session.add(userRole)
 
-                db.session.add(user_role)
+                if userRole.role_id != Role.query.filter_by(name=ADMIN_ROLE).first().id:
+                    userDepartment = UserDepartments(user_id = userId, department_id = form.department.data)
+                    db.session.add(userDepartment)
+
                 db.session.commit()
 
             except:
-                flash("Error while processing form.")
+                flash("Error while processing form.", "error")
                 return render_template('extra.html', form=form)
 
             message = "User " + user.username + " successfully registered."
-            flash(message.encode('ascii'))
+            flash(message.encode('ascii'), "success")
             return redirect(url_for('manageUsers'))
     elif request.method == 'GET':
         return render_template('extra.html', form=form)
@@ -415,17 +421,36 @@ def deleteQuery():
 
 @application.route('/user/manage')
 @login_required
-@roles_required(ADMIN_ROLE)
+@roles_required((ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE))
 def manageUsers():
-    allUsers = User.query.all()
 
+    # Gets roles in advance to avoid querying too many times
+    allRoles = Role.query.all()
+    roleNames = {}
+    for role in allRoles:
+        roleNames[role.id] = role.name
+
+    # TODO: Replace this solution with a better one using the relationships
+
+    # If user is admin, than he's got access to all users of all departments
+    # If user is not admin, he's only got access to users who are members the same departments
+    if current_user.has_roles(ADMIN_ROLE):
+        userDepartments = Department.query.all()
+    else:
+        userDepartments = current_user.departments
+
+    userAccessLevel = max(role.access_level for role in current_user.roles)
+
+    allUsers = User.query.all()
     usersList = []
     for user in allUsers:
-        users = {}
-        users['id'] = user.id
-        users['name'] = user.first_name + " " + user.last_name
-        users['role'] = Role.query.filter_by(id=UserRoles.query.filter_by(user_id=user.id).first().id).first().name
-        usersList.append(users.copy())
+        targetAccessLevel = max(role.access_level for role in user.roles)
+        if any([i for i in user.departments if i in userDepartments]) and userAccessLevel <= targetAccessLevel:
+            users = {}
+            users['id'] = user.id
+            users['name'] = user.first_name + " " + user.last_name
+            users['role'] = roleNames[UserRoles.query.filter_by(user_id=user.id).first().role_id]
+            usersList.append(users.copy())
     return render_template("users.html", users = usersList)
 
 @application.route('/user/delete', methods=['POST'])
