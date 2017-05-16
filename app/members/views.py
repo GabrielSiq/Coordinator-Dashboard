@@ -64,16 +64,17 @@ def server_error(error):
     return render_template('503.html')
 
 @application.route('/user/extra', methods = ['GET', 'POST'])
-@roles_required((ADMIN_ROLE, COORDINATOR_ROLE))
+@roles_required((ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE))
 def extraInformation():
     roles = Role.query.all()
-    departments = Department.query.all()
     form = ExtraInfo()
-    form.role.choices = [(role.id, role.name) for role in roles]
-    form.department.choices = [(department.id, department.code) for department in departments]
+    form.role.choices = [(role.id, role.name) for role in roles if role.access_level >= max(role.access_level for role in current_user.roles)]
+
 
     if not current_user.has_roles(ADMIN_ROLE):
-        del form.role.choices[ADMIN_ROLE]
+        form.department.choices = [(department.id, department.code) for department in current_user.departments ]
+    else:
+        form.department.choices = [(department.id, department.code) for department in Department.query.all()]
     userId = request.args.get('userId', None)
     if userId is None:
         flash("No user specified.", "error")
@@ -108,7 +109,7 @@ def extraInformation():
     elif request.method == 'GET':
         return render_template('extra.html', form=form)
 
-@roles_required((ADMIN_ROLE, COORDINATOR_ROLE))
+@roles_required((ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE))
 def protectedRegister():
     """
     Registration page is restricted to admins for now. 
@@ -455,8 +456,9 @@ def manageUsers():
 
 @application.route('/user/delete', methods=['POST'])
 @login_required
-@roles_required(ADMIN_ROLE)
+@roles_required(ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE)
 def deleteUser():
+    #TODO: CREATE A LOG TO FIND OUT WHO DELETED WHO
     try:
         userId = request.form['_userId']
     except:

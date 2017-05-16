@@ -51,16 +51,15 @@
 
 {% block scripts %}
     <script>
-        {#   TODO: Adequate this to the new roles model (not use role name directly) #}
         $(document).ready(function () {
             $('#role').change(function () {
-                if($(this).val() !== "{{ config['ADMIN_ROLE'] }}"){
+                if($('#role option:selected').text() === '{{ config['ADMIN_ROLE'] }}'){
                     $('#department').addClass('hidden');
                 }
                 else{
                     $('#department').removeClass('hidden');
                 }
-            });
+            }).trigger('change');
         });
     </script>
 {% endblock scripts %}
