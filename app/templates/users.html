@@ -23,14 +23,25 @@
                                 <th>ID</th>
                                 <th>Name</th>
                                 <th>Role</th>
+                                <th>Departments</th>
                                 <th>Edit</th>
                                 <th>Delete</th>
                             </tr>
                             {% for user in users %}
                                 <tr>
+                                    <input type="hidden" name="_firstName" value="{{ user.first_name }}">
+                                    <input type="hidden" name="_lastName" value="{{ user.last_name }}">
+                                    <input type="hidden" name="_email" value="{{ user.email }}">
+                                    <input type="hidden" name="_roleId" value="{{ user.role_id }}">
                                     <td>{{ user.id }}</td>
-                                    <td>{{ user.name }}</td>
+                                    <td>{{ user.first_name + " " + user.last_name }}</td>
                                     <td>{{ user.role }}</td>
+                                    <td>
+                                        {% for department in user.departments %}
+                                            <p>{{ department.code }}</p>
+                                            <input type="hidden" name="_department" value="{{ department.id }}">
+                                        {% endfor %}
+                                    </td>
                                     <td><div><button type="button" class="btn btn-warning btn-sq-sm delete-query" data-toggle="modal" data-target="#editUser"><span class="glyphicon glyphicon-pencil"></span></button></div></td>
                                     <td><div><button type="button" class="btn btn-danger btn-sq-sm delete-query"><span class="glyphicon glyphicon-remove" data-toggle="modal" data-target="#deleteUser"></span></button></div></td>
                                 </tr>
@@ -53,12 +64,37 @@
                     <h4 class="modal-title" id="myModalLabel">Edit User</h4>
                 </div>
                 <div class="modal-body">
-                    <form>
-                        <input type="hidden" name="_visualizationId"/>
-                        <input type="hidden" name="_queryData"/>
+                    <form method="POST" action="{{ url_for('editUser') }}">
+                        <input type="hidden" name="_userId"/>
                         <div class="form-group">
-                            <label for="text">Saved Query Name:</label>
-                            <input type="text" class="form-control" id="name">
+                            <div class="row col-md-6">
+                                {{ extraForm.first_name.label(class_="control-label") }}
+                            </div>
+                            {{ extraForm.first_name(class_="form-control") }}
+                        </div>
+                        <div class="form-group">
+                            <div class="row col-md-6">
+                                {{ extraForm.last_name.label }}
+                            </div>
+                            {{ extraForm.last_name(class_="form-control") }}
+                        </div>
+                        <div class="form-group">
+                            <div class="row col-md-6">
+                                <label for="email">Email</label>
+                            </div>
+                            <input type="text" name="email" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <div class="row col-md-6">
+                                {{ extraForm.role.label }}
+                            </div>
+                            {{ extraForm.role(class_="form-control", id_="role") }}
+                        </div>
+                        <div class="form-group hidden" id="department">
+                            <div class="row col-md-6">
+                                {{ extraForm.department.label }}
+                            </div>
+                            {{ extraForm.department(class_="form-control") }}
                         </div>
                     </form>
                 </div>
@@ -96,4 +132,17 @@
 
 {% block scripts %}
     <script src="{{ url_for('static', filename='assets/js/user-management.js')}}"></script>
+    <script>
+        var editModal = $('#editUser');
+        editModal.on('show.bs.modal', function (e) {
+            $('#role').change(function () {
+                if($('#role option:selected').text() === '{{ config['ADMIN_ROLE'] }}'){
+                    $('#department').addClass('hidden');
+                }
+                else{
+                    $('#department').removeClass('hidden');
+                }
+            }).trigger('change');
+        });
+    </script>
 {% endblock scripts %}

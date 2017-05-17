@@ -89,13 +89,16 @@ class Role(db.Model):
     name = db.Column(db.String(50), unique=True)
     access_level = db.Column(db.Integer()) # To control which roles outrank which.
 
+    def __repr__(self):
+        return str(self.id)
+
 
 class UserRoles(db.Model):
     """
     UserRoles model. Links users and roles.
     """
     id = db.Column(db.Integer(), primary_key=True)
-    user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
+    user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'), unique=True)
     role_id = db.Column(db.Integer(), db.ForeignKey('role.id', ondelete='CASCADE'))
 
 class Department(db.Model):
@@ -105,6 +108,9 @@ class Department(db.Model):
     id  = db.Column(db.Integer(), primary_key=True)
     code = db.Column(db.String(3), unique=True)
     name = db.Column(db.String(50))
+
+    def __repr__(self):
+        return str(self.id)
 
 class UserDepartments(db.Model):
     """
@@ -120,5 +126,5 @@ class ExtraInfo(FlaskForm):
     first_name = StringField('First Name', validators=[DataRequired()])
     last_name = StringField('Last Name', validators=[DataRequired()])
     role = SelectField('User Role', coerce=int, validators=[DataRequired()])
-    department = SelectField('User Role', coerce=int)
+    department = SelectField('User Department', coerce=int)
 

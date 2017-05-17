@@ -427,6 +427,10 @@ def manageUsers():
 
     # Gets roles in advance to avoid querying too many times
     allRoles = Role.query.all()
+    extraForm = ExtraInfo()
+    extraForm.role.choices = [(role.id, role.name) for role in allRoles if
+                         role.access_level >= max(role.access_level for role in current_user.roles)]
+
     roleNames = {}
     for role in allRoles:
         roleNames[role.id] = role.name
@@ -435,28 +439,37 @@ def manageUsers():
 
     # If user is admin, than he's got access to all users of all departments
     # If user is not admin, he's only got access to users who are members the same departments
-    if current_user.has_roles(ADMIN_ROLE):
+    isAdmin = current_user.has_roles(ADMIN_ROLE)
+
+    if isAdmin:
         userDepartments = Department.query.all()
     else:
         userDepartments = current_user.departments
 
+    extraForm.department.choices = [(department.id, department.code) for department in userDepartments]
+
     userAccessLevel = max(role.access_level for role in current_user.roles)
 
-    allUsers = User.query.all()
+    allUsers = User.query.order_by(User.id.asc()).all()
     usersList = []
     for user in allUsers:
         targetAccessLevel = max(role.access_level for role in user.roles)
-        if any([i for i in user.departments if i in userDepartments]) and userAccessLevel <= targetAccessLevel:
+        if isAdmin or (any([i for i in user.departments if i in userDepartments]) and userAccessLevel <= targetAccessLevel):
             users = {}
             users['id'] = user.id
-            users['name'] = user.first_name + " " + user.last_name
-            users['role'] = roleNames[UserRoles.query.filter_by(user_id=user.id).first().role_id]
+            users['first_name'] = user.first_name
+            users['last_name'] = user.last_name
+            users['email'] = user.email
+            role = UserRoles.query.filter_by(user_id=user.id).first().role_id
+            users['role'] = roleNames[role]
+            users['role_id'] = role
+            users['departments'] = user.departments
             usersList.append(users.copy())
-    return render_template("users.html", users = usersList)
+    return render_template("users.html", users = usersList, extraForm = extraForm)
 
 @application.route('/user/delete', methods=['POST'])
 @login_required
-@roles_required(ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE)
+@roles_required((ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE))
 def deleteUser():
     #TODO: CREATE A LOG TO FIND OUT WHO DELETED WHO
     try:
@@ -475,6 +488,37 @@ def deleteUser():
             flash("DB error.", "error")
             return redirect(url_for("manageUsers"))
         flash("User succesfully deleted.", "success")
+    else:
+        flash("User not found.", "error")
+
+    return redirect(url_for("manageUsers"))
+
+@application.route('/user/edit', methods=['POST'])
+@login_required
+@roles_required((ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE))
+def editUser():
+    #TODO: CREATE A LOG TO FIND OUT WHO DELETED WHO
+    try:
+        userId = request.form['_userId']
+    except:
+        flash("Parameter error.", "error")
+        return redirect(url_for("manageUsers"))
+
+    user = User.query.filter_by(id=userId).first()
+    role = UserRoles.query.filter_by(id=userId).first()
+    if user:
+        # Everything related to user is deleted with it (if models are properly set up)
+        try:
+            user.first_name = request.form['first_name']
+            user.last_name = request.form['last_name']
+            user.email = request.form['email']
+            role.role_id = request.form['role']
+
+            db.session.commit()
+        except:
+            flash("DB error.", "error")
+            return redirect(url_for("manageUsers"))
+        flash("User succesfully edited.", "success")
     else:
         flash("User not found.", "error")
 

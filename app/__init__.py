@@ -79,7 +79,6 @@ def createDummyUsers():
 
     user_departments = list()
     user_departments.append(UserDepartments(user_id=2, department_id = 1))
-    user_departments.append(UserDepartments(user_id=3, department_id=1))
     user_departments.append(UserDepartments(user_id=3, department_id=2))
     user_departments.append(UserDepartments(user_id=4, department_id=1))
     for user_department in user_departments:
