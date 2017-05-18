@@ -23,7 +23,7 @@
                         <p class="category">For data monitoring purposes.</p>
                     </div>
                     <div class="content table-responsive table-full-width">
-                        <table class="table table-hover table-striped display">
+                        <table class="table table-hover table-striped display" id="studentData">
                             <thead>
                                 <tr>
                                     {% for item in df.columns %}
@@ -39,18 +39,36 @@
                                 </tr>
                             </tfoot>
                             <tbody>
-{#                                {% for id, row in df.iterrows() %}#}
-{#                                    <tr>#}
-{#                                        <td>{{ row['student_id'] }}</td>#}
-{#                                        <td>{{ row['semester'] }}</td>#}
-{#                                        <td>{{ row['course'] }}</td>#}
-{#                                        <td>{{ row['units'] }}</td>#}
-{#                                        <td>{{ row['section'] }}</td>#}
-{#                                        <td>{{ row['grade'] }}</td>#}
-{#                                        <td>{{ row['situation'] }}</td>#}
-{#                                        <td>{{ row['professor'] }}</td>#}
-{#                                    </tr>#}
-{#                                {% endfor %}#}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="header">
+                        <h4 class="title">Instructor Data</h4>
+                        <p class="category">For data monitoring purposes.</p>
+                    </div>
+                    <div class="content table-responsive table-full-width">
+                        <table class="table table-hover table-striped display" id="instructorData">
+                            <thead>
+                                <tr>
+                                    {% for item in df2.columns %}
+                                        <th>{{ item }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    {% for item in df2.columns %}
+                                        <th>{{ item }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </tfoot>
+                            <tbody>
                             </tbody>
                         </table>
                     </div>
@@ -64,10 +82,15 @@
     <script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
     <script>
         $(document).ready(function() {
-            $('table.display').DataTable( {
+            $('#studentData').DataTable( {
                 "processing": true,
                 "serverSide": true,
-                "ajax": "{{ url_for("getDataTable") }}"
+                "ajax": "{{ url_for("getStudentDataTable") }}"
+            });
+            $('#instructorData').DataTable( {
+                "processing": true,
+                "serverSide": true,
+                "ajax": "{{ url_for("getInstructorDataTable") }}"
             });
         });
     </script>

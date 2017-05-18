@@ -1,4 +1,4 @@
-#coding: utf-8
+#encoding: utf-8
 
 from flask import Flask, flash, request
 from urlparse import urlparse, urljoin
@@ -228,6 +228,13 @@ def loadData(dbOption = False):
     global STUDENT_ACADEMIC_DATA
     STUDENT_ACADEMIC_DATA = pd.read_csv(csv_url)
     STUDENT_ACADEMIC_DATA.columns = ['student_id', 'semester', 'course', 'units', 'section', 'grade', 'situation', 'professor']
+
+    csv_url = os.path.join(SITE_ROOT, 'static', 'assets', 'data', 'instructor_evaluation_data.csv')
+    global INSTRUCTOR_EVALUATION_DATA
+    INSTRUCTOR_EVALUATION_DATA = pd.read_csv(csv_url)
+    INSTRUCTOR_EVALUATION_DATA.columns = ["semester", "course", "section", "professor", "student_count", "question_text", "grade_1", "grade_2", "grade_3", "grade_4", "grade_5", "grade_na", "average", "standard_deviation", "total"]
+    del INSTRUCTOR_EVALUATION_DATA['total']
+
     if(dbOption == True):
         for index, row in STUDENT_ACADEMIC_DATA.iterrows():
             db_row = AcademicData(row.student_id, row.semester, row.course, row.units, row.section, row.situation,

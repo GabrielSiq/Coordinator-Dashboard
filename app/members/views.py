@@ -1,3 +1,4 @@
+#encoding: utf-8
 from flask import redirect, url_for, render_template, request, flash, current_app
 from flask_user import login_required, roles_required, signals
 from flask_user.views import _get_safe_next_param, _send_registered_email, render, _endpoint_url, _do_login_user, quote
@@ -51,14 +52,17 @@ def table():
     studentData = getUserAllowedData()
     df = pd.DataFrame(columns=studentData.columns)
 
+    instructorData = getInstructorEvaluationData()
+    del instructorData['question_text']
+    df2 = pd.DataFrame(columns=instructorData.columns)
 
-    return render_template('table.html', df = df)
 
-@application.route('/getDataTable')
+    return render_template('table.html', df = df, df2=df2)
+
+@application.route('/getStudentDataTable')
 @roles_required((ADMIN_ROLE, COORDINATOR_ROLE))
 @login_required
-def getDataTable():
-    print "oi"
+def getStudentDataTable():
     data = getUserAllowedData()
     response = {}
     response['draw'] = request.args.get('draw', None)
@@ -67,8 +71,27 @@ def getDataTable():
     start =  int(request.args.get('start', None))
     length = int(request.args.get('length', None))
     end = start + length
-    print start
-    print end
+    listData = []
+    for index, row in data[start:end].iterrows():
+        listRow = []
+        for item in row:
+            listRow.append(str(item))
+        listData.append(listRow)
+    response['data'] = listData
+    return json.dumps(response)
+
+@application.route('/getInstructorDataTable')
+@roles_required((ADMIN_ROLE, COORDINATOR_ROLE))
+@login_required
+def getInstructorDataTable():
+    data = getInstructorEvaluationData()
+    response = {}
+    response['draw'] = request.args.get('draw', None)
+    response['recordsTotal'] = len(data)
+    response['recordsFiltered'] =len(data)
+    start =  int(request.args.get('start', None))
+    length = int(request.args.get('length', None))
+    end = start + length
     listData = []
     for index, row in data[start:end].iterrows():
         listRow = []
