@@ -1,7 +1,7 @@
 from flask import redirect, url_for, render_template, request, flash, current_app
 from flask_user import login_required, roles_required, signals
 from flask_user.views import _get_safe_next_param, _send_registered_email, render, _endpoint_url, _do_login_user, quote
-from app import application, SITE_ROOT, current_user
+from app import application, SITE_ROOT, current_user, getStudentAcademicData, getInstructorEvaluationData, getStudentMappingData
 import json
 import os
 import pandas as pd
@@ -9,11 +9,8 @@ from models import *
 from datetime import datetime
 from roles import ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE, STUDENT_ROLE
 
-#TODO: load data from database
-
-csv_url = os.path.join(SITE_ROOT, 'static', 'assets', 'data', 'student_academic_data.csv')
-DATA = pd.read_csv(csv_url)
-DATA.columns = ['student_id', 'semester', 'course', 'units', 'section', 'grade', 'situation', 'professor']
+def getUserAllowedData():
+    return getStudentAcademicData()
 
 @application.route('/')
 def index():
@@ -29,7 +26,8 @@ def dashboard():
     """
     Our main dashboard. Does some data processing and renders dashboard view.
     """
-    global DATA
+    #global DATA
+    DATA = getUserAllowedData()
 
     course_codes = DATA['course'].unique()
     course_codes.sort()
@@ -50,7 +48,7 @@ def table():
     """
     Big table with our academic data. Won't be present in the final product.
     """
-    global DATA
+    DATA = getUserAllowedData()
     return render_template('table.html', df = DATA.head(50))
 
 @application.errorhandler(404)
@@ -275,7 +273,7 @@ def protectedRegister():
 @application.route('/getEnrollmentData', methods=['POST'])
 @login_required
 def getEnrollmentData(requestParams):
-    global DATA
+    DATA = getUserAllowedData()
 
     rowData = {}
     allLabels = []
@@ -328,7 +326,7 @@ def getEnrollmentData(requestParams):
 @application.route('/getCancellationData', methods=['POST'])
 @login_required
 def getCancellationData(requestParams):
-    global DATA
+    DATA = getUserAllowedData()
     filtered = DATA
     onlyRow = requestParams['row0']
     if("sort" not in onlyRow):

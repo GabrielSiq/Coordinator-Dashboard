@@ -7,12 +7,13 @@ from flask_user import SQLAlchemyAdapter, UserManager, current_user
 import os
 from apscheduler.schedulers.background import BackgroundScheduler
 import pandas as pd
-from members.models import db, User, AcademicData, Role, UserRoles, Query, Department, UserDepartments
+from members.models import db, User, AcademicData, Role, UserRoles, Query, Department, UserDepartments, StudentMajorMapping, InstructorEvaluationData
 from passlib.hash import bcrypt
 import datetime
 import json
 from wtforms import ValidationError
 from members.roles import ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE, STUDENT_ROLE
+import math
 
 # Initializes application
 application = Flask(__name__)
@@ -23,7 +24,9 @@ db.init_app(application)
 
 # Defines some global variables
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
-DATA_SOURCE = pd.DataFrame()
+STUDENT_ACADEMIC_DATA = pd.DataFrame()
+STUDENT_MAPPING_DATA = pd.DataFrame()
+INSTRUCTOR_EVALUATION_DATA = pd.DataFrame()
 
 # Registers user model with db
 with application.app_context():
@@ -33,6 +36,18 @@ with application.app_context():
 
 
 #TODO: Move these aux functions to a different file
+
+def getStudentAcademicData():
+    global STUDENT_ACADEMIC_DATA
+    return STUDENT_ACADEMIC_DATA
+
+def getStudentMappingData():
+    global STUDENT_MAPPING_DATA
+    return STUDENT_MAPPING_DATA
+
+def getInstructorEvaluationData():
+    global INSTRUCTOR_EVALUATION_DATA
+    return INSTRUCTOR_EVALUATION_DATA
 
 def createDummyUsers():
     # Test creation of users
@@ -135,8 +150,7 @@ def initialize():
     createDummyUsers()
     scheduler = BackgroundScheduler()
     scheduler.start()
-    scheduler.add_job(updateData, trigger = "interval", days = 1)
-
+    scheduler.add_job(updateData, trigger = "interval", minutes = 15)
 
 def is_safe_url(target):
     """
@@ -162,16 +176,48 @@ def updateData():
     """
     Updates our student academic transcript data. Currently just grabs the same dummy file and loads into DB for demo purposes. Should be hooked up to an api.
     """
-    response = urlopen("https://gist.githubusercontent.com/GabrielSiq/2a592eb7ab47f604ce53cfba6f8191a8/raw/d2560c36b1c98fd74c03ef4d428aed5d7a950efe/historico_anon.csv")
-    global DATA_SOURCE
-    DATA_SOURCE = pd.read_csv(response)
-    DATA_SOURCE.columns = ['matricula', 'periodo', 'disciplina', 'creditos', 'turma', 'grau', 'situacao', 'professor']
+    global STUDENT_ACADEMIC_DATA
+    global STUDENT_MAPPING_DATA
+    global INSTRUCTOR_EVALUATION_DATA
 
-    for index, row in DATA_SOURCE.iterrows():
-        if row.matricula.isdigit():
-            db_row = AcademicData(row.matricula, row.periodo, row.disciplina, row.creditos, row.turma, row.situacao,
-                                  row.professor, row.grau)
+    # Update student academic data
+    response = urlopen(
+        "https://gist.githubusercontent.com/GabrielSiq/cfa8822fe87ae5ac40b1a944ac791447/raw/07a5e12a9f9bfce3aa60cb24e6c6efeed0abd32c/student_academic_data.csv")
+    STUDENT_ACADEMIC_DATA = pd.read_csv(response)
+    STUDENT_ACADEMIC_DATA.columns = ['student_id', 'semester', 'course', 'units', 'section', 'grade', 'situation', 'professor']
+
+    for index, row in STUDENT_ACADEMIC_DATA.iterrows():
+        db_row = AcademicData(row.student_id, row.semester, row.course, row.units, row.section, row.situation,
+                              row.professor, row.grade)
+        db.session.add(db_row)
+
+    # Update student mapping data
+    response = urlopen(
+        "https://gist.githubusercontent.com/GabrielSiq/4512611d24ee4aefbd7c2ce72a70706d/raw/ada394ba2ae678a302f0c3eaa127670622fd9961/student_major_mapping.csv")
+    STUDENT_MAPPING_DATA = pd.read_csv(response)
+    STUDENT_MAPPING_DATA.columns = ['student_id', 'major']
+
+    for index, row in STUDENT_MAPPING_DATA.iterrows():
+        db_row = StudentMajorMapping(row.student_id, row.major)
+        db.session.add(db_row)
+
+    db.session.commit()
+
+    # Update instructor evaluation data
+    response = urlopen(
+        "https://gist.githubusercontent.com/GabrielSiq/6e5574a42be340121bceed955dd5201b/raw/b4e88380f0235880656c2dfca75c98cfea0e8ef6/instructor_evaluation_data.csv")
+    INSTRUCTOR_EVALUATION_DATA = pd.read_csv(response)
+    INSTRUCTOR_EVALUATION_DATA.columns = ["semester", "course", "section", "professor", "student_count", "question_text", "grade_1", "grade_2", "grade_3", "grade_4", "grade_5", "grade_na", "average", "standard_deviation", "total"]
+
+
+    for index, row in INSTRUCTOR_EVALUATION_DATA.iterrows():
+        if not math.isnan(row.student_count):
+            db_row = InstructorEvaluationData(row.semester, row.course, row.section, row.professor, row.student_count, row.question_text, row.grade_1, row.grade_2, row.grade_3, row.grade_4, row.grade_5, row.grade_na, row.average, row.standard_deviation)
             db.session.add(db_row)
+            db.session.commit()
+
+
+
     db.session.commit()
 
 def loadData(dbOption = False):
@@ -179,16 +225,15 @@ def loadData(dbOption = False):
         Loads data from stored csv file into global variable and into database. For dev purposes. Not for production.
     """
     csv_url = os.path.join(SITE_ROOT, 'static', 'assets', 'data', 'student_academic_data.csv')
-    global DATA_SOURCE
-    DATA_SOURCE = pd.read_csv(csv_url)
-    DATA_SOURCE.columns = ['student_id', 'semester', 'course', 'units', 'section', 'grade', 'situation', 'professor']
+    global STUDENT_ACADEMIC_DATA
+    STUDENT_ACADEMIC_DATA = pd.read_csv(csv_url)
+    STUDENT_ACADEMIC_DATA.columns = ['student_id', 'semester', 'course', 'units', 'section', 'grade', 'situation', 'professor']
     if(dbOption == True):
-        for index, row in DATA_SOURCE.iterrows():
+        for index, row in STUDENT_ACADEMIC_DATA.iterrows():
             db_row = AcademicData(row.student_id, row.semester, row.course, row.units, row.section, row.situation,
                                   row.professor, row.grade)
             db.session.add(db_row)
         db.session.commit()
-
 
 @application.context_processor
 def injectDataTable():
@@ -199,8 +244,8 @@ def injectDataTable():
     """
     def getDataTable(id):
         if id == "cancellation":
-            cancellation = DATA_SOURCE[DATA_SOURCE['situation'].isin(['CA', 'CD', 'CL', 'DT', 'LT'])]
-            course_count = DATA_SOURCE.groupby('course').size()
+            cancellation = STUDENT_ACADEMIC_DATA[STUDENT_ACADEMIC_DATA['situation'].isin(['CA', 'CD', 'CL', 'DT', 'LT'])]
+            course_count = STUDENT_ACADEMIC_DATA.groupby('course').size()
             cancellation = cancellation.groupby('course').size()
             canc_rate = (cancellation / course_count).dropna()
 

@@ -22,6 +22,7 @@ class AcademicData(db.Model):
     section = db.Column(db.String(3), primary_key=True)
     grade = db.Column(db.Float())
     situation = db.Column(db.String(2), primary_key=True)
+    professor = db.Column(db.String(50))
 
     def __init__(self, student_id, semester, course, units, section, situation, professor, grade = None):
         self.student_id = student_id
@@ -36,6 +37,45 @@ class AcademicData(db.Model):
     def __repr__(self):
         return '<matr {} peri{} disc {} turm {}>'.format(self.student_id, self.semester, self.course, self.section)
 
+class StudentMajorMapping(db.Model):
+    student_id = db.Column(db.Integer(), primary_key=True)
+    major = db.Column(db.String(3))
+
+    def __init__(self, student_id, major):
+        self.student_id = student_id
+        self.major = major
+
+class InstructorEvaluationData(db.Model):
+    semester = db.Column(db.SmallInteger(), primary_key=True)
+    course = db.Column(db.String(7), primary_key=True)
+    section = db.Column(db.String(3), primary_key=True)
+    professor = db.Column(db.String(50), primary_key=True)
+    student_count = db.Column(db.Integer())
+    question_text = db.Column(db.String(150), primary_key=True)
+    grade_1 = db.Column(db.Integer())
+    grade_2 = db.Column(db.Integer())
+    grade_3 = db.Column(db.Integer())
+    grade_4 = db.Column(db.Integer())
+    grade_5 = db.Column(db.Integer())
+    grade_na = db.Column(db.Integer())
+    average = db.Column(db.Float())
+    standard_deviation = db.Column(db.Float())
+
+    def __init__(self, semester, course, section, professor, student_count, question_text, grade_1, grade_2, grade_3, grade_4, grade_5, grade_na, average, standard_deviation):
+        self.semester = semester
+        self.course = course
+        self.section = section
+        self.professor = professor
+        self.student_count = student_count
+        self.question_text = question_text
+        self.grade_1 = grade_1
+        self.grade_2 = grade_2
+        self.grade_3 = grade_3
+        self.grade_4 = grade_4
+        self.grade_5 = grade_5
+        self.grade_na = grade_na
+        self.average = average
+        self.standard_deviation = standard_deviation
 
 class User(db.Model, UserMixin):
     """
