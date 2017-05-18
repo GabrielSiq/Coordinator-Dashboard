@@ -48,8 +48,35 @@ def table():
     """
     Big table with our academic data. Won't be present in the final product.
     """
-    DATA = getUserAllowedData()
-    return render_template('table.html', df = DATA.head(50))
+    studentData = getUserAllowedData()
+    df = pd.DataFrame(columns=studentData.columns)
+
+
+    return render_template('table.html', df = df)
+
+@application.route('/getDataTable')
+@roles_required((ADMIN_ROLE, COORDINATOR_ROLE))
+@login_required
+def getDataTable():
+    print "oi"
+    data = getUserAllowedData()
+    response = {}
+    response['draw'] = request.args.get('draw', None)
+    response['recordsTotal'] = len(data)
+    response['recordsFiltered'] =len(data)
+    start =  int(request.args.get('start', None))
+    length = int(request.args.get('length', None))
+    end = start + length
+    print start
+    print end
+    listData = []
+    for index, row in data[start:end].iterrows():
+        listRow = []
+        for item in row:
+            listRow.append(str(item))
+        listData.append(listRow)
+    response['data'] = listData
+    return json.dumps(response)
 
 @application.errorhandler(404)
 @application.errorhandler(405)
