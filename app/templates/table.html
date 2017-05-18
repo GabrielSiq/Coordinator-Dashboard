@@ -5,6 +5,12 @@
         div.dataTables_wrapper {
             margin-bottom: 3em;
         }
+        div.dataTables_info, div.dataTables_length{
+            padding-left: 15px;
+        }
+        div.dataTables_filter, div.dataTables_paginate.paging_simple_numbers{
+            padding-right: 15px;
+        }
     </style>
 {% endblock css %}
 {% block content %}
@@ -13,8 +19,8 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="header">
-                        <h4 class="title">Raw Student Academic Data</h4>
-                        <p class="category">This uses <a href="https://datatables.net/">DataTables</a>. Formatting is still broken...</p>
+                        <h4 class="title">Student Academic Data</h4>
+                        <p class="category">For data monitoring purposes.</p>
                     </div>
                     <div class="content table-responsive table-full-width">
                         <table class="table table-hover table-striped display">
