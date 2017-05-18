@@ -427,6 +427,8 @@ def manageUsers():
 
     # Gets roles in advance to avoid querying too many times
     allRoles = Role.query.all()
+
+    # Prepares form for editing users
     extraForm = ExtraInfo()
     extraForm.role.choices = [(role.id, role.name) for role in allRoles if
                          role.access_level >= max(role.access_level for role in current_user.roles)]
@@ -435,26 +437,26 @@ def manageUsers():
     for role in allRoles:
         roleNames[role.id] = role.name
 
-    # TODO: Replace this solution with a better one using the relationships
-
     # If user is admin, than he's got access to all users of all departments
     # If user is not admin, he's only got access to users who are members the same departments
     isAdmin = current_user.has_roles(ADMIN_ROLE)
 
     if isAdmin:
         userDepartments = Department.query.all()
+        allUsers = User.query.order_by(User.id.asc()).all()
     else:
         userDepartments = current_user.departments
+        allUsers = User.query.filter(User.departments.any(Department.id.in_([department.id for department in userDepartments]))).all()
+
 
     extraForm.department.choices = [(department.id, department.code) for department in userDepartments]
 
     userAccessLevel = max(role.access_level for role in current_user.roles)
 
-    allUsers = User.query.order_by(User.id.asc()).all()
     usersList = []
     for user in allUsers:
         targetAccessLevel = max(role.access_level for role in user.roles)
-        if isAdmin or (any([i for i in user.departments if i in userDepartments]) and userAccessLevel <= targetAccessLevel):
+        if isAdmin or userAccessLevel <= targetAccessLevel:
             users = {}
             users['id'] = user.id
             users['first_name'] = user.first_name
@@ -507,12 +509,15 @@ def editUser():
     user = User.query.filter_by(id=userId).first()
     role = UserRoles.query.filter_by(id=userId).first()
     if user:
-        # Everything related to user is deleted with it (if models are properly set up)
         try:
             user.first_name = request.form['first_name']
             user.last_name = request.form['last_name']
             user.email = request.form['email']
             role.role_id = request.form['role']
+
+            if (not current_user.has_roles(ADMIN_ROLE)) and Role.query.filter_by(id = role.role_id).first().name == ADMIN_ROLE:
+                flash("Not enough privileges.", "error")
+                return redirect(url_for("manageUsers"))
 
             db.session.commit()
         except:
