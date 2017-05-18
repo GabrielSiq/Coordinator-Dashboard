@@ -98,7 +98,7 @@ class UserRoles(db.Model):
     UserRoles model. Links users and roles.
     """
     id = db.Column(db.Integer(), primary_key=True)
-    user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'), unique=True)
+    user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'), unique=True) # At this time, only one role is permitted per user, but the structure is here to support more in the future.
     role_id = db.Column(db.Integer(), db.ForeignKey('role.id', ondelete='CASCADE'))
 
 class Department(db.Model):
@@ -117,7 +117,7 @@ class UserDepartments(db.Model):
     Links users and departments
     """
     id = db.Column(db.Integer(), primary_key=True)
-    user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
+    user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'), unique=True) # At this time, only one department is permitted per user, but the structure is here to support more in the future.
     department_id = db.Column(db.Integer(), db.ForeignKey('department.id', ondelete='CASCADE'))
 
 # Forms

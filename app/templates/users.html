@@ -6,6 +6,14 @@
             width: 40px !important;
             height: 40px !important;
         }
+        .query-controls{
+            padding-right: 30px;
+            padding-bottom: 15px;
+            float: right
+        }
+        .pe-7s-add-user{
+            font-size: 24px;
+        }
     </style>
 {% endblock css %}
 
@@ -15,6 +23,11 @@
             <div class="card" type="table-view" id="userList">
                 <div class="header">
                     <h3 class="title">Users</h3>
+                </div>
+                <div class="query-controls">
+                    <div class="row">
+                        <a href="{{ url_for("user.register") }}" class="btn btn-primary"><i class="pe-7s-add-user"></i><span> Register User</span></a>
+                    </div>
                 </div>
                 <div class="content table-responsive table-full-width">
                     <table class="table table-hover table-striped">
@@ -42,8 +55,14 @@
                                             <input type="hidden" name="_department" value="{{ department.id }}">
                                         {% endfor %}
                                     </td>
-                                    <td><div><button type="button" class="btn btn-warning btn-sq-sm delete-query" data-toggle="modal" data-target="#editUser"><span class="glyphicon glyphicon-pencil"></span></button></div></td>
-                                    <td><div><button type="button" class="btn btn-danger btn-sq-sm delete-query"><span class="glyphicon glyphicon-remove" data-toggle="modal" data-target="#deleteUser"></span></button></div></td>
+                                    <td>
+                                        <div><button type="button" class="btn btn-warning btn-sq-sm delete-query" data-toggle="modal" data-target="#editUser"><span class="glyphicon glyphicon-pencil"></span></button></div>
+                                    </td>
+                                    <td>
+                                        {% if user.id != current_user.id %}
+                                            <div><button type="button" class="btn btn-danger btn-sq-sm delete-query"><span class="glyphicon glyphicon-remove" data-toggle="modal" data-target="#deleteUser"></span></button></div>
+                                        {% endif %}
+                                    </td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -133,16 +152,18 @@
 {% block scripts %}
     <script src="{{ url_for('static', filename='assets/js/user-management.js')}}"></script>
     <script>
-        var editModal = $('#editUser');
-        editModal.on('show.bs.modal', function (e) {
-            $('#role').change(function () {
-                if($('#role option:selected').text() === '{{ config['ADMIN_ROLE'] }}'){
-                    $('#department').addClass('hidden');
-                }
-                else{
-                    $('#department').removeClass('hidden');
-                }
-            }).trigger('change');
+        $(document).ready(function () {
+            var editModal = $('#editUser');
+            editModal.on('show.bs.modal', function (e) {
+                $('#role').change(function () {
+                    if($('#role option:selected').text() === '{{ config['ADMIN_ROLE'] }}'){
+                        $('#department').addClass('hidden');
+                    }
+                    else{
+                        $('#department').removeClass('hidden');
+                    }
+                }).trigger('change');
+            });
         });
     </script>
 {% endblock scripts %}

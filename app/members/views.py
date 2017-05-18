@@ -482,14 +482,17 @@ def deleteUser():
 
     user = User.query.filter_by(id=userId).first()
     if user:
-        # Everything related to user is deleted with it (if models are properly set up)
-        try:
-            db.session.delete(user)
-            db.session.commit()
-        except:
-            flash("DB error.", "error")
-            return redirect(url_for("manageUsers"))
-        flash("User succesfully deleted.", "success")
+        if user.id == current_user.id:
+            flash("You cannot delete your own account", "error")
+        else:
+            # Everything related to user is deleted with it (if models are properly set up)
+            try:
+                db.session.delete(user)
+                db.session.commit()
+            except:
+                flash("DB error.", "error")
+                return redirect(url_for("manageUsers"))
+            flash("User succesfully deleted.", "success")
     else:
         flash("User not found.", "error")
 
@@ -507,17 +510,27 @@ def editUser():
         return redirect(url_for("manageUsers"))
 
     user = User.query.filter_by(id=userId).first()
-    role = UserRoles.query.filter_by(id=userId).first()
     if user:
         try:
             user.first_name = request.form['first_name']
             user.last_name = request.form['last_name']
-            user.email = request.form['email']
+            if user.email != request.form['email']:
+                user.email = request.form['email']
+                #TODO: Add email confirmation rotine
+
+            role = UserRoles.query.filter_by(user_id=userId).first()
             role.role_id = request.form['role']
 
-            if (not current_user.has_roles(ADMIN_ROLE)) and Role.query.filter_by(id = role.role_id).first().name == ADMIN_ROLE:
-                flash("Not enough privileges.", "error")
-                return redirect(url_for("manageUsers"))
+            if Role.query.filter_by(id = role.role_id).first().name == ADMIN_ROLE:
+                # If trying to change role to Admin
+                if not current_user.has_roles(ADMIN_ROLE):
+                    # Only and admin can add another admin
+                    flash("Not enough privileges.", "error")
+                    return redirect(url_for("manageUsers"))
+            else:
+                # If trying to add anything else, add department info
+                department = UserDepartments.query.filter_by(user_id=userId).first()
+                department.department_id = request.form['department']
 
             db.session.commit()
         except:

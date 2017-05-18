@@ -70,14 +70,6 @@
                         </a>
                     </li>
                 {% endif %}
-                {% if current_user.is_authenticated and current_user.has_roles(( config['ADMIN_ROLE'], config['COORDINATOR_ROLE'], config['PROFESSOR_ROLE'])) %}
-                    <li>
-                        <a href="{{ url_for("user.register") }}">
-                            <i class="pe-7s-add-user"></i>
-                            <p>Register User</p>
-                        </a>
-                    </li>
-                {% endif %}
                 {% if current_user.is_authenticated and current_user.has_roles((config['ADMIN_ROLE'], config['COORDINATOR_ROLE'], config['PROFESSOR_ROLE'])) %}
                     <li>
                         <a href="{{ url_for("manageUsers") }}">
