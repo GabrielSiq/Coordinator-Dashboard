@@ -1,6 +1,6 @@
 #encoding: utf-8
 from flask import redirect, url_for, render_template, request, flash, current_app, abort
-from flask_user import login_required, roles_required, signals
+from flask_user import login_required, roles_required, signals, emails
 from flask_user.views import _get_safe_next_param, _send_registered_email, render, _endpoint_url, _do_login_user, quote
 from app import application, SITE_ROOT, current_user, getStudentAcademicData, getInstructorEvaluationData, getStudentMappingData
 import json
@@ -53,7 +53,6 @@ def table():
     df = pd.DataFrame(columns=studentData.columns)
 
     instructorData = getInstructorEvaluationData()
-    del instructorData['question_text']
     df2 = pd.DataFrame(columns=instructorData.columns)
 
 
@@ -112,7 +111,6 @@ def server_error(error):
     return render_template('503.html')
 
 @application.route('/user/extra', methods = ['GET', 'POST'])
-@roles_required((ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE))
 def extraInformation():
     roles = Role.query.all()
     form = ExtraInfo()
@@ -157,8 +155,7 @@ def extraInformation():
     elif request.method == 'GET':
         return render_template('extra.html', form=form)
 
-@roles_required((ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE))
-def protectedRegister():
+def customRegister():
     """
     Registration page is restricted to admins for now. 
     """
@@ -319,6 +316,73 @@ def protectedRegister():
                   form=register_form,
                   login_form=login_form,
                   register_form=register_form)
+
+@login_required
+def customInvite():
+    """ Allows users to send invitations to register an account """
+    user_manager = current_app.user_manager
+    db_adapter = user_manager.db_adapter
+    extraForm = ExtraInfo()
+    roles = Role.query.all()
+    extraForm.role.choices = [(role.id, role.name) for role in roles if
+                         role.access_level >= max(role.access_level for role in current_user.roles)]
+    if not current_user.has_roles(ADMIN_ROLE):
+        extraForm.department.choices = [(department.id, department.code) for department in current_user.departments ]
+    else:
+        extraForm.department.choices = [(department.id, department.code) for department in Department.query.all()]
+
+    invite_form = user_manager.invite_form(request.form)
+
+    if request.method=='POST' and invite_form.validate():
+        email = invite_form.email.data
+
+        User = db_adapter.UserClass
+        user_class_fields = User.__dict__
+        user_fields = {
+            "email": email
+        }
+
+        user, user_email = user_manager.find_user_by_email(email)
+        if user:
+            flash("User with that email has already registered", "error")
+            return redirect(url_for('user.invite'))
+        else:
+            user_invite = db_adapter \
+                            .add_object(db_adapter.UserInvitationClass, **{
+                                "email": email,
+                                "invited_by_user_id": current_user.id
+                            })
+        db_adapter.commit()
+
+        token = user_manager.generate_token(user_invite.id)
+        accept_invite_link = url_for('user.register',
+                                     token=token,
+                                     _external=True)
+
+        # Store token
+        if hasattr(db_adapter.UserInvitationClass, 'token'):
+            user_invite.token = token
+            db_adapter.commit()
+
+        try:
+            # Send 'invite' email
+            emails.send_invite_email(user_invite, accept_invite_link)
+        except Exception as e:
+            # delete new User object if send fails
+            db_adapter.delete_object(user_invite)
+            db_adapter.commit()
+            raise
+
+        signals \
+            .user_sent_invitation \
+            .send(current_app._get_current_object(), user_invite=user_invite,
+                  form=invite_form)
+
+        flash('Invitation has been sent.', 'success')
+        safe_next = _get_safe_next_param('next', user_manager.after_invite_endpoint)
+        return redirect(safe_next)
+
+    return render(user_manager.invite_template, form=invite_form, extraForm = extraForm)
 
 @application.route('/getEnrollmentData', methods=['POST'])
 @login_required

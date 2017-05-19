@@ -27,6 +27,8 @@ class Config(object):
     USER_SEND_REGISTERED_EMAIL = False
     USER_AUTO_LOGIN_AFTER_REGISTER = False
     USER_AFTER_REGISTER_ENDPOINT =  ''
+    USER_ENABLE_INVITATION = True
+    USER_REQUIRE_INVITATION = True
 
     # User roles for Jinja
 
@@ -35,4 +37,13 @@ class Config(object):
     PROFESSOR_ROLE = PROFESSOR_ROLE
     STUDENT_ROLE = STUDENT_ROLE
 
+    """
+    FLASK-MAIL CONFIGS
+    """
+    MAIL_SERVER = "smtp-mail.outlook.com"
+    MAIL_PORT = 587
+    MAIL_USE_TLS = True
+    MAIL_USERNAME = "gabrielsiq@msn.com"
+    MAIL_PASSWORD = "Analuiza2005!"
+    MAIL_DEFAULT_SENDER = "gabrielsiq@msn.com"
 

@@ -7,13 +7,14 @@ from flask_user import SQLAlchemyAdapter, UserManager, current_user
 import os
 from apscheduler.schedulers.background import BackgroundScheduler
 import pandas as pd
-from members.models import db, User, AcademicData, Role, UserRoles, Query, Department, UserDepartments, StudentMajorMapping, InstructorEvaluationData
+from members.models import db, User, AcademicData, Role, UserRoles, Query, Department, UserDepartments, StudentMajorMapping, InstructorEvaluationData, UserInvitation
 from passlib.hash import bcrypt
 import datetime
 import json
 from wtforms import ValidationError
 from members.roles import ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE, STUDENT_ROLE
 import math
+from flask_mail import Mail
 
 # Initializes application
 application = Flask(__name__)
@@ -32,7 +33,7 @@ INSTRUCTOR_EVALUATION_DATA = pd.DataFrame()
 with application.app_context():
     db.drop_all()
     db.create_all() # Creates tables defined
-    db_adapter = SQLAlchemyAdapter(db, User)        # Register the User model
+    db_adapter = SQLAlchemyAdapter(db, User, UserInvitationClass=UserInvitation)        # Register the User model
 
 
 #TODO: Move these aux functions to a different file
@@ -55,11 +56,11 @@ def createDummyUsers():
     users.append(User(username="admin", password=bcrypt.hash("password"), email="gabrielsiq@msn.com",
                       confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="Gabriel",
                       last_name="Siqueira"))
-    users.append(User(username="simone", password=bcrypt.hash("password"), email="simone@inf.puc-rio.br",
+    users.append(User(username="simone", password=bcrypt.hash("password"), email="gdssiqueira@gmail.com",
                       confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="Simone", last_name="Barbosa"))
-    users.append(User(username="noemi", password=bcrypt.hash("password"), email="noemi@inf.puc-rio.br",
+    users.append(User(username="noemi", password=bcrypt.hash("password"), email="gdssiqueira@umail.ucsb.edu",
                       confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="Noemi", last_name="Rodriguez"))
-    users.append(User(username="johndoe", password=bcrypt.hash("password"), email="john@doe.doe",
+    users.append(User(username="johndoe", password=bcrypt.hash("password"), email="gdssiqueira@cs.ucsb.edu",
                       confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="John", last_name="Doe"))
     for user in users:
         db.session.add(user)
@@ -150,7 +151,7 @@ def initialize():
     createDummyUsers()
     scheduler = BackgroundScheduler()
     scheduler.start()
-    scheduler.add_job(updateData, trigger = "interval", minutes = 15)
+    scheduler.add_job(updateData, trigger = "interval", days = 1)
 
 def is_safe_url(target):
     """
@@ -234,6 +235,7 @@ def loadData(dbOption = False):
     INSTRUCTOR_EVALUATION_DATA = pd.read_csv(csv_url)
     INSTRUCTOR_EVALUATION_DATA.columns = ["semester", "course", "section", "professor", "student_count", "question_text", "grade_1", "grade_2", "grade_3", "grade_4", "grade_5", "grade_na", "average", "standard_deviation", "total"]
     del INSTRUCTOR_EVALUATION_DATA['total']
+    del INSTRUCTOR_EVALUATION_DATA['question_text']
 
     if(dbOption == True):
         for index, row in STUDENT_ACADEMIC_DATA.iterrows():
@@ -273,10 +275,13 @@ def injectDataTable():
 def my_password_validator(form, field):
     password = field.data
     if len(password) < 3:
-        raise ValidationError(_('Password must have at least 8 characters'))
+        raise ValidationError('Password must have at least 3 characters')
+
+# Initializing Flask-Mail
+mail = Mail(application)
 
 # Hack for modularization
 import members.views
 
 # Initialize flask-user
-user_manager = UserManager(db_adapter, application,register_view_function = members.views.protectedRegister, password_validator=my_password_validator)
+user_manager = UserManager(db_adapter, application,register_view_function = members.views.customRegister, invite_view_function = members.views.customInvite, password_validator=my_password_validator)

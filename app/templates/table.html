@@ -83,12 +83,12 @@
     <script>
         $(document).ready(function() {
             $('#studentData').DataTable( {
-                "processing": true,
+                "processing": false,
                 "serverSide": true,
                 "ajax": "{{ url_for("getStudentDataTable") }}"
             });
             $('#instructorData').DataTable( {
-                "processing": true,
+                "processing": false,
                 "serverSide": true,
                 "ajax": "{{ url_for("getInstructorDataTable") }}"
             });
