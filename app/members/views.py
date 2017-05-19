@@ -1,5 +1,5 @@
 #encoding: utf-8
-from flask import redirect, url_for, render_template, request, flash, current_app
+from flask import redirect, url_for, render_template, request, flash, current_app, abort
 from flask_user import login_required, roles_required, signals
 from flask_user.views import _get_safe_next_param, _send_registered_email, render, _endpoint_url, _do_login_user, quote
 from app import application, SITE_ROOT, current_user, getStudentAcademicData, getInstructorEvaluationData, getStudentMappingData
@@ -429,10 +429,30 @@ def savedQueries():
 
     return json.dumps(data_list)
 
+@application.route('/renameQuery', methods=['POST'])
+@login_required
+def renameQuery():
+    try:
+        queryName = request.json['query_name']
+        queryId = request.json['query_id']
+    except:
+        flash("Parameter error.", "error")
+        return ""
+    try:
+        query = Query.query.filter_by(id = queryId).first()
+        if query.user_id != current_user.id:
+            flash("You don't have permissions to alter this query", "error")
+            return ""
+        query.name = queryName
+        db.session.commit()
+    except:
+        flash("DB error.", "error")
+        return ""
+    return "success"
+
 @application.route('/saveQuery', methods=['POST'])
 @login_required
 def saveQuery():
-    #TODO: Handle exceptions on the server side (Client side is done by flashing)
     try:
         visualizationId = request.json['view_id']
         queryName = request.json['query_name']

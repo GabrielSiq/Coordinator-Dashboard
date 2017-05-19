@@ -175,6 +175,7 @@ function populateSavedQuery(dataStore, controls, _callback) {
 
 $(document).ready(function(){
     demo.initChartist();
+
     // Initializes line charts
     $(".ct-chart.line").each(function () {
 
@@ -196,11 +197,13 @@ $(document).ready(function(){
         };
         new Chartist.Line('#' + $(this).attr("id"), data, options);
     });
+
     // Populates the saved queries for all cards
     var dataStore = {};
     $('.query-controls').each(function () {
         populateSavedQuery(dataStore, $(this));
     });
+
     // Updates charts whenever a filter is changed
     var forms = $(".card form");
     forms.on('change',  'select.combobox', function () {
@@ -208,6 +211,7 @@ $(document).ready(function(){
         console.log($(this).closest(".card").find("select[name='queryName']"));
         updateView($(this).closest(".card").attr("type"), $(this).closest(".content"));
     });
+
     // Updates filters and chart whenever the selected saved query is changed
     $(".query-controls select[name='queryName']").change(function(){
         // TODO: Remove dependence on ".row .add"
@@ -238,11 +242,14 @@ $(document).ready(function(){
             }
             updateView(card.attr("type"), content);
             card.find(".query-controls .delete-query").css('visibility','visible');
+            card.find(".query-controls .rename-query").css('visibility','visible');
         }
         else{
             card.find(".query-controls .delete-query").css('visibility','hidden');
+            card.find(".query-controls .rename-query").css('visibility','hidden');
         }
     });
+
     // Deletes a row of filters (a new series) for charts
     forms.on('click', 'div.row button.clear', function () {
         var row = $(this).closest('.row');
@@ -258,6 +265,7 @@ $(document).ready(function(){
         form.closest(".card").find("select[name='queryName']").val("");
         updateView(form.closest(".card").attr("type"), form.closest('.content'));
     });
+
     // Adds a new row of filters (series)
     $(".card form button.add").click(function () {
         var prevRow = $(this).closest('.row').prev();
@@ -266,6 +274,7 @@ $(document).ready(function(){
         newRow.attr("id", "row" + rowId);
         newRow.insertAfter(prevRow);
     });
+
     // Modal to save query data. Gathers all data into the form.
     var saveModal = $('#saveQuery');
     saveModal.on('show.bs.modal', function (e) {
@@ -284,28 +293,34 @@ $(document).ready(function(){
         $(this).find("input[name='_queryData']").val(JSON.stringify(data));
         $(this).find("input[name='_visualizationId']").val(visualizationId);
     });
+
     // Saves query data
     saveModal.find('button.btn-primary').on('click', function () {
         var modal = $(this).closest("#saveQuery");
         var visualizationId = modal.find("input[name='_visualizationId']").val();
         var queryName =  modal.find("input#name").val();
-        console.log("oi");
         $.ajax({
             type: "POST",
             url: "/saveQuery",
             contentType: "application/json",
             data: JSON.stringify({'view_id': visualizationId, "query_name" : queryName, "query_data" : modal.find("input[name='_queryData']").val() }),
-            success: function() {
-                targetControls = $("html").find("#" + modal.find("input[name='_visualizationId']").val() + " .query-controls");
-                populateSavedQuery(dataStore, targetControls, function (id) {
-                    targetControls.find("select[name='queryName']").eq(0).val(id);
-                });
+            success: function(response) {
+                if($.trim(response)) {
+                    targetControls = $("html").find("#" + visualizationId + " .query-controls");
+                    populateSavedQuery(dataStore, targetControls, function (id) {
+                        targetControls.find("select[name='queryName']").eq(0).val(id);
+                    });
+                }
+                else{
+                    window.location.reload();
+                }
             },
             error: function(){
                 console.log("Ajax error");
             }
         });
     });
+
     // Cosmetic changes for tables
     $("#sort").change(function () {
         var card = $(this).closest(".card");
@@ -321,7 +336,8 @@ $(document).ready(function(){
             arrow.addClass('glyphicon-triangle-top');
         }
 
-    })
+    });
+
     // Deleting saved queries
     $("button.delete-query").on('click', function () {
         card = $(this).closest(".card");
@@ -330,14 +346,62 @@ $(document).ready(function(){
             url: "/deleteQuery",
             contentType: "application/json",
             data: JSON.stringify({'query_id': card.find("select[name='queryName']").val()}),
-            success: function() {
-                populateSavedQuery(dataStore, card.find(".query-controls"));
+            success: function(response) {
+                if($.trim(response)) {
+                    populateSavedQuery(dataStore, card.find(".query-controls"));
+                }
+                else{
+                    window.location.reload();
+                }
             },
             error: function(){
                 //
             }
         });
     });
+
+    // Modal to rename query
+    var renameModal = $("#renameQuery");
+    renameModal.on('show.bs.modal', function (e) {
+        var card = $(e.relatedTarget).closest(".card");
+        var visualizationId = card.attr("id");
+        var queryId = card.find("select[name='queryName']").val();
+        var queryName = card.find("select[name='queryName'] option:selected").text();
+        $(this).find("input[name='_queryId']").val(queryId);
+        $(this).find("input[name='_visualizationId']").val(visualizationId);
+        $(this).find("#name").val(queryName);
+    });
+
+    // Renames query
+    renameModal.find('button.btn-primary').on('click', function () {
+        var modal = $(this).closest("#renameQuery");
+        var queryId = modal.find("input[name='_queryId']").val();
+        var queryName =  modal.find("input#name").val();
+        var visualizationId = modal.find("input[name='_visualizationId']").val();
+        $.ajax({
+            type: "POST",
+            url: "/renameQuery",
+            contentType: "application/json",
+            data: JSON.stringify({'query_id': queryId, "query_name" : queryName}
+            ),
+            success: function(resultJSON) {
+                if($.trim(resultJSON)){
+                    console.log($.trim(resultJSON));
+                    targetControls = $("html").find("#" + visualizationId + " .query-controls");
+                    populateSavedQuery(dataStore, targetControls, function (id) {
+                        targetControls.find("select[name='queryName']").eq(0).val(id);
+                    });
+                }
+                else{
+                    window.location.reload();
+                }
+            },
+            error: function(){
+                console.log("Ajax error");
+            }
+        });
+    });
+
 });
 
 
