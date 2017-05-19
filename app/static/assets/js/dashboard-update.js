@@ -38,7 +38,6 @@ function updateTable(content) {
                     if (!$.isEmptyObject(result)) {
                         tbody.html("");
                         for(var course in result){
-                            console.log(typeof result[course]);
                             tbody.append("<tr><td>"+course+"</td><td>"+(result[course]*100).toFixed(1)+"%</td></tr>>")
                         }
                     }
@@ -81,7 +80,6 @@ function updateChart(content) {
     });
     var requestJSON = {"chartId" : content.parent().attr("id"), "requestParams" : paramSet};
     var chart = content.find(".ct-chart.line");
-    console.log(labels);
     if(hasAny){
         $.ajax({
             type: "POST",
@@ -165,7 +163,7 @@ function populateSavedQuery(dataStore, controls, _callback) {
                     text: savedQueries[key].name
                 }));
             }
-            typeof _callback === 'function' && _callback(key);
+            typeof _callback === 'function' && _callback();
         },
         error: function(){
             alert("error");
@@ -208,7 +206,6 @@ $(document).ready(function(){
     var forms = $(".card form");
     forms.on('change',  'select.combobox', function () {
         $(this).closest(".card").find("select[name='queryName']").val("");
-        console.log($(this).closest(".card").find("select[name='queryName']"));
         updateView($(this).closest(".card").attr("type"), $(this).closest(".content"));
     });
 
@@ -307,8 +304,8 @@ $(document).ready(function(){
             success: function(response) {
                 if($.trim(response)) {
                     targetControls = $("html").find("#" + visualizationId + " .query-controls");
-                    populateSavedQuery(dataStore, targetControls, function (id) {
-                        targetControls.find("select[name='queryName']").eq(0).val(id);
+                    populateSavedQuery(dataStore, targetControls, function () {
+                        targetControls.find("select[name='queryName']").eq(0).val(response);
                     });
                 }
                 else{
@@ -386,10 +383,9 @@ $(document).ready(function(){
             ),
             success: function(resultJSON) {
                 if($.trim(resultJSON)){
-                    console.log($.trim(resultJSON));
                     targetControls = $("html").find("#" + visualizationId + " .query-controls");
-                    populateSavedQuery(dataStore, targetControls, function (id) {
-                        targetControls.find("select[name='queryName']").eq(0).val(id);
+                    populateSavedQuery(dataStore, targetControls, function () {
+                        targetControls.find("select[name='queryName']").eq(0).val(queryId);
                     });
                 }
                 else{

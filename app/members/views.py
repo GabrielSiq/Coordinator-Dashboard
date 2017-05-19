@@ -467,7 +467,7 @@ def saveQuery():
     except:
         flash("DB error.", "error")
         return ""
-    return "success"
+    return json.dumps(query.id)
 
 @application.route('/deleteQuery', methods=['POST'])
 @login_required
