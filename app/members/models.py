@@ -1,8 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask_user import UserMixin
+from flask_user import UserMixin, current_app
 from flask_wtf import FlaskForm
-from wtforms import SelectField, StringField
-from wtforms.validators import DataRequired
+from wtforms import SelectField, StringField, HiddenField, validators, PasswordField, SubmitField
+from wtforms.validators import DataRequired, ValidationError
 
 # Initializes SQLALchemy
 db = SQLAlchemy()
@@ -120,7 +120,6 @@ class Query(db.Model):
     # Unique names for saved queries from a certain user in a certain visualization
     __table_args__ = (db.UniqueConstraint('user_id', 'visualization_id', 'name', name="_query_uc"),)
 
-
 class Role(db.Model):
     """
     Role model for authorization.
@@ -131,7 +130,6 @@ class Role(db.Model):
 
     def __repr__(self):
         return str(self.id)
-
 
 class UserRoles(db.Model):
     """
@@ -160,7 +158,6 @@ class UserDepartments(db.Model):
     user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'), unique=True) # At this time, only one department is permitted per user, but the structure is here to support more in the future.
     department_id = db.Column(db.Integer(), db.ForeignKey('department.id', ondelete='CASCADE'))
 
-
 class UserInvitation(db.Model):
     __tablename__ = 'user_invite'
     id = db.Column(db.Integer, primary_key=True)
@@ -169,6 +166,8 @@ class UserInvitation(db.Model):
     invited_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     # token used for registration page to identify user registering
     token = db.Column(db.String(100), nullable=False, server_default='')
+    department_id = db.Column(db.Integer(), db.ForeignKey('department.id', ondelete='CASCADE'))
+    role_id = db.Column(db.Integer(), db.ForeignKey('role.id', ondelete='CASCADE'))
 
 # Forms
 
@@ -177,4 +176,69 @@ class ExtraInfo(FlaskForm):
     last_name = StringField('Last Name', validators=[DataRequired()])
     role = SelectField('User Role', coerce=int, validators=[DataRequired()])
     department = SelectField('User Department', coerce=int)
+
+def unique_username_validator(form, field):
+    """ Username must be unique"""
+    user_manager =  current_app.user_manager
+    if not user_manager.username_is_available(field.data):
+        raise ValidationError('This Username is already in use. Please try another one.')
+
+def unique_email_validator(form, field):
+    """ Username must be unique"""
+    user_manager =  current_app.user_manager
+    if not user_manager.email_is_available(field.data):
+        raise ValidationError('This Email is already in use. Please try another one.')
+
+class CustomRegisterForm(FlaskForm):
+    password_validator_added = False
+
+    next = HiddenField()        # for login_or_register.html
+    reg_next = HiddenField()    # for register.html
+
+    username = StringField('Username', validators=[
+        validators.DataRequired('Username is required'),
+        unique_username_validator])
+    email = StringField('Email', validators=[
+        validators.DataRequired('Email is required'),
+        validators.Email('Invalid Email'),
+        unique_email_validator])
+    password = PasswordField('Password', validators=[
+        validators.DataRequired('Password is required')])
+    retype_password = PasswordField('Retype Password', validators=[
+        validators.EqualTo('password', message='Password and Retype Password did not match')])
+    invite_token = HiddenField('Token')
+    first_name = StringField('First Name', validators=[DataRequired()])
+    last_name = StringField('Last Name', validators=[DataRequired()])
+
+    submit = SubmitField('Register')
+
+    def validate(self):
+        # remove certain form fields depending on user manager config
+        user_manager =  current_app.user_manager
+        if not user_manager.enable_username:
+            delattr(self, 'username')
+        if not user_manager.enable_email:
+            delattr(self, 'email')
+        if not user_manager.enable_retype_password:
+            delattr(self, 'retype_password')
+        # Add custom username validator if needed
+        if user_manager.enable_username:
+            has_been_added = False
+            for v in self.username.validators:
+                if v==user_manager.username_validator:
+                    has_been_added = True
+            if not has_been_added:
+                self.username.validators.append(user_manager.username_validator)
+        # Add custom password validator if needed
+        has_been_added = False
+        for v in self.password.validators:
+            if v==user_manager.password_validator:
+                has_been_added = True
+        if not has_been_added:
+            self.password.validators.append(user_manager.password_validator)
+        # Validate field-validators
+        if not super(CustomRegisterForm, self).validate():
+            return False
+        # All is well
+        return True
 

@@ -7,7 +7,7 @@ from flask_user import SQLAlchemyAdapter, UserManager, current_user
 import os
 from apscheduler.schedulers.background import BackgroundScheduler
 import pandas as pd
-from members.models import db, User, AcademicData, Role, UserRoles, Query, Department, UserDepartments, StudentMajorMapping, InstructorEvaluationData, UserInvitation
+from members.models import db, User, AcademicData, Role, UserRoles, Query, Department, UserDepartments, StudentMajorMapping, InstructorEvaluationData, UserInvitation, CustomRegisterForm
 from passlib.hash import bcrypt
 import datetime
 import json
@@ -284,4 +284,4 @@ mail = Mail(application)
 import members.views
 
 # Initialize flask-user
-user_manager = UserManager(db_adapter, application,register_view_function = members.views.customRegister, invite_view_function = members.views.customInvite, password_validator=my_password_validator)
+user_manager = UserManager(db_adapter, application,register_view_function = members.views.customRegister, invite_view_function = members.views.customInvite, password_validator=my_password_validator, register_form = CustomRegisterForm)

@@ -279,6 +279,14 @@ def customRegister():
 
         db_adapter.commit()
 
+        # Add department and role
+        userId = User.query.filter_by(email=register_form.email.data).first().id
+        userRole = UserRoles(user_id=userId, role_id=user_invite.role_id)
+        db.session.add(userRole)
+        userDepartment = UserDepartments(user_id=userId, department_id=user_invite.department_id)
+        db.session.add(userDepartment)
+
+        db.session.commit()
         # Send 'registered' email and delete new User object if send fails
         if user_manager.send_registered_email:
             try:
@@ -335,6 +343,9 @@ def customInvite():
 
     if request.method=='POST' and invite_form.validate():
         email = invite_form.email.data
+        roleId = extraForm.role.data
+
+        departmentId = extraForm.department.data
 
         User = db_adapter.UserClass
         user_class_fields = User.__dict__
@@ -350,7 +361,9 @@ def customInvite():
             user_invite = db_adapter \
                             .add_object(db_adapter.UserInvitationClass, **{
                                 "email": email,
-                                "invited_by_user_id": current_user.id
+                                "invited_by_user_id": current_user.id,
+                                "role_id": roleId,
+                                "department_id": departmentId
                             })
         db_adapter.commit()
 

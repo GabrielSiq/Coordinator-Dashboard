@@ -25,10 +25,11 @@ class Config(object):
     FLASK-USER CONFIGS
     """
     USER_SEND_REGISTERED_EMAIL = False
-    USER_AUTO_LOGIN_AFTER_REGISTER = False
+    USER_AUTO_LOGIN_AFTER_REGISTER = True
     USER_AFTER_REGISTER_ENDPOINT =  ''
     USER_ENABLE_INVITATION = True
     USER_REQUIRE_INVITATION = True
+    USER_INVITE_ENDPOINT = 'manageUsers'
 
     # User roles for Jinja
 

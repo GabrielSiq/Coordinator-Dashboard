@@ -39,7 +39,8 @@
         {% if user_manager.enable_email and user_manager.enable_username %}
             {{ render_field(form.email, tabindex=220) }}
         {% endif %}
-
+        {{ render_field(form.first_name, tabindex=230) }}
+        {{ render_field(form.last_name, tabindex=230) }}
         {{ render_field(form.password, tabindex=230) }}
 
         {% if user_manager.enable_retype_password %}
