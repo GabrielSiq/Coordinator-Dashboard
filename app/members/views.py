@@ -266,6 +266,9 @@ def customRegister():
                                      user=user,
                                      user_invite=user_invite)
 
+        user_invite.user_registered = True
+        db_adapter.commit()
+
         # Redirect if USER_ENABLE_CONFIRM_EMAIL is set
         if user_manager.enable_confirm_email and require_email_confirmation:
             safe_reg_next = user_manager.make_safe_url_function(register_form.reg_next.data)
@@ -326,7 +329,8 @@ def customInvite():
                                 "email": email,
                                 "invited_by_user_id": current_user.id,
                                 "role_id": roleId,
-                                "department_id": departmentId
+                                "department_id": departmentId,
+                                "date" : datetime.utcnow()
                             })
         db_adapter.commit()
 

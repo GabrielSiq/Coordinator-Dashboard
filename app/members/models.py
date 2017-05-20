@@ -166,6 +166,8 @@ class UserInvitation(db.Model):
     invited_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     # token used for registration page to identify user registering
     token = db.Column(db.String(100), nullable=False, server_default='')
+    date = db.Column(db.DateTime())
+    user_registered = db.Column(db.Boolean(), default=False)
     department_id = db.Column(db.Integer(), db.ForeignKey('department.id', ondelete='CASCADE'))
     role_id = db.Column(db.Integer(), db.ForeignKey('role.id', ondelete='CASCADE'))
 
