@@ -30,7 +30,7 @@ class Config(object):
     USER_AFTER_REGISTER_ENDPOINT =  ''
     USER_ENABLE_INVITATION = True
     USER_REQUIRE_INVITATION = True
-    USER_INVITE_ENDPOINT = 'manageUsers'
+    USER_INVITE_ENDPOINT = 'manageInvites'
     USER_INVITE_EXPIRATION = 60*60*24*7*4 # Token is valid for four weeks
 
     # User roles for Jinja

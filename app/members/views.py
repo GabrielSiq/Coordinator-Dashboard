@@ -588,19 +588,57 @@ def manageInvites():
     user_manager = current_app.user_manager
     invitedUsers = UserInvitation.query.filter_by(invited_by_user_id = current_user.id).all()
     invitedList = []
-    for user in invitedUsers:
-        is_valid, has_expired, user_id = user_manager.verify_token(
-            user.token,
-            user_manager.invite_expiration)
-        if not has_expired:
+    convertedList = []
+    for invite in invitedUsers:
+        if invite.user_registered:
             userInfo = {}
-            userInfo['email'] = user.email
-            userInfo['department'] = Department.query.filter_by(id=user.department_id).first().code
-            userInfo['role'] = Role.query.filter_by(id=user.role_id).first().name
-            invitedList.append(userInfo.copy())
+            userInfo['email'] = invite.email
+            userInfo['department'] = Department.query.filter_by(id=invite.department_id).first().code
+            userInfo['role'] = Role.query.filter_by(id=invite.role_id).first().name
+            userInfo['date'] = User.query.filter_by(email=invite.email).first().confirmed_at
+            convertedList.append(userInfo.copy())
+        else:
+            is_valid, has_expired, user_id = user_manager.verify_token(
+                invite.token,
+                user_manager.invite_expiration)
+            if not has_expired:
+                userInfo = {}
+                userInfo['id'] = invite.id
+                userInfo['email'] = invite.email
+                userInfo['department'] = Department.query.filter_by(id=invite.department_id).first().code
+                userInfo['role'] = Role.query.filter_by(id=invite.role_id).first().name
+                userInfo['date'] = invite.date
+                invitedList.append(userInfo.copy())
 
 
-    return render_template("invites.html", invitedUsers=invitedList)
+    return render_template("invites.html", invitedUsers = invitedList, convertedUsers = convertedList)
+
+@application.route('/user/deleteInvite', methods=['POST'])
+@login_required
+@roles_required((ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE))
+def deleteInvite():
+    try:
+        inviteId = request.form['_inviteId']
+    except:
+        flash("Parameter error.", "error")
+        return redirect(url_for("manageInvites"))
+
+    invite = UserInvitation.query.filter_by(id=inviteId).first()
+    if invite:
+        if invite.user_registered == True:
+            flash("You cannot delete an invite that has been claimed.", "error")
+        else:
+            try:
+                db.session.delete(invite)
+                db.session.commit()
+            except:
+                flash("DB error.", "error")
+                return redirect(url_for("manageInvites"))
+            flash("Invite succesfully deleted.", "success")
+    else:
+        flash("Invite not found.", "error")
+
+    return redirect(url_for("manageInvites"))
 
 @application.route('/user/delete', methods=['POST'])
 @login_required

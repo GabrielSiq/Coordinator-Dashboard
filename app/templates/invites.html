@@ -18,7 +18,7 @@
 {% endblock css %}
 
 {% block content %}
-        <div class="row">
+    <div class="row">
         <div class="col-md-12">
             <div class="card" type="table-view" id="userList">
                 <div class="header">
@@ -32,26 +32,54 @@
                 <div class="content table-responsive table-full-width">
                     <table class="table table-hover table-striped">
                         <tbody>
+                        <tr>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Department</th>
+                            <th>Date Sent</th>
+                            <th>Delete</th>
+                        </tr>
+                        {% for invitation in invitedUsers %}
                             <tr>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Department</th>
-                                <th>Delete</th>
+                                <input type="hidden" name="_invitationId" value="{{ invitation.id }}">
+                                <td name="email">{{ invitation.email }}</td>
+                                <td name="role">{{ invitation.role }}</td>
+                                <td name="department">{{ invitation.department }}</td>
+                                <td name="date">{{ invitation.date }}</td>
+                                <td>
+                                    <div><button type="button" class="btn btn-danger btn-sq-sm delete-query"><span class="glyphicon glyphicon-remove" data-toggle="modal" data-target="#deleteInvite"></span></button></div>
+                                </td>
                             </tr>
-                            {% for user in invitedUsers %}
-                                <tr>
-{#                                    <input type="hidden" name="_firstName" value="{{ user.first_name }}">#}
-{#                                    <input type="hidden" name="_lastName" value="{{ user.last_name }}">#}
-{#                                    <input type="hidden" name="_email" value="{{ user.email }}">#}
-{#                                    <input type="hidden" name="_roleId" value="{{ user.role_id }}">#}
-                                    <td>{{ user.email }}</td>
-                                    <td>{{ user.role }}</td>
-                                    <td>{{ user.department }}</td>
-                                    <td>
-                                        <div><button type="button" class="btn btn-danger btn-sq-sm delete-query"><span class="glyphicon glyphicon-remove" data-toggle="modal" data-target="#deleteUser"></span></button></div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card" type="table-view" id="userList">
+                <div class="header">
+                    <h3 class="title">Converted Invitations</h3>
+                </div>
+                <div class="content table-responsive table-full-width">
+                    <table class="table table-hover table-striped">
+                        <tbody>
+                        <tr>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Department</th>
+                            <th>Date Registered</th>
+                        </tr>
+                        {% for invitation in convertedUsers %}
+                            <tr>
+                                <td>{{ invitation.email }}</td>
+                                <td>{{ invitation.role }}</td>
+                                <td>{{ invitation.department }}</td>
+                                <td>{{ invitation.date }}</td>
+                            </tr>
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -59,3 +87,31 @@
         </div>
     </div>
 {% endblock content %}
+
+{% block modals %}
+    <div class="modal fade" id="deleteInvite" tabindex="-1" role="dialog" aria-labelledby="deleteInvite">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span>&times;</span></button>
+                    <h4 class="modal-title" id="deleteInvite">Delete Invite</h4>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{{ url_for('deleteInvite') }}">
+                        <input type="hidden" name="_inviteId"/>
+                    </form>
+                    <p>Do you really want to delete this invitation for <span id="deleteInviteEmail"></span>?</p>
+                    <p>This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger" data-dismiss="modal">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock modals %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='assets/js/invite-management.js')}}"></script>
+{% endblock scripts %}
