@@ -110,51 +110,6 @@ def not_found(error):
 def server_error(error):
     return render_template('503.html')
 
-@application.route('/user/extra', methods = ['GET', 'POST'])
-def extraInformation():
-    roles = Role.query.all()
-    form = ExtraInfo()
-    form.role.choices = [(role.id, role.name) for role in roles if role.access_level >= max(role.access_level for role in current_user.roles)]
-
-
-    if not current_user.has_roles(ADMIN_ROLE):
-        form.department.choices = [(department.id, department.code) for department in current_user.departments ]
-    else:
-        form.department.choices = [(department.id, department.code) for department in Department.query.all()]
-    userId = request.args.get('userId', None)
-    if userId is None:
-        flash("No user specified.", "error")
-        return render_template('404.html')
-    if request.method == 'POST':
-        if form.validate() == False:
-            flash('All fields are required.', "error")
-            return render_template('extra.html', form=form)
-        else:
-            try:
-                user = User.query.filter_by(id=userId).one()
-                user.first_name = form.first_name.data
-                user.last_name = form.last_name.data
-                user.confirmed_at = datetime.now()
-
-                userRole = UserRoles(user_id=userId, role_id=form.role.data)
-                db.session.add(userRole)
-
-                if userRole.role_id != Role.query.filter_by(name=ADMIN_ROLE).first().id:
-                    userDepartment = UserDepartments(user_id = userId, department_id = form.department.data)
-                    db.session.add(userDepartment)
-
-                db.session.commit()
-
-            except:
-                flash("Error while processing form.", "error")
-                return render_template('extra.html', form=form)
-
-            message = "User " + user.username + " successfully registered."
-            flash(message.encode('ascii'), "success")
-            return redirect(url_for('manageUsers'))
-    elif request.method == 'GET':
-        return render_template('extra.html', form=form)
-
 def customRegister():
     """
     Registration page is restricted to admins for now. 
@@ -173,6 +128,11 @@ def customRegister():
 
     # invite token used to determine validity of registeree
     invite_token = request.values.get("token")
+
+    is_valid, has_expired, user_id = user_manager.verify_token(invite_token, user_manager.invite_expiration)
+    if has_expired:
+        flash("Your registration token has expired. Please, request a new one.", "error")
+        return redirect(url_for('user.login'))
 
     # require invite without a token should disallow the user from registering
     if user_manager.require_invitation and not invite_token:
@@ -296,6 +256,9 @@ def customRegister():
                 # delete new User object if send  fails
                 db_adapter.delete_object(user)
                 db_adapter.commit()
+                db.session.remove(userId)
+                db.session.remove(userDepartment)
+                db.session.commit()
                 raise
 
         # Send user_registered signal
@@ -306,7 +269,7 @@ def customRegister():
         # Redirect if USER_ENABLE_CONFIRM_EMAIL is set
         if user_manager.enable_confirm_email and require_email_confirmation:
             safe_reg_next = user_manager.make_safe_url_function(register_form.reg_next.data)
-            return redirect(url_for('extraInformation', userId = user.id))
+            return redirect(safe_reg_next)
 
         # Auto-login after register or redirect to login page
         if 'reg_next' in request.args:
@@ -565,7 +528,7 @@ def deleteQuery():
         return ""
     return "success"
 
-@application.route('/user/manage')
+@application.route('/user/manageUsers')
 @login_required
 @roles_required((ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE))
 def manageUsers():
@@ -613,6 +576,27 @@ def manageUsers():
             users['departments'] = user.departments
             usersList.append(users.copy())
     return render_template("users.html", users = usersList, extraForm = extraForm)
+
+@application.route('/user/manageInvites')
+@login_required
+@roles_required((ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE))
+def manageInvites():
+    user_manager = current_app.user_manager
+    invitedUsers = UserInvitation.query.filter_by(invited_by_user_id = current_user.id).all()
+    invitedList = []
+    for user in invitedUsers:
+        is_valid, has_expired, user_id = user_manager.verify_token(
+            user.token,
+            user_manager.invite_expiration)
+        if not has_expired:
+            userInfo = {}
+            userInfo['email'] = user.email
+            userInfo['department'] = Department.query.filter_by(id=user.department_id).first().code
+            userInfo['role'] = Role.query.filter_by(id=user.role_id).first().name
+            invitedList.append(userInfo.copy())
+
+
+    return render_template("invites.html", invitedUsers=invitedList)
 
 @application.route('/user/delete', methods=['POST'])
 @login_required

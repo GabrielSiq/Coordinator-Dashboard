@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block css %}
+    <style>
+        .btn-sq-sm {
+            width: 40px !important;
+            height: 40px !important;
+        }
+        .query-controls{
+            padding-right: 30px;
+            padding-bottom: 15px;
+            float: right
+        }
+        .pe-7s-add-user{
+            font-size: 24px;
+        }
+    </style>
+{% endblock css %}
+
+{% block content %}
+        <div class="row">
+        <div class="col-md-12">
+            <div class="card" type="table-view" id="userList">
+                <div class="header">
+                    <h3 class="title">Pending Invitations</h3>
+                </div>
+                <div class="query-controls">
+                    <div class="row">
+                        <a href="{{ url_for("user.invite") }}" class="btn btn-primary"><i class="pe-7s-add-user"></i><span> Invite User</span></a>
+                    </div>
+                </div>
+                <div class="content table-responsive table-full-width">
+                    <table class="table table-hover table-striped">
+                        <tbody>
+                            <tr>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Department</th>
+                                <th>Delete</th>
+                            </tr>
+                            {% for user in invitedUsers %}
+                                <tr>
+{#                                    <input type="hidden" name="_firstName" value="{{ user.first_name }}">#}
+{#                                    <input type="hidden" name="_lastName" value="{{ user.last_name }}">#}
+{#                                    <input type="hidden" name="_email" value="{{ user.email }}">#}
+{#                                    <input type="hidden" name="_roleId" value="{{ user.role_id }}">#}
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.role }}</td>
+                                    <td>{{ user.department }}</td>
+                                    <td>
+                                        <div><button type="button" class="btn btn-danger btn-sq-sm delete-query"><span class="glyphicon glyphicon-remove" data-toggle="modal" data-target="#deleteUser"></span></button></div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
