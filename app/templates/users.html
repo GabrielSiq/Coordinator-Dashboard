@@ -47,8 +47,8 @@
                                     <input type="hidden" name="_lastName" value="{{ user.last_name }}">
                                     <input type="hidden" name="_email" value="{{ user.email }}">
                                     <input type="hidden" name="_roleId" value="{{ user.role_id }}">
-                                    <td>{{ user.id }}</td>
-                                    <td>{{ user.first_name + " " + user.last_name }}</td>
+                                    <td name="userId">{{ user.id }}</td>
+                                    <td name="userName">{{ user.first_name + " " + user.last_name }}</td>
                                     <td>{{ user.role }}</td>
                                     <td>
                                         {% for department in user.departments %}

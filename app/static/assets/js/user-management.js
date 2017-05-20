@@ -3,8 +3,8 @@ $(document).ready(function () {
     var deleteModal = $('#deleteUser');
     deleteModal.on('show.bs.modal', function (e) {
         var row = $(e.relatedTarget).closest("tr");
-        var userId = row.find("td").eq(0).text();
-        var userName = row.find("td").eq(1).text();
+        var userId = row.find("td[name='userId']").text();
+        var userName = row.find("td[name='userName']").text();
         $(this).find("input[name='_userId']").val(userId);
         $(this).find("#deleteUserName").text(userName);
     });
@@ -15,7 +15,7 @@ $(document).ready(function () {
     var editModal = $('#editUser');
     editModal.on('show.bs.modal', function (e) {
         var row = $(e.relatedTarget).closest("tr");
-        var userId = row.find("td").eq(0).text();
+        var userId = row.find("td[name='userId']").text();
         var firstName = row.find("input[name='_firstName']").val();
         var lastName = row.find("input[name='_lastName']").val();
         var email = row.find("input[name='_email']").val();
