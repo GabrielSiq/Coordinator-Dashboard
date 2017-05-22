@@ -1,17 +1,20 @@
 #encoding: utf-8
-from flask import redirect, url_for, render_template, request, flash, current_app, abort
+from flask import redirect, url_for, render_template, request, flash
 from flask_user import login_required, roles_required, signals, emails
 from flask_user.views import _get_safe_next_param, _send_registered_email, render, _endpoint_url, _do_login_user, quote
 from app import application, SITE_ROOT, current_user, getStudentAcademicData, getInstructorEvaluationData, getStudentMappingData
 import json
-import os
 import pandas as pd
 from models import *
 from datetime import datetime
 from roles import ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE, STUDENT_ROLE
 
 def getUserAllowedData():
-    return getStudentAcademicData()
+    data = getStudentAcademicData()
+    if not current_user.has_roles((ADMIN_ROLE, COORDINATOR_ROLE)):
+        department = Department.query.filter_by(id = str(current_user.departments[0])).first().code
+        data = data[data['course'].str.contains(department)]
+    return data
 
 @application.route('/')
 def index():
