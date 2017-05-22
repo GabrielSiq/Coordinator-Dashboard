@@ -8,6 +8,7 @@ import pandas as pd
 from models import *
 from datetime import datetime
 from roles import ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE, STUDENT_ROLE
+import numpy as np
 
 def getUserAllowedData():
     data = getStudentAcademicData()
@@ -437,6 +438,60 @@ def getCancellationData(requestParams):
 
     return canc_rate.sort_values(ascending=(onlyRow['sort'] == "smallest")).head(10).to_json()
 
+@application.route('/getCancellationData', methods=['POST'])
+@login_required
+def getAverageGradeData(requestParams):
+    DATA = getUserAllowedData()
+
+    rowData = {}
+    allLabels = []
+    for row in requestParams:
+        rowData[row] = {}
+        filtered = DATA
+        # Applies all filters from the request to our data
+        rowParams = requestParams[row]
+        for key in rowParams:
+            if rowParams[key] != "":
+                filtered = filtered[filtered[key] == rowParams[key]]
+
+        # Counts number of rows per semester. Outputs in asc order.
+        filtered = filtered[filtered['situation'].isin(['AP', 'RM'])]
+        filtered = filtered[['semester', 'grade']]
+        filtered = filtered.groupby('semester').mean()
+
+        # Formats the data to return in a dict and converts to json
+
+        rowData[row]['labels'] = filtered.index.values.tolist()
+        rowData[row]['series'] = filtered.values.flatten().tolist()
+        allLabels += list(set(rowData[row]['labels']) - set(allLabels))
+
+    if len(allLabels) != 0:
+        allLabels.sort()
+
+        # Now we have to fill in the data with all semesters between the first and last so the year looks full.
+        year = allLabels[0]
+        while year <= allLabels[-1]:
+            if year not in allLabels:
+                allLabels.append(year)
+            if (year % 10) == 1:
+                year += 1
+            else:
+                year += 9
+        allLabels.sort()
+
+    # We then fill the series with null values to match the labels in length
+    data = {'labels': allLabels, 'series': []}
+    for row in rowData:
+        fullRow = []
+        for label in allLabels:
+            if label in rowData[row]['labels']:
+                fullRow.append(rowData[row]['series'][rowData[row]['labels'].index(label)])
+            else:
+                fullRow.append(None)
+        data['series'].append(fullRow)
+
+    return json.dumps(data)
+
 @application.route('/getChartData', methods=['POST'])
 @login_required
 def getChartData():
@@ -453,6 +508,8 @@ def getChartData():
         return getEnrollmentData(requestParams)
     elif chartId in ["cancellation"]:
         return getCancellationData(requestParams)
+    elif chartId in ["avg-grade"]:
+        return getAverageGradeData(requestParams)
     else:
         flash("Unknown visualization type.", "error")
         return ""
@@ -715,3 +772,11 @@ def editUser():
         flash("User not found.", "error")
 
     return redirect(url_for("manageUsers"))
+
+@application.route('/getProfessors', methods=['POST'])
+@login_required
+def getProfessors():
+    data = getUserAllowedData()
+    data = data[data['course'] == request.json['course']]
+    data = data[pd.notnull(data['professor'])]
+    return json.dumps(data['professor'].unique().tolist())

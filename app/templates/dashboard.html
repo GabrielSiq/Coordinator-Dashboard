@@ -27,6 +27,9 @@
         .delete-query, .rename-query{
             visibility: hidden;
         }
+        .ct-chart{
+            position:relative;
+        }
     </style>
 {% endblock css %}
 
@@ -162,7 +165,64 @@
                             </div>
                         </div>
                     </form>
-                    <div id="chartLine" class="ct-chart line"></div>
+                    <div id="enrollmentChart" class="ct-chart line"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card" type="line-chart-view" id="avg-grade">
+                <div class="header">
+                    <h4 class="title">Average Grade</h4>
+                    <p class="category">Average grade among students who finished the course by semester</p>
+                </div>
+                <div class="query-controls">
+                    <form>
+                        <div class="row">
+                            <div class="form-group col-md-3">
+                                <label for="queryName">Saved Query</label>
+                                <select name="queryName" class="form-control">
+                                </select>
+                            </div>
+                            <div class="form-group button col-md-1">
+                                <button type="button" class="btn btn-warning btn-sq-sm rename-query" data-toggle="modal" data-target="#renameQuery"><span class="glyphicon glyphicon-pencil"></span></button>
+                            </div>
+                            <div class="form-group button col-md-1">
+                                <button type="button" class="btn btn-danger btn-sq-sm delete-query"><span>&times;</span></button>
+                            </div>
+                            <div class="form-group button">
+                                <button type="button" class="btn btn-success save-query" data-toggle="modal" data-target="#saveQuery">Save Config.</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="content">
+                    <form>
+                        <div class="row param" id="row0">
+                            <div class="form-group col-md-2">
+                                <label for="course">Course</label>
+                                <select id="course" class="form-control combobox">
+                                    <option value=""></option>
+                                    {% for course_code in course_codes %}
+                                        <option value={{ course_code }}>{{ course_code }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label for="professor">Professor</label>
+                                <select id="professor" class="form-control combobox">
+                                </select>
+                            </div>
+                            <div class="form-group button">
+                                <button type="button" class="btn btn-danger clear" style="vertical-align: bottom;">Clear</button>
+                            </div>
+                        </div>
+                        <div class="row add">
+                            <div class="form-group">
+                                <button type="button" class="btn btn-warning add" style="vertical-align: bottom;">Add</button>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="averageChart" class="ct-chart line"></div>
                 </div>
             </div>
         </div>

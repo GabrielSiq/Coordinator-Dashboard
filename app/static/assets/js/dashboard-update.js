@@ -68,7 +68,7 @@ function updateChart(content) {
         var params = {};
         var label = "";
         $(this).find("select.form-control").each(function () {
-            var value = $(this).val()
+            var value = $(this).val();
             params[$(this).attr("id")] = value;
             label += label === "" ? value : (" " + value);
             if(hasAny === false && $(this).val() !== ""){
@@ -78,7 +78,7 @@ function updateChart(content) {
         labels.push(label);
         paramSet[$(this).attr("id")] = params;
     });
-    var requestJSON = {"chartId" : content.parent().attr("id"), "requestParams" : paramSet};
+    var requestJSON = {"chartId" : content.closest('.card').attr("id"), "requestParams" : paramSet};
     var chart = content.find(".ct-chart.line");
     if(hasAny){
         $.ajax({
@@ -89,6 +89,11 @@ function updateChart(content) {
             success: function(resultJSON) {
                 if($.trim(resultJSON)) {
                     var result = JSON.parse(resultJSON);
+                    for(var i in result['labels']){
+                        var labelString = result['labels'][i].toString();
+                        var len = labelString.length;
+                        result['labels'][i] = labelString.slice(len-3, len-1)+"."+labelString.slice(len-1, len)
+                    }
                     var data = {
                         labels: result['labels'],
                         series: result['series']
@@ -394,6 +399,38 @@ $(document).ready(function(){
             },
             error: function(){
                 console.log("Ajax error");
+            }
+        });
+    });
+
+    $("#avg-grade #course").on('change', function () {
+        var course = $(this);
+        $.ajax({
+            type: "POST",
+            url: "/getProfessors",
+            contentType: "application/json",
+            data: JSON.stringify({'course': $(this).val()}),
+            success: function(response) {
+                if($.trim(response)) {
+                    profList = JSON.parse(response);
+                    var professor = course.closest('.param').find('#professor');
+                    professor.find('option').remove();
+                    professor.append($('<option>', {
+                        value: "",
+                        text: ""
+                    }));
+                    for (var i in profList) {
+
+                        professor.append($('<option>', {
+                            value: profList[i],
+                            text: profList[i]
+                        }));
+                    }
+
+                }
+            },
+            error: function(){
+                //
             }
         });
     });
