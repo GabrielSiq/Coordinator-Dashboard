@@ -35,7 +35,7 @@
                 {% endfor %}
             {% endif %}
         </div>
-
+        {{ render_field(form.enrollment_number, tabindex=230) }}
         {% if user_manager.enable_email and user_manager.enable_username %}
             {{ render_field(form.email, tabindex=220) }}
         {% endif %}
@@ -52,3 +52,12 @@
 </form>
 
 {% endblock content %}
+
+{% block scripts %}
+    <script>
+        $(document).ready(function () {
+           $('#enrollment_number').attr('readonly', '');
+           $('#email').attr('readonly', '');
+        });
+    </script>
+{% endblock scripts %}

@@ -92,6 +92,7 @@ class User(db.Model, UserMixin):
     confirmed_at = db.Column(db.DateTime())
 
     # User information
+    enrollment_number = db.Column(db.String(10), nullable=False, unique=True)
     is_enabled = db.Column(db.Boolean(), nullable=False, default=False)
     first_name = db.Column(db.String(50), nullable=False, default='')
     last_name = db.Column(db.String(50), nullable=False, default='')
@@ -170,12 +171,14 @@ class UserInvitation(db.Model):
     user_registered = db.Column(db.Boolean(), default=False)
     department_id = db.Column(db.Integer(), db.ForeignKey('department.id', ondelete='CASCADE'))
     role_id = db.Column(db.Integer(), db.ForeignKey('role.id', ondelete='CASCADE'))
+    enrollment_number = db.Column(db.String(10), nullable=False, unique=True)
 
 # Forms
 
 class ExtraInfo(FlaskForm):
     first_name = StringField('First Name', validators=[DataRequired()])
     last_name = StringField('Last Name', validators=[DataRequired()])
+    enrollment_number = StringField('Enrollment Number', validators=[DataRequired()])
     role = SelectField('User Role', coerce=int, validators=[DataRequired()])
     department = SelectField('User Department', coerce=int)
 
@@ -209,6 +212,7 @@ class CustomRegisterForm(FlaskForm):
     retype_password = PasswordField('Retype Password', validators=[
         validators.EqualTo('password', message='Password and Retype Password did not match')])
     invite_token = HiddenField('Token')
+    enrollment_number = StringField('Enrollment Number', validators=[DataRequired()])
     first_name = StringField('First Name', validators=[DataRequired()])
     last_name = StringField('Last Name', validators=[DataRequired()])
 

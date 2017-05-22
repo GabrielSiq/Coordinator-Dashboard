@@ -55,13 +55,13 @@ def createDummyUsers():
     users = list()
     users.append(User(username="admin", password=bcrypt.hash("password"), email="gabrielsiq@msn.com",
                       confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="Gabriel",
-                      last_name="Siqueira"))
+                      last_name="Siqueira", enrollment_number="1234567"))
     users.append(User(username="simone", password=bcrypt.hash("password"), email="gdssiqueira@gmail.com",
-                      confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="Simone", last_name="Barbosa"))
+                      confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="Simone", last_name="Barbosa", enrollment_number="1234568"))
     users.append(User(username="noemi", password=bcrypt.hash("password"), email="gdssiqueira@umail.ucsb.edu",
-                      confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="Noemi", last_name="Rodriguez"))
+                      confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="Noemi", last_name="Rodriguez", enrollment_number="1234569"))
     users.append(User(username="johndoe", password=bcrypt.hash("password"), email="gdssiqueira@cs.ucsb.edu",
-                      confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="John", last_name="Doe"))
+                      confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="John", last_name="Doe", enrollment_number="1234560"))
     for user in users:
         db.session.add(user)
 

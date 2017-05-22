@@ -115,9 +115,6 @@ def server_error(error):
     return render_template('503.html')
 
 def customRegister():
-    """
-    Registration page is restricted to admins for now. 
-    """
     """ Display registration form and create new User."""
 
     user_manager = current_app.user_manager
@@ -140,16 +137,16 @@ def customRegister():
 
     # require invite without a token should disallow the user from registering
     if user_manager.require_invitation and not invite_token:
-        flash("Registration is invite only", "error")
+        flash("Registration is invite only.", "error")
         return redirect(url_for('user.login'))
 
     user_invite = None
     if invite_token and db_adapter.UserInvitationClass:
         user_invite = db_adapter.find_first_object(db_adapter.UserInvitationClass, token=invite_token)
-        if user_invite:
+        if user_invite and user_invite.user_registered == False:
             register_form.invite_token.data = invite_token
         else:
-            flash("Invalid invitation token", "error")
+            flash("Invalid invitation token.", "error")
             return redirect(url_for('user.login'))
 
     if request.method != 'POST':
@@ -157,6 +154,7 @@ def customRegister():
         login_form.reg_next.data = register_form.reg_next.data = safe_reg_next
         if user_invite:
             register_form.email.data = user_invite.email
+            register_form.enrollment_number.data = user_invite.enrollment_number
 
     # Process valid POST
     if request.method == 'POST' and register_form.validate():
@@ -164,6 +162,10 @@ def customRegister():
         User = db_adapter.UserClass
         user_class_fields = User.__dict__
         user_fields = {}
+
+        if user_invite.email != register_form.email.data or user_invite.enrollment_number != register_form.enrollment_number.data:
+            flash("Email/Enrollment Number don't match invitation.", 'error')
+            return redirect(url_for('user.login'))
 
         # Create a UserEmail object using Form fields that have a corresponding UserEmail field
         if db_adapter.UserEmailClass:
@@ -316,6 +318,7 @@ def customInvite():
         roleId = extraForm.role.data
 
         departmentId = extraForm.department.data
+        enrollmentNumber = extraForm.enrollment_number.data
 
         User = db_adapter.UserClass
         user_class_fields = User.__dict__
@@ -334,7 +337,8 @@ def customInvite():
                                 "invited_by_user_id": current_user.id,
                                 "role_id": roleId,
                                 "department_id": departmentId,
-                                "date" : datetime.utcnow()
+                                "date" : datetime.utcnow(),
+                                "enrollment_number" : enrollmentNumber
                             })
         db_adapter.commit()
 
@@ -780,3 +784,15 @@ def getProfessors():
     data = data[data['course'] == request.json['course']]
     data = data[pd.notnull(data['professor'])]
     return json.dumps(data['professor'].unique().tolist())
+
+@application.route('/user/accountInformation')
+@login_required
+def accountInformation():
+    user = User.query.filter_by(id = current_user.id)
+    role = Role.query.filter_by(id =  str(current_user.roles[0]))
+    if not current_user.has_roles(ADMIN_ROLE):
+        department = Department.query.filter_by(id =  str(current_user.departments[0]))
+    else:
+        department = None
+
+    return render_template('account.html', user=user, role=role, department=department)

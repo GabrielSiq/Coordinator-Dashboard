@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-	<meta charset="utf-8" />
+    <meta charset="utf-8" />
 
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/img/apple-touch-icon.png')}}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/img/favicon-32x32.png')}}" sizes="32x32">
@@ -9,12 +9,12 @@
     <link rel="manifest" href="{{ url_for('static', filename='assets/img/manifest.json')}}">
     <link rel="mask-icon" href="{{ url_for('static', filename='assets/img/safari-pinned-tab.svg')}}" color="#5bbad5">
     <meta name="theme-color" content="#ffffff">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
-	<title>Dashboard Prototype</title>
+    <title>Dashboard Prototype</title>
 
 
-	<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
     <meta name="viewport" content="width=device-width" />
 
     <!-- JQuery UI CSS     -->
@@ -43,14 +43,14 @@
 <div class="wrapper">
     <div class="sidebar" data-color="orange" data-image="{{ url_for('static', filename='assets/img/sidebar-6.png')}}">
 
-    <!--
+        <!--
 
-        Tip 1: you can change the color of the sidebar using: data-color="blue | azure | green | orange | red | purple"
-        Tip 2: you can also add an image using data-image tag
+            Tip 1: you can change the color of the sidebar using: data-color="blue | azure | green | orange | red | purple"
+            Tip 2: you can also add an image using data-image tag
 
-    -->
+        -->
 
-    	<div class="sidebar-wrapper">
+        <div class="sidebar-wrapper">
             <div class="logo">
                 <a target="_blank" href="http://www.puc-rio.br/index.html"><img src="{{ url_for('static', filename='assets/img/puc-rio.png')}}" alt=""></a>
             </div>
@@ -79,7 +79,7 @@
                     </li>
                 {% endif %}
             </ul>
-    	</div>
+        </div>
     </div>
 
     <div class="main-panel">
@@ -105,15 +105,21 @@
 
                     <ul class="nav navbar-nav navbar-right">
                         {% if current_user.is_authenticated %}
-                            <li>
-                                <div class="greeting">Hi {{ current_user.first_name }}!</div>
-                            </li>
-                            <li>
-                               <a href="{{ url_for('user.logout') }}">Sign out</a>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    Hi {{ current_user.first_name }}!
+                                    <b class="caret"></b>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="{{ url_for('accountInformation') }}">My Account</a></li>
+                                    <li><a href="{{ url_for('user.change_password') }}">Change Password</a></li>
+                                    <li class="divider"></li>
+                                    <li><a href="{{ url_for('user.logout') }}">Sign Out</a></li>
+                                </ul>
                             </li>
                         {% else %}
                             <li>
-                               <a href="{{ url_for('user.login') }}">Sign out</a>
+                                <a href="{{ url_for('user.login') }}">Sign in</a>
                             </li>
                         {% endif %}
                     </ul>
@@ -153,26 +159,26 @@
 {% block modals %}{% endblock modals %}
 </body>
 
-    <!--   Core JS Files   -->
-    <script src="{{ url_for('static', filename='assets/bower_components/jquery/dist/jquery.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='assets/bower_components/jquery-ui/jquery-ui.min.js')}}"></script>
+<!--   Core JS Files   -->
+<script src="{{ url_for('static', filename='assets/bower_components/jquery/dist/jquery.min.js')}}"></script>
+<script src="{{ url_for('static', filename='assets/bower_components/jquery-ui/jquery-ui.min.js')}}"></script>
 
-    <script src="{{ url_for('static', filename='assets/bower_components/bootstrap/dist/js/bootstrap.min.js')}}"></script>
+<script src="{{ url_for('static', filename='assets/bower_components/bootstrap/dist/js/bootstrap.min.js')}}"></script>
 
-	<!--  Charts Plugin -->
-	<script src="{{ url_for('static', filename='assets/bower_components/chartist/dist/chartist.min.js')}}"></script>
-    <!--  Notifications Plugin    -->
-    <script src="{{ url_for('static', filename='assets/js/bootstrap-notify.js')}}"></script>
+<!--  Charts Plugin -->
+<script src="{{ url_for('static', filename='assets/bower_components/chartist/dist/chartist.min.js')}}"></script>
+<!--  Notifications Plugin    -->
+<script src="{{ url_for('static', filename='assets/js/bootstrap-notify.js')}}"></script>
 
-	<script src="{{ url_for('static', filename='assets/js/light-bootstrap-dashboard.js')}}"></script>
-    <script src="{{ url_for('static', filename='assets/js/bootstrap-checkbox-radio-switch.js')}}"></script>
+<script src="{{ url_for('static', filename='assets/js/light-bootstrap-dashboard.js')}}"></script>
+<script src="{{ url_for('static', filename='assets/js/bootstrap-checkbox-radio-switch.js')}}"></script>
 
-	<script src="{{ url_for('static', filename='assets/js/demo.js')}}"></script>
+<script src="{{ url_for('static', filename='assets/js/demo.js')}}"></script>
 
 
-    {% with messages = get_flashed_messages(category_filter=["error"]) %}
-        {% if messages %}
-            <script>
+{% with messages = get_flashed_messages(category_filter=["error"]) %}
+    {% if messages %}
+        <script>
             $(document).ready(function(){
                 var messages = {{ messages | safe }};
                 for (var i=0; i<messages.length; i++) {
@@ -187,12 +193,12 @@
                     });
                 }
             });
-            </script>
-        {% endif %}
-    {% endwith %}
-    {% with messages = get_flashed_messages(category_filter=["success"]) %}
-        {% if messages %}
-            <script>
+        </script>
+    {% endif %}
+{% endwith %}
+{% with messages = get_flashed_messages(category_filter=["success"]) %}
+    {% if messages %}
+        <script>
             $(document).ready(function(){
                 var messages = {{ messages | safe }};
                 for (var i=0; i<messages.length; i++) {
@@ -207,11 +213,11 @@
                     });
                 }
             });
-            </script>
-        {% endif %}
-    {% endwith %}
+        </script>
+    {% endif %}
+{% endwith %}
 
 
-    {% block scripts %}{% endblock %}
+{% block scripts %}{% endblock %}
 
 </html>

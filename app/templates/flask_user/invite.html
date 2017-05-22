@@ -9,6 +9,12 @@
     {{ render_field(form.email, tabindex=10) }}
     <div class="form-group">
         <div class="row col-md-6">
+            {{ extraForm.enrollment_number.label }}
+        </div>
+        {{ extraForm.enrollment_number(class_="form-control") }}
+    </div>
+    <div class="form-group">
+        <div class="row col-md-6">
             {{ extraForm.role.label }}
         </div>
         {{ extraForm.role(class_="form-control", id_="role") }}
