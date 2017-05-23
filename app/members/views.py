@@ -737,7 +737,7 @@ def deleteUser():
 @login_required
 @roles_required((ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE))
 def editUser():
-    #TODO: CREATE A LOG TO FIND OUT WHO DELETED WHO
+    #TODO: CREATE A LOG TO FIND OUT WHO CHANGED WHO
     try:
         userId = request.form['_userId']
     except:
@@ -788,11 +788,34 @@ def getProfessors():
 @application.route('/user/accountInformation')
 @login_required
 def accountInformation():
-    user = User.query.filter_by(id = current_user.id)
-    role = Role.query.filter_by(id =  str(current_user.roles[0]))
+    user = User.query.filter_by(id = current_user.id).first()
+    role = Role.query.filter_by(id =  str(current_user.roles[0])).first()
     if not current_user.has_roles(ADMIN_ROLE):
-        department = Department.query.filter_by(id =  str(current_user.departments[0]))
+        department = Department.query.filter_by(id =  str(current_user.departments[0])).first()
     else:
         department = None
 
     return render_template('account.html', user=user, role=role, department=department)
+
+@application.route('/user/updateProfile', methods=['POST'])
+@login_required
+def updateProfile():
+    try:
+        email = request.form['email']
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
+    except:
+        flash("Parameter error.", "error")
+        return redirect(url_for("accountInformation"))
+
+    if email:
+        current_user.email = email
+        #TODO: ADD ROUTINE TO CONFIRM NEW EMAIL
+    if first_name:
+        current_user.first_name = first_name
+    if last_name:
+        current_user.last_name = last_name
+    db.session.commit()
+    flash("Profile successfully updated!", "success")
+
+    return redirect(url_for("accountInformation"))

@@ -1093,12 +1093,6 @@ body > .navbar-collapse[data-color="purple"]:after {
   color: #333333;
 }
 
-.checkbox input,
-.radio input {
-  outline: none !important;
-  display: none;
-}
-
 .checkbox .icons,
 .radio .icons {
   color: #DDDDDD;
