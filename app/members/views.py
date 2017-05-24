@@ -450,13 +450,17 @@ def getAverageGradeData(requestParams):
     rowData = {}
     allLabels = []
     for row in requestParams:
-        rowData[row] = {}
         filtered = DATA
         # Applies all filters from the request to our data
         rowParams = requestParams[row]
+        has_filter = False
         for key in rowParams:
-            if rowParams[key] != "":
+            if rowParams[key] != "" and rowParams[key] != None:
                 filtered = filtered[filtered[key] == rowParams[key]]
+                has_filter = True
+
+        if has_filter == False:
+            continue
 
         # Counts number of rows per semester. Outputs in asc order.
         filtered = filtered[filtered['situation'].isin(['AP', 'RM'])]
@@ -464,7 +468,7 @@ def getAverageGradeData(requestParams):
         filtered = filtered.groupby('semester').mean()
 
         # Formats the data to return in a dict and converts to json
-
+        rowData[row] = {}
         rowData[row]['labels'] = filtered.index.values.tolist()
         rowData[row]['series'] = filtered.values.flatten().tolist()
         allLabels += list(set(rowData[row]['labels']) - set(allLabels))
@@ -783,7 +787,9 @@ def getProfessors():
     data = getUserAllowedData()
     data = data[data['course'] == request.json['course']]
     data = data[pd.notnull(data['professor'])]
-    return json.dumps(data['professor'].unique().tolist())
+    professors = data['professor'].unique().tolist()
+    professors.sort()
+    return json.dumps(professors)
 
 @application.route('/user/accountInformation')
 @login_required

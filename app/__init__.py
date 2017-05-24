@@ -229,6 +229,12 @@ def loadData(dbOption = False):
     global STUDENT_ACADEMIC_DATA
     STUDENT_ACADEMIC_DATA = pd.read_csv(csv_url)
     STUDENT_ACADEMIC_DATA.columns = ['student_id', 'semester', 'course', 'units', 'section', 'grade', 'situation', 'professor']
+    for index, row in STUDENT_ACADEMIC_DATA.iterrows():
+        if str(row.student_id)[3] == "0":
+            STUDENT_ACADEMIC_DATA.set_value(index, 'curriculum', "0")
+        else:
+            STUDENT_ACADEMIC_DATA.set_value(index, 'curriculum', "1")
+
 
     csv_url = os.path.join(SITE_ROOT, 'static', 'assets', 'data', 'instructor_evaluation_data.csv')
     global INSTRUCTOR_EVALUATION_DATA

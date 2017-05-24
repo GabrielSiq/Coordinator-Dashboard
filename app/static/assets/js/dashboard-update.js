@@ -233,12 +233,47 @@ $(document).ready(function(){
                     newRow =  firstRow.clone();
                 }
                 else{
-                    newRow = lastRow.clone()
+                    newRow = lastRow.clone();
                     var rowId = parseInt(newRow.attr("id").slice(3)) + 1;
                     newRow.attr("id", "row" + rowId);
                 }
                 for (var key in rowData) {
-                    newRow.find("select#" + key).val(rowData[key]);
+                    select = newRow.find("select#" + key);
+                    if(select.attr("dynamic-endpoint") !== undefined){
+                        field = select.attr("dynamic-field");
+                        value = newRow.find("select#" + field).val();
+                        $.ajax({
+                            type: "POST",
+                            url: select.attr("dynamic-endpoint"),
+                            contentType: "application/json",
+                            select : select,
+                            key : key,
+                            data: JSON.stringify({[field]: value}),
+                            success: function(response) {
+                                if($.trim(response)) {
+                                    var optionsList = JSON.parse(response);
+                                    this.select.find('option').remove();
+                                    this.select.append($('<option>', {
+                                        value: "",
+                                        text: ""
+                                    }));
+                                    for (var i in optionsList) {
+                                        this.select.append($('<option>', {
+                                            value: optionsList[i],
+                                            text: optionsList[i]
+                                        }));
+                                    }
+                                }
+                                this.select.val(rowData[this.key]);
+                            },
+                            error: function(){
+                                //
+                            }
+                        });
+                    }
+                    else{
+                        select.val(rowData[key]);
+                    }
                 }
                 newRow.insertBefore(content.find(".row.add"));
             }

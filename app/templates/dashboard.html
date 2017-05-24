@@ -209,7 +209,16 @@
                             </div>
                             <div class="form-group col-md-2">
                                 <label for="professor">Professor</label>
-                                <select id="professor" class="form-control combobox">
+                                <select id="professor" class="form-control combobox" dynamic-field="course" dynamic-endpoint="{{ url_for('getProfessors') }}">
+                                    <option value=""></option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label for="curriculum">Curriculum</label>
+                                <select id="curriculum" class="form-control combobox">
+                                    <option value=""></option>
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
                                 </select>
                             </div>
                             <div class="form-group button">
