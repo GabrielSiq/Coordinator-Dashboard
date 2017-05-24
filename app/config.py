@@ -17,9 +17,9 @@ class Config(object):
     SQLALCHEMY CONFIGS
     """
     # Local DB
-    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres:database@localhost:5432/prototype"
+    #SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres:database@localhost:5432/prototype"
     # RDS (AWS) DB
-    #SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres:postgres@ebdb.chmuay6n3r4k.sa-east-1.rds.amazonaws.com/ebdb"
+    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres:postgres@ebdb.chpe6qpj0z1n.us-east-1.rds.amazonaws.com:5432/ebdb"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     """
     FLASK-USER CONFIGS
