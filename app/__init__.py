@@ -183,7 +183,7 @@ def updateData():
 
     # Update student academic data
     response = urlopen(
-        "https://gist.githubusercontent.com/GabrielSiq/cfa8822fe87ae5ac40b1a944ac791447/raw/07a5e12a9f9bfce3aa60cb24e6c6efeed0abd32c/student_academic_data.csvaa")
+        "https://gist.githubusercontent.com/GabrielSiq/cfa8822fe87ae5ac40b1a944ac791447/raw/07a5e12a9f9bfce3aa60cb24e6c6efeed0abd32c/student_academic_data.csv")
     STUDENT_ACADEMIC_DATA = pd.read_csv(response)
     STUDENT_ACADEMIC_DATA.columns = ['student_id', 'semester', 'course', 'units', 'section', 'grade', 'situation', 'professor']
 
