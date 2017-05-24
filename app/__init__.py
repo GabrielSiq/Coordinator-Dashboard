@@ -38,6 +38,19 @@ with application.app_context():
 
 #TODO: Move these aux functions to a different file
 
+@application.before_first_request
+def initialize():
+    """
+    Initializes our Flask app. Downloads student data and sets up a scheduler to re-download every day.
+    """
+
+    updateData()
+    #loadData(dbOption = False)
+    createDummyUsers()
+    scheduler = BackgroundScheduler()
+    scheduler.start()
+    scheduler.add_job(updateData, trigger = "interval", days = 1)
+
 def getStudentAcademicData():
     global STUDENT_ACADEMIC_DATA
     return STUDENT_ACADEMIC_DATA
@@ -140,19 +153,6 @@ def createDummyUsers():
         db.session.add(query)
     db.session.commit()
 
-@application.before_first_request
-def initialize():
-    """
-    Initializes our Flask app. Downloads student data and sets up a scheduler to re-download every day.
-    """
-
-    #updateData()
-    loadData(dbOption = False)
-    createDummyUsers()
-    scheduler = BackgroundScheduler()
-    scheduler.start()
-    scheduler.add_job(updateData, trigger = "interval", days = 1)
-
 def is_safe_url(target):
     """
     Ensures that a redirect target will lead to the same server
@@ -183,7 +183,7 @@ def updateData():
 
     # Update student academic data
     response = urlopen(
-        "https://gist.githubusercontent.com/GabrielSiq/cfa8822fe87ae5ac40b1a944ac791447/raw/07a5e12a9f9bfce3aa60cb24e6c6efeed0abd32c/student_academic_data.csv")
+        "https://gist.githubusercontent.com/GabrielSiq/cfa8822fe87ae5ac40b1a944ac791447/raw/07a5e12a9f9bfce3aa60cb24e6c6efeed0abd32c/student_academic_data.csvaa")
     STUDENT_ACADEMIC_DATA = pd.read_csv(response)
     STUDENT_ACADEMIC_DATA.columns = ['student_id', 'semester', 'course', 'units', 'section', 'grade', 'situation', 'professor']
 
