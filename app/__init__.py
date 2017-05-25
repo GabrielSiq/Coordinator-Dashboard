@@ -44,8 +44,8 @@ def initialize():
     Initializes our Flask app. Downloads student data and sets up a scheduler to re-download every day.
     """
 
-    updateData()
-    #loadData(dbOption = False)
+    #updateData()
+    loadData(dbOption = False)
     createDummyUsers()
     scheduler = BackgroundScheduler()
     scheduler.start()

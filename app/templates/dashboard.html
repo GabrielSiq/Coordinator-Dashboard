@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block css %}
-    <link href="{{ url_for('static', filename='assets/css/bootstrap-combobox.css')}}" rel="stylesheet" type='text/css'/>
     <link href="{{ url_for('static', filename='assets/bower_components/chartist-plugin-legend/chartist-plugin-legend.css')}}" rel="stylesheet" type='text/css'/>
     <link href="{{ url_for('static', filename='assets/bower_components/chartist-plugin-tooltip/dist/chartist-plugin-tooltip.css')}}" rel="stylesheet" type='text/css'/>
 
@@ -137,7 +136,7 @@
                 <div class="content">
                     <form>
                         <div class="row param" id="row0">
-                            <div class="form-group col-md-2">
+                            <div class="form-group col-md-3">
                                 <label for="course">Course</label>
                                 <select id="course" class="form-control combobox">
                                     <option value=""></option>
@@ -146,7 +145,7 @@
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="form-group col-md-2">
+                            <div class="form-group col-md-3">
                                 <label for="situation">Situation</label>
                                 <select id="situation" class="form-control combobox">
                                     <option value=""></option>
@@ -198,7 +197,7 @@
                 <div class="content">
                     <form>
                         <div class="row param" id="row0">
-                            <div class="form-group col-md-2">
+                            <div class="form-group col-md-3">
                                 <label for="course">Course</label>
                                 <select id="course" class="form-control combobox">
                                     <option value=""></option>
@@ -207,7 +206,7 @@
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="form-group col-md-2">
+                            <div class="form-group col-md-3">
                                 <label for="professor">Professor</label>
                                 <select id="professor" class="form-control combobox" dynamic-field="course" dynamic-endpoint="{{ url_for('getProfessors') }}">
                                     <option value=""></option>
