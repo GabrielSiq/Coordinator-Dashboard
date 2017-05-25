@@ -1,32 +1,36 @@
 {% extends 'base.html' %}
 
+{% block css %}
+    <style>
+        input[type=submit]{
+            margin-left: 15px;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
 {% from "flask_user/_macros.html" import render_field, render_submit_field %}
-<h1>{%trans%}Invite User{%endtrans%}</h1>
+<h2>{%trans%}Invite User{%endtrans%}</h2>
 
-<form action="" method="POST" class="form" role="form">
-    {{ form.hidden_tag() }}
-    {{ render_field(form.email, tabindex=10) }}
-    <div class="form-group">
-        <div class="row col-md-6">
-            {{ extraForm.enrollment_number.label }}
+    <form action="" method="POST" class="form" role="form">
+        <div class="col-md-6">
+            {{ form.hidden_tag() }}
+            {{ render_field(form.email, tabindex=10) }}
+            <div class="form-group">
+                {{ extraForm.enrollment_number.label }}
+                {{ extraForm.enrollment_number(class_="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ extraForm.role.label }}
+                {{ extraForm.role(class_="form-control", id_="role") }}
+            </div>
+            <div class="form-group hidden" id="department">
+                {{ extraForm.department.label }}
+                {{ extraForm.department(class_="form-control") }}
+            </div>
+            {{ render_submit_field(form.submit, tabindex=90) }}
         </div>
-        {{ extraForm.enrollment_number(class_="form-control") }}
-    </div>
-    <div class="form-group">
-        <div class="row col-md-6">
-            {{ extraForm.role.label }}
-        </div>
-        {{ extraForm.role(class_="form-control", id_="role") }}
-    </div>
-    <div class="form-group hidden" id="department">
-        <div class="row col-md-6">
-            {{ extraForm.department.label }}
-        </div>
-        {{ extraForm.department(class_="form-control") }}
-    </div>
-    {{ render_submit_field(form.submit, tabindex=90) }}
-</form>
+    </form>
 
 {% endblock content%}
 

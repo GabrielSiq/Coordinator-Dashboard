@@ -74,7 +74,7 @@
     </div>
 
     <div class="main-panel">
-        <nav class="navbar navbar-default navbar-fixed">
+        <nav class="navbar navbar-default navbar-fixed" role="navigation">
             <div class="container-fluid">
                 <div class="navbar-header">
                     <button type="button" class="navbar-toggle" data-toggle="collapse">
@@ -83,15 +83,11 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="{{ url_for("index") }}">Academic Monitoring System</a>
+                    <a class="navbar-brand" href="{{ url_for("index") }}">PUC-Rio Academic Monitoring System</a>
                 </div>
                 <div class="collapse navbar-collapse">
                     <ul class="nav navbar-nav navbar-left">
-                        <li>
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                <i class="fa fa-dashboard"></i>
-                            </a>
-                        </li>
+                            {#           For adding icons such as notifications and etc             #}
                     </ul>
 
                     <ul class="nav navbar-nav navbar-right">
@@ -117,15 +113,11 @@
                 </div>
             </div>
         </nav>
-
-
         <div class="content">
             <div class="container-fluid">
                 {% block content %}{% endblock %}
             </div>
         </div>
-
-
         <footer class="footer">
             <div class="container-fluid">
                 <nav class="pull-left">
@@ -135,7 +127,6 @@
                                 Home
                             </a>
                         </li>
-
                     </ul>
                 </nav>
                 <p class="copyright pull-right">
@@ -143,7 +134,6 @@
                 </p>
             </div>
         </footer>
-
     </div>
 </div>
 
@@ -153,18 +143,14 @@
 <!--   Core JS Files   -->
 <script src="{{ url_for('static', filename='assets/bower_components/jquery/dist/jquery.min.js')}}"></script>
 <script src="{{ url_for('static', filename='assets/bower_components/jquery-ui/jquery-ui.min.js')}}"></script>
-
 <script src="{{ url_for('static', filename='assets/bower_components/bootstrap/dist/js/bootstrap.min.js')}}"></script>
+<script src="{{ url_for('static', filename='assets/js/light-bootstrap-dashboard.js')}}"></script>
 
 <!--  Charts Plugin -->
 <script src="{{ url_for('static', filename='assets/bower_components/chartist/dist/chartist.min.js')}}"></script>
+
 <!--  Notifications Plugin    -->
 <script src="{{ url_for('static', filename='assets/js/bootstrap-notify.js')}}"></script>
-
-<script src="{{ url_for('static', filename='assets/js/light-bootstrap-dashboard.js')}}"></script>
-
-<script src="{{ url_for('static', filename='assets/js/demo.js')}}"></script>
-
 
 {% with messages = get_flashed_messages(category_filter=["error"]) %}
     {% if messages %}

@@ -7,12 +7,18 @@
             height: 40px !important;
         }
         .query-controls{
-            padding-right: 30px;
-            padding-bottom: 15px;
+            margin-right: 10px;
+            margin-bottom: 15px;
             float: right
         }
         .pe-7s-add-user, .pe-7s-mail{
             font-size: 24px;
+        }
+        .title-wrapper{
+            float: left
+        }
+        .query-controls .btn{
+            margin-left: 10px;
         }
     </style>
 {% endblock css %}
@@ -22,13 +28,15 @@
         <div class="col-md-12">
             <div class="card" type="table-view" id="userList">
                 <div class="header">
-                    <h3 class="title">Users</h3>
-                </div>
-                <div class="query-controls">
+                    <div class="title-wrapper">
+                        <h4 class="title">Users</h4>
+                    </div>
+                    <div class="query-controls">
                     <div class="row">
                         <a href="{{ url_for("user.invite") }}" class="btn btn-primary"><i class="pe-7s-add-user"></i><span> Invite User</span></a>
                         <a href="{{ url_for("manageInvites") }}" class="btn btn-success"><i class="pe-7s-mail"></i><span> Manage Invitations</span></a>
                     </div>
+                </div>
                 </div>
                 <div class="content table-responsive table-full-width">
                     <table class="table table-hover table-striped">

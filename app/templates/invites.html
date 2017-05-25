@@ -7,12 +7,17 @@
             height: 40px !important;
         }
         .query-controls{
-            padding-right: 30px;
-            padding-bottom: 15px;
-            float: right
+            margin-right: 10px;
+            float: right;
+            margin-top: -5px;
+            margin-bottom: 10px;
+
         }
         .pe-7s-add-user{
             font-size: 24px;
+        }
+        .title-wrapper{
+            float: left
         }
     </style>
 {% endblock css %}
@@ -22,13 +27,16 @@
         <div class="col-md-12">
             <div class="card" type="table-view" id="userList">
                 <div class="header">
-                    <h3 class="title">Pending Invitations</h3>
-                </div>
-                <div class="query-controls">
-                    <div class="row">
-                        <a href="{{ url_for("user.invite") }}" class="btn btn-primary"><i class="pe-7s-add-user"></i><span> Invite User</span></a>
+                    <div class="title-wrapper">
+                        <h4 class="title">Pending Invitations</h4>
+                    </div>
+                    <div class="query-controls">
+                        <div class="row">
+                            <a href="{{ url_for("user.invite") }}" class="btn btn-primary"><i class="pe-7s-add-user"></i><span> Invite User</span></a>
+                        </div>
                     </div>
                 </div>
+
                 <div class="content table-responsive table-full-width">
                     <table class="table table-hover table-striped">
                         <tbody>
@@ -61,7 +69,7 @@
         <div class="col-md-12">
             <div class="card" type="table-view" id="userList">
                 <div class="header">
-                    <h3 class="title">Converted Invitations</h3>
+                    <h4 class="title">Converted Invitations</h4>
                 </div>
                 <div class="content table-responsive table-full-width">
                     <table class="table table-hover table-striped">

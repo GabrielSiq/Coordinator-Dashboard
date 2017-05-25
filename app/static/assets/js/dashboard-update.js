@@ -177,8 +177,6 @@ function populateSavedQuery(dataStore, controls, _callback) {
 }
 
 $(document).ready(function(){
-    demo.initChartist();
-
     // Initializes line charts
     $(".ct-chart.line").each(function () {
 

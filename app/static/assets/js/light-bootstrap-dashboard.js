@@ -1,10 +1,3 @@
-
-var searchVisible = 0;
-var transparent = true;
-
-var transparentDemo = true;
-var fixedTop = false;
-
 var navbar_initialized = false;
 
 $(document).ready(function(){
@@ -17,19 +10,7 @@ $(document).ready(function(){
     if(window_width <= 991){
         lbd.initRightMenu();   
     }
-     
-    //  Activate the tooltips   
-    $('[rel="tooltip"]').tooltip();
 
-    //      Activate the switches with icons 
-    if($('.switch').length != 0){
-        $('.switch')['bootstrapSwitch']();
-    }  
-    //      Activate regular switches
-    if($("[data-toggle='switch']").length != 0){
-         $("[data-toggle='switch']").wrap('<div class="switch" />').parent().bootstrapSwitch();     
-    }
-     
     $('.form-control').on("focus", function(){
         $(this).parent('.input-group').addClass("input-group-focus");
     }).on("blur", function(){
@@ -41,8 +22,6 @@ $(document).ready(function(){
     if(loc != "") {
         $('.nav a[href^="/' + loc + '"]').parent('li').addClass('active');
     }
-
-      
 });
 
 // activate collapse right menu when the windows is resized 
@@ -145,7 +124,7 @@ lbd = {
         }
    
     }
-}
+};
 
 
 // Returns a function, that, as long as it continues to be invoked, will not
