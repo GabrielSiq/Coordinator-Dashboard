@@ -55,7 +55,8 @@
                                     <input type="hidden" name="_lastName" value="{{ user.last_name }}">
                                     <input type="hidden" name="_email" value="{{ user.email }}">
                                     <input type="hidden" name="_roleId" value="{{ user.role_id }}">
-                                    <td name="userId">{{ user.id }}</td>
+                                    <input type="hidden" name="_userId" value="{{ user.id }}">
+                                    <td name="enrollmentId">{{ user.enrollment_number }}</td>
                                     <td name="userName">{{ user.first_name + " " + user.last_name }}</td>
                                     <td>{{ user.role }}</td>
                                     <td>
@@ -104,6 +105,12 @@
                                 {{ extraForm.last_name.label }}
                             </div>
                             {{ extraForm.last_name(class_="form-control") }}
+                        </div>
+                        <div class="form-group">
+                            <div class="row col-md-6">
+                                {{ extraForm.enrollment_number.label }}
+                            </div>
+                            {{ extraForm.enrollment_number(class_="form-control") }}
                         </div>
                         <div class="form-group">
                             <div class="row col-md-6">

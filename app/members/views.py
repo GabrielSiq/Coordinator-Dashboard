@@ -646,6 +646,7 @@ def manageUsers():
             users['role'] = roleNames[role]
             users['role_id'] = role
             users['departments'] = user.departments
+            users['enrollment_number'] = user.enrollment_number
             usersList.append(users.copy())
     return render_template("users.html", users = usersList, extraForm = extraForm)
 
@@ -753,6 +754,7 @@ def editUser():
         try:
             user.first_name = request.form['first_name']
             user.last_name = request.form['last_name']
+            user.enrollment_number = request.form['enrollment_number']
             if user.email != request.form['email']:
                 user.email = request.form['email']
                 #TODO: Add email confirmation rotine
