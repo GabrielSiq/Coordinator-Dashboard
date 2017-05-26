@@ -6,28 +6,36 @@
 
     <style>
         .form-group{
-            padding: 15px 15px 0;
+            padding: 5px 15px 0;
         }
         div.form-group.button {
             padding-top: 29.5px;
+            margin-left: auto;
+            margin-right: auto;
+            display: inline-block;
+            white-space: nowrap;
+            text-align: center;
         }
         .query-controls{
-            padding: 15px 15px 0;
+            margin: 15px 15px 0;
         }
         .table-full-width > form > .param{
-            padding: 15px 15px 0;
+            padding: 5px 15px 0;
         }
         .btn-sq-sm {
             width: 40px !important;
             height: 40px !important;
             margin:0 auto;
-            display:block;
+            display:inline-block;
         }
         .delete-query, .rename-query{
             visibility: hidden;
         }
         .ct-chart{
             position:relative;
+        }
+        .form-group{
+            margin-bottom: 5px; !important;
         }
     </style>
 {% endblock css %}
@@ -43,15 +51,13 @@
                 <div class="query-controls">
                     <form>
                         <div class="row">
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-5">
                                 <label for="queryName">Saved Query</label>
                                 <select name="queryName" class="form-control">
                                 </select>
                             </div>
-                            <div class="form-group button col-md-1">
+                            <div class="form-group button col-md-3">
                                 <button type="button" class="btn btn-warning btn-sq-sm rename-query" data-toggle="modal" data-target="#renameQuery"><span class="glyphicon glyphicon-pencil"></span></button>
-                            </div>
-                            <div class="form-group button col-md-1">
                                 <button type="button" class="btn btn-danger btn-sq-sm delete-query"><span>&times;</span></button>
                             </div>
                             <div class="form-group button col-md-4">
@@ -63,7 +69,7 @@
                 <div class="content table-responsive table-full-width">
                     <form>
                         <div class="row param" id="row0">
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-sm-4">
                                 <label for="sort">Sort by:</label>
                                 <select id="sort" class="form-control combobox">
                                     <option value=""></option>
@@ -116,18 +122,16 @@
                 <div class="query-controls">
                     <form>
                         <div class="row">
-                            <div class="form-group col-md-3">
+                            <div class="form-group col-md-5">
                                 <label for="queryName">Saved Query</label>
                                 <select name="queryName" class="form-control">
                                 </select>
                             </div>
-                            <div class="form-group button col-md-1">
+                            <div class="form-group button col-md-3">
                                 <button type="button" class="btn btn-warning btn-sq-sm rename-query" data-toggle="modal" data-target="#renameQuery"><span class="glyphicon glyphicon-pencil"></span></button>
-                            </div>
-                            <div class="form-group button col-md-1">
                                 <button type="button" class="btn btn-danger btn-sq-sm delete-query"><span>&times;</span></button>
                             </div>
-                            <div class="form-group button">
+                            <div class="form-group button col-md-4">
                                 <button type="button" class="btn btn-success save-query" data-toggle="modal" data-target="#saveQuery">Save Config.</button>
                             </div>
                         </div>
@@ -136,7 +140,7 @@
                 <div class="content">
                     <form>
                         <div class="row param" id="row0">
-                            <div class="form-group col-md-3">
+                            <div class="form-group col-sm-3">
                                 <label for="course">Course</label>
                                 <select id="course" class="form-control combobox">
                                     <option value=""></option>
@@ -145,7 +149,7 @@
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="form-group col-md-3">
+                            <div class="form-group col-sm-3">
                                 <label for="situation">Situation</label>
                                 <select id="situation" class="form-control combobox">
                                     <option value=""></option>
@@ -177,18 +181,16 @@
                 <div class="query-controls">
                     <form>
                         <div class="row">
-                            <div class="form-group col-md-3">
+                            <div class="form-group col-md-4">
                                 <label for="queryName">Saved Query</label>
                                 <select name="queryName" class="form-control">
                                 </select>
                             </div>
-                            <div class="form-group button col-md-1">
+                            <div class="form-group button col-md-3">
                                 <button type="button" class="btn btn-warning btn-sq-sm rename-query" data-toggle="modal" data-target="#renameQuery"><span class="glyphicon glyphicon-pencil"></span></button>
-                            </div>
-                            <div class="form-group button col-md-1">
                                 <button type="button" class="btn btn-danger btn-sq-sm delete-query"><span>&times;</span></button>
                             </div>
-                            <div class="form-group button">
+                            <div class="form-group button col-md-4">
                                 <button type="button" class="btn btn-success save-query" data-toggle="modal" data-target="#saveQuery">Save Config.</button>
                             </div>
                         </div>
@@ -245,18 +247,16 @@
                 <div class="query-controls">
                     <form>
                         <div class="row">
-                            <div class="form-group col-md-3">
+                            <div class="form-group col-md-5">
                                 <label for="queryName">Saved Query</label>
                                 <select name="queryName" class="form-control">
                                 </select>
                             </div>
-                            <div class="form-group button col-md-1">
+                            <div class="form-group button col-md-3">
                                 <button type="button" class="btn btn-warning btn-sq-sm rename-query" data-toggle="modal" data-target="#renameQuery"><span class="glyphicon glyphicon-pencil"></span></button>
-                            </div>
-                            <div class="form-group button col-md-1">
                                 <button type="button" class="btn btn-danger btn-sq-sm delete-query"><span>&times;</span></button>
                             </div>
-                            <div class="form-group button">
+                            <div class="form-group button col-md-4">
                                 <button type="button" class="btn btn-success save-query" data-toggle="modal" data-target="#saveQuery">Save Config.</button>
                             </div>
                         </div>
