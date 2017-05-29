@@ -15,7 +15,7 @@ class AcademicData(db.Model):
     #TODO: Check if primary key is really consistent. Study possibility of using artificially created ID. (what for?)
     __tablename__ = 'academic_data'
 
-    student_id = db.Column(db.Integer(), db.ForeignKey('user.enrollment_number'), primary_key=True)
+    student_id = db.Column(db.String(10), primary_key=True)
     semester = db.Column(db.SmallInteger(), primary_key=True)
     course = db.Column(db.String(7), primary_key=True)
     units = db.Column(db.SmallInteger())
@@ -25,7 +25,7 @@ class AcademicData(db.Model):
     professor = db.Column(db.String(50))
 
     # Relationships
-    evaluations = db.relationship('InstructorEvaluationData')
+    # evaluations = db.relationship('InstructorEvaluationData')
 
     def __init__(self, student_id, semester, course, units, section, situation, professor, grade = None):
         self.student_id = student_id
@@ -41,7 +41,7 @@ class AcademicData(db.Model):
         return '<matr {} peri{} disc {} turm {}>'.format(self.student_id, self.semester, self.course, self.section)
 
 class StudentMajorMapping(db.Model):
-    student_id = db.Column(db.Integer(), db.ForeignKey('user.enrollment_number'), primary_key=True)
+    student_id = db.Column(db.String(10), primary_key=True)
     major = db.Column(db.String(3))
 
     def __init__(self, student_id, major):
@@ -49,10 +49,10 @@ class StudentMajorMapping(db.Model):
         self.major = major
 
 class InstructorEvaluationData(db.Model):
-    semester = db.Column(db.SmallInteger(), db.ForeignKey('academic_data.semester'), primary_key=True)
-    course = db.Column(db.String(7), db.ForeignKey('academic_data.course'), primary_key=True)
-    section = db.Column(db.String(3), db.ForeignKey('academic_data.section'), primary_key=True)
-    professor = db.Column(db.String(50), db.ForeignKey('academic_data.professor'), primary_key=True)
+    semester = db.Column(db.SmallInteger(), primary_key=True)
+    course = db.Column(db.String(7), primary_key=True)
+    section = db.Column(db.String(3), primary_key=True)
+    professor = db.Column(db.String(50), primary_key=True)
     student_count = db.Column(db.Integer())
     question_text = db.Column(db.String(150), primary_key=True)
     grade_1 = db.Column(db.Integer())
@@ -107,8 +107,8 @@ class User(db.Model, UserMixin):
                             backref=db.backref('users', lazy='dynamic'))
     queries = db.relationship('Query', cascade='delete')
 
-    dataRows = db.relationship('AcademicData')
-    major = db.relationship('StudentMajorMapping')
+    # dataRows = db.relationship('AcademicData')
+    # major = db.relationship('StudentMajorMapping')
 
 
     def is_active(self):

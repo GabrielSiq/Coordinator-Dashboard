@@ -2,7 +2,7 @@
 
 from flask import Flask, flash, request
 from urlparse import urlparse, urljoin
-from urllib2 import urlopen
+from urllib2 import urlopen, URLError
 from flask_user import SQLAlchemyAdapter, UserManager, current_user
 import os
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -173,53 +173,121 @@ def flash_errors(form):
                 error
             ))
 
-def updateData():
-    """
-    Updates our student academic transcript data. Currently just grabs the same dummy file and loads into DB for demo purposes. Should be hooked up to an api.
-    """
+# Update functions
+
+def getUpdatedAcademicData(fromDb = False):
     global STUDENT_ACADEMIC_DATA
-    global STUDENT_MAPPING_DATA
-    global INSTRUCTOR_EVALUATION_DATA
+    if fromDb == True:
+        try:
+            STUDENT_ACADEMIC_DATA =  pd.read_sql_query(AcademicData.query.statement, db.session.bind)
+        except:
+            #TODO: LOG UPDATE FAIL
+            raise
+    else:
+        try:
+            response = urlopen(
+                "https://gist.githubusercontent.com/GabrielSiq/cfa8822fe87ae5ac40b1a944ac791447/raw/07a5e12a9f9bfce3aa60cb24e6c6efeed0abd32c/student_academic_data.csv")
+            STUDENT_ACADEMIC_DATA = pd.read_csv(response)
+        except URLError:
+            #TODO: LOG UPDATE FAIL
+            raise
+    STUDENT_ACADEMIC_DATA.columns = ['student_id', 'semester', 'course', 'units', 'section', 'grade',
+                                             'situation', 'professor']
+    #TODO: LOG UPDATE SUCCESSFUL
 
-    # Update student academic data
-    response = urlopen(
-        "https://gist.githubusercontent.com/GabrielSiq/cfa8822fe87ae5ac40b1a944ac791447/raw/07a5e12a9f9bfce3aa60cb24e6c6efeed0abd32c/student_academic_data.csv")
-    STUDENT_ACADEMIC_DATA = pd.read_csv(response)
-    STUDENT_ACADEMIC_DATA.columns = ['student_id', 'semester', 'course', 'units', 'section', 'grade', 'situation', 'professor']
-
+def persistAcademicData():
+    global STUDENT_ACADEMIC_DATA
+    AcademicData.query.delete()
     for index, row in STUDENT_ACADEMIC_DATA.iterrows():
         db_row = AcademicData(row.student_id, row.semester, row.course, row.units, row.section, row.situation,
                               row.professor, row.grade)
         db.session.add(db_row)
+    db.session.commit()
 
-    # Update student mapping data
-    response = urlopen(
-        "https://gist.githubusercontent.com/GabrielSiq/4512611d24ee4aefbd7c2ce72a70706d/raw/ada394ba2ae678a302f0c3eaa127670622fd9961/student_major_mapping.csv")
-    STUDENT_MAPPING_DATA = pd.read_csv(response)
+def getUpdatedMappingData(fromDb = False):
+    global STUDENT_MAPPING_DATA
+    if fromDb == True:
+        try:
+            STUDENT_MAPPING_DATA =  pd.read_sql_query(StudentMajorMapping.query.statement, db.session.bind)
+        except:
+            #TODO: LOG UPDATE FAIL
+            raise
+    else:
+        try:
+            response = urlopen(
+                "https://gist.githubusercontent.com/GabrielSiq/4512611d24ee4aefbd7c2ce72a70706d/raw/ada394ba2ae678a302f0c3eaa127670622fd9961/student_major_mapping.csv")
+            STUDENT_MAPPING_DATA = pd.read_csv(response)
+        except URLError:
+            #TODO: LOG UPDATE FAIL
+            raise
+
     STUDENT_MAPPING_DATA.columns = ['student_id', 'major']
+    #TODO: LOG UPDATE SUCCESSFUL
 
+def persistMappingData():
+    global STUDENT_MAPPING_DATA
+    StudentMajorMapping.query.delete()
     for index, row in STUDENT_MAPPING_DATA.iterrows():
         db_row = StudentMajorMapping(row.student_id, row.major)
         db.session.add(db_row)
 
     db.session.commit()
 
-    # Update instructor evaluation data
-    response = urlopen(
-        "https://gist.githubusercontent.com/GabrielSiq/6e5574a42be340121bceed955dd5201b/raw/b4e88380f0235880656c2dfca75c98cfea0e8ef6/instructor_evaluation_data.csv")
-    INSTRUCTOR_EVALUATION_DATA = pd.read_csv(response)
+def getUpdatedEvaluationData(fromDb = False):
+    global INSTRUCTOR_EVALUATION_DATA
+    if fromDb == True:
+        try:
+            INSTRUCTOR_EVALUATION_DATA =  pd.read_sql_query(InstructorEvaluationData.query.statement, db.session.bind)
+        except:
+            #TODO: LOG UPDATE FAIL
+            raise
+    else:
+        try:
+            response = urlopen(
+                "https://gist.githubusercontent.com/GabrielSiq/6e5574a42be340121bceed955dd5201b/raw/b4e88380f0235880656c2dfca75c98cfea0e8ef6/instructor_evaluation_data.csv")
+            INSTRUCTOR_EVALUATION_DATA = pd.read_csv(response)
+        except URLError:
+            #TODO: LOG UPDATE FAIL
+            raise
+
     INSTRUCTOR_EVALUATION_DATA.columns = ["semester", "course", "section", "professor", "student_count", "question_text", "grade_1", "grade_2", "grade_3", "grade_4", "grade_5", "grade_na", "average", "standard_deviation", "total"]
+    #TODO: LOG UPDATE SUCCESSFUL
 
-
+def persistEvaluationData():
+    global INSTRUCTOR_EVALUATION_DATA
+    InstructorEvaluationData.query.delete()
     for index, row in INSTRUCTOR_EVALUATION_DATA.iterrows():
         if not math.isnan(row.student_count):
             db_row = InstructorEvaluationData(row.semester, row.course, row.section, row.professor, row.student_count, row.question_text, row.grade_1, row.grade_2, row.grade_3, row.grade_4, row.grade_5, row.grade_na, row.average, row.standard_deviation)
             db.session.add(db_row)
             db.session.commit()
 
-
-
     db.session.commit()
+
+def updateData():
+    """
+    Updates our student academic transcript data. Currently just grabs the same dummy file and loads into DB for demo purposes. Should be hooked up to an api.
+    """
+    # Update student academic data
+    try:
+        getUpdatedAcademicData()
+        persistAcademicData()
+    except URLError:
+        getUpdatedAcademicData(fromDb = True)
+
+    # Update student mapping data
+    try:
+        getUpdatedMappingData()
+        persistMappingData()
+    except URLError:
+        getUpdatedMappingData(fromDb = True)
+
+    # Update instructor evaluation data
+    try:
+        getUpdatedEvaluationData()
+        persistEvaluationData()
+    except URLError:
+        getUpdatedEvaluationData(fromDb = True)
 
 def loadData(dbOption = False):
     """
