@@ -107,6 +107,7 @@ class User(db.Model, UserMixin):
                             backref=db.backref('users', lazy='dynamic'))
     queries = db.relationship('Query', cascade='delete')
 
+    #TODO: MODEL RELATIONSHIP BETWEEN OUR DATASETS
     # dataRows = db.relationship('AcademicData')
     # major = db.relationship('StudentMajorMapping')
 
@@ -203,7 +204,6 @@ def unique_email_validator(form, field):
 class CustomRegisterForm(FlaskForm):
     password_validator_added = False
 
-    next = HiddenField()        # for login_or_register.html
     reg_next = HiddenField()    # for register.html
 
     username = StringField('Username', validators=[

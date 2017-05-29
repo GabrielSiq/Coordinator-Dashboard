@@ -266,7 +266,7 @@ def persistEvaluationData():
 
 def updateData():
     """
-    Updates our student academic transcript data. Currently just grabs the same dummy file and loads into DB for demo purposes. Should be hooked up to an api.
+    Updates our student academic transcript data. Currently just grabs the same file and loads into DB for demo purposes. Should be hooked to an api.
     """
     # Update student academic data
     try:
