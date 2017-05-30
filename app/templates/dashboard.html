@@ -43,6 +43,33 @@
 {% block content %}
     <div class="row">
         <div class="col-md-6">
+            <div class="card" type="bar-chart-view" id="semester-count">
+                <div class="header">
+                    <h4 class="title">Student Semester Count</h4>
+                    <p class="category">Histogram of student semester count for the selected semester</p>
+                </div>
+                <div class="content">
+                    <form>
+                        <div class="row param" id="row0">
+                            <div class="form-group col-md-2">
+                                <label for="semester">Course</label>
+                                <select id="semester" class="form-control combobox">
+                                    <option value=""></option>
+                                    {% for semester in previous_semesters %}
+                                        {% set semString = semester|string() %}
+                                        <option value={{ semester }}>{{ semString[:4] + "." +  semString[4] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="chartBar" class="ct-chart bar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="card" type="table-view" id="cancellation">
                 <div class="header">
                     <h4 class="title">Drop Rate <span class="glyphicon"/></h4>
@@ -117,7 +144,7 @@
             <div class="card" type="line-chart-view" id="enrollment">
                 <div class="header">
                     <h4 class="title">Enrollment Numbers</h4>
-                    <p class="category">Number of students by course by year</p>
+                    <p class="category">Number of students by course by semester</p>
                 </div>
                 <div class="query-controls">
                     <form>

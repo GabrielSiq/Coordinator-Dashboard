@@ -59,6 +59,61 @@ function updateTable(content) {
     }
 }
 
+
+function updateBar(content) {
+    var paramSet = {};
+    var hasAny = false;
+    content.find(".row.param").each(function () {
+        var params = {};
+        $(this).find("select.form-control").each(function () {
+            var value = $(this).val();
+            params[$(this).attr("id")] = value;
+            if(hasAny === false && value !== ""){
+                hasAny = true;
+            }
+        });
+        paramSet[$(this).attr("id")] = params;
+    });
+    var requestJSON = {"chartId" : content.closest('.card').attr("id"), "requestParams" : paramSet};
+    var chart = content.find(".ct-chart.bar");
+    if(hasAny){
+        $.ajax({
+            type: "POST",
+            url: "/getChartData",
+            contentType:"application/json",
+            data : JSON.stringify(requestJSON),
+            success: function(resultJSON) {
+                if($.trim(resultJSON)) {
+                    var result = JSON.parse(resultJSON);
+                    var data = {
+                        labels: result['labels'],
+                        series: result['series']
+                    };
+                    var options = {
+
+                    };
+                    if (result['labels'].length !== 0) {
+                        chart.html("");
+                        new Chartist.Bar('#' + chart.attr("id"),data, options);
+                    }
+                    else {
+                        chart.html("<p style='text-align:center; vertical-align:middle'>No data found for given parameters.</p>");
+                    }
+                }
+                else {
+                    chart.html("<p style='text-align:center; vertical-align:middle'>Query submission error.</p>");
+                }
+            },
+            error: function() {
+                alert('error');
+            }
+        });
+    }
+    else{
+        chart.html("");
+    }
+}
+
 // Updates a line chart based on the currently selected filters
 function updateChart(content) {
     var paramSet = {};
@@ -138,6 +193,9 @@ function updateView(viewType, content){
             break;
         case "table-view":
             updateTable(content);
+            break;
+        case "bar-chart-view":
+            updateBar(content);
             break;
         default:
         //

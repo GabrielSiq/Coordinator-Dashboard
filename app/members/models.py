@@ -180,14 +180,7 @@ class UserInvitation(db.Model):
     role_id = db.Column(db.Integer(), db.ForeignKey('role.id', ondelete='CASCADE'))
     enrollment_number = db.Column(db.String(10), nullable=False, unique=True)
 
-# Forms
-
-class ExtraInfo(FlaskForm):
-    first_name = StringField('First Name', validators=[DataRequired()])
-    last_name = StringField('Last Name', validators=[DataRequired()])
-    enrollment_number = StringField('Enrollment Number', validators=[DataRequired()])
-    role = SelectField('User Role', coerce=int, validators=[DataRequired()])
-    department = SelectField('User Department', coerce=int)
+# Validators
 
 def unique_username_validator(form, field):
     """ Username must be unique"""
@@ -200,6 +193,15 @@ def unique_email_validator(form, field):
     user_manager =  current_app.user_manager
     if not user_manager.email_is_available(field.data):
         raise ValidationError('This Email is already in use. Please try another one.')
+
+# Forms
+
+class ExtraInfo(FlaskForm):
+    first_name = StringField('First Name', validators=[DataRequired()])
+    last_name = StringField('Last Name', validators=[DataRequired()])
+    enrollment_number = StringField('Enrollment Number', validators=[DataRequired()])
+    role = SelectField('User Role', coerce=int, validators=[DataRequired()])
+    department = SelectField('User Department', coerce=int)
 
 class CustomRegisterForm(FlaskForm):
     password_validator_added = False

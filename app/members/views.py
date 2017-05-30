@@ -10,13 +10,6 @@ from datetime import datetime
 from roles import ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE, STUDENT_ROLE
 import numpy as np
 
-def getUserAllowedData():
-    data = getStudentAcademicData()
-    if not current_user.has_roles((ADMIN_ROLE, COORDINATOR_ROLE)):
-        department = Department.query.filter_by(id = str(current_user.departments[0])).first().code
-        data = data[data['course'].str.contains(department)]
-    return data
-
 @application.route('/')
 def index():
     """
@@ -31,20 +24,18 @@ def dashboard():
     """
     Our main dashboard. Does some data processing and renders dashboard view.
     """
-    #global DATA
     DATA = getUserAllowedData()
 
-    course_codes = DATA['course'].unique()
-    course_codes.sort()
+    courseCodes = DATA['course'].unique()
+    courseCodes.sort()
 
-    situation_codes = DATA['situation'].unique()
-    situation_codes.sort()
+    situationCodes = DATA['situation'].unique()
+    situationCodes.sort()
 
-    cancellation = DATA[DATA['situation'].isin(['CA', 'CD', 'CL', 'DT', 'LT'])]
-    course_count = DATA.groupby('course').size()
-    cancellation = cancellation.groupby('course').size()
-    canc_rate = (cancellation / course_count).dropna()
-    return render_template('dashboard.html', df = DATA.head(10).to_dict(), canc = canc_rate.sort_values().head(10), canc2 = canc_rate.sort_values(ascending=False).head(10), course_codes=course_codes, situation_codes=situation_codes)
+    previousSemesters = DATA['semester'].unique()
+    previousSemesters.sort()
+
+    return render_template('dashboard.html', df = DATA.head(10).to_dict(), course_codes=courseCodes, situation_codes=situationCodes, previous_semesters = previousSemesters)
 
 @application.route('/table')
 @roles_required((ADMIN_ROLE, COORDINATOR_ROLE))
@@ -62,48 +53,6 @@ def table():
 
     return render_template('table.html', df = df, df2=df2)
 
-@application.route('/getStudentDataTable')
-@roles_required((ADMIN_ROLE, COORDINATOR_ROLE))
-@login_required
-def getStudentDataTable():
-    data = getUserAllowedData()
-    response = {}
-    response['draw'] = request.args.get('draw', None)
-    response['recordsTotal'] = len(data)
-    response['recordsFiltered'] =len(data)
-    start =  int(request.args.get('start', None))
-    length = int(request.args.get('length', None))
-    end = start + length
-    listData = []
-    for index, row in data[start:end].iterrows():
-        listRow = []
-        for item in row:
-            listRow.append(str(item))
-        listData.append(listRow)
-    response['data'] = listData
-    return json.dumps(response)
-
-@application.route('/getInstructorDataTable')
-@roles_required((ADMIN_ROLE, COORDINATOR_ROLE))
-@login_required
-def getInstructorDataTable():
-    data = getInstructorEvaluationData()
-    response = {}
-    response['draw'] = request.args.get('draw', None)
-    response['recordsTotal'] = len(data)
-    response['recordsFiltered'] =len(data)
-    start =  int(request.args.get('start', None))
-    length = int(request.args.get('length', None))
-    end = start + length
-    listData = []
-    for index, row in data[start:end].iterrows():
-        listRow = []
-        for item in row:
-            listRow.append(str(item))
-        listData.append(listRow)
-    response['data'] = listData
-    return json.dumps(response)
-
 @application.errorhandler(404)
 @application.errorhandler(405)
 def not_found(error):
@@ -113,6 +62,9 @@ def not_found(error):
 @application.errorhandler(503)
 def server_error(error):
     return render_template('503.html')
+
+
+# Registration and User Management
 
 def customRegister():
     """ Display registration form and create new User."""
@@ -372,234 +324,6 @@ def customInvite():
 
     return render(user_manager.invite_template, form=invite_form, extraForm = extraForm)
 
-@application.route('/getEnrollmentData', methods=['POST'])
-@login_required
-def getEnrollmentData(requestParams):
-    DATA = getUserAllowedData()
-
-    rowData = {}
-    allLabels = []
-    for row in requestParams:
-        rowData[row] = {}
-        filtered = DATA
-        # Applies all filters from the request to our data
-        rowParams = requestParams[row]
-        for key in rowParams:
-            if rowParams[key] != "":
-                filtered = filtered[filtered[key] == rowParams[key]]
-
-        # Counts number of rows per semester. Outputs in asc order.
-        filtered = filtered.groupby('semester').size()
-
-        # Formats the data to return in a dict and converts to json
-
-        rowData[row]['labels'] = filtered.index.values.tolist()
-
-        rowData[row]['series'] = filtered.values.tolist()
-        allLabels += list(set(rowData[row]['labels']) - set(allLabels))
-
-    if len(allLabels) != 0:
-        allLabels.sort()
-
-        # Now we have to fill in the data with all semesters between the first and last so the year looks full.
-        year =  allLabels[0]
-        while year <= allLabels[-1]:
-            if year not in allLabels:
-                allLabels.append(year)
-            if (year % 10) == 1:
-                year += 1
-            else:
-                year += 9
-        allLabels.sort()
-
-    # We then fill the series with null values to match the labels in length
-    data = {'labels' : allLabels, 'series' : []}
-    for row in rowData:
-        fullRow = []
-        for label in allLabels:
-            if label in rowData[row]['labels']:
-                fullRow.append(rowData[row]['series'][rowData[row]['labels'].index(label)])
-            else:
-                fullRow.append(None)
-        data['series'].append(fullRow)
-
-    return json.dumps(data)
-
-@application.route('/getCancellationData', methods=['POST'])
-@login_required
-def getCancellationData(requestParams):
-    DATA = getUserAllowedData()
-    filtered = DATA
-    onlyRow = requestParams['row0']
-    if("sort" not in onlyRow):
-        flash("Parameter error.", "error")
-        return ""
-
-    cancellation = filtered[filtered['situation'].isin(['CA', 'CD', 'CL', 'DT', 'LT'])]
-    course_count = DATA.groupby('course').size()
-    cancellation = cancellation.groupby('course').size()
-    canc_rate = (cancellation / course_count).dropna()
-
-    return canc_rate.sort_values(ascending=(onlyRow['sort'] == "smallest")).head(10).to_json()
-
-@application.route('/getCancellationData', methods=['POST'])
-@login_required
-def getAverageGradeData(requestParams):
-    DATA = getUserAllowedData()
-
-    rowData = {}
-    allLabels = []
-    for row in requestParams:
-        filtered = DATA
-        # Applies all filters from the request to our data
-        rowParams = requestParams[row]
-        has_filter = False
-        for key in rowParams:
-            if rowParams[key] != "" and rowParams[key] != None:
-                filtered = filtered[filtered[key] == rowParams[key]]
-                has_filter = True
-
-        if has_filter == False:
-            continue
-
-        # Counts number of rows per semester. Outputs in asc order.
-        filtered = filtered[filtered['situation'].isin(['AP', 'RM'])]
-        filtered = filtered[['semester', 'grade']]
-        filtered = filtered.groupby('semester').mean()
-
-        # Formats the data to return in a dict and converts to json
-        rowData[row] = {}
-        rowData[row]['labels'] = filtered.index.values.tolist()
-        rowData[row]['series'] = filtered.values.flatten().tolist()
-        allLabels += list(set(rowData[row]['labels']) - set(allLabels))
-
-    if len(allLabels) != 0:
-        allLabels.sort()
-
-        # Now we have to fill in the data with all semesters between the first and last so the year looks full.
-        year = allLabels[0]
-        while year <= allLabels[-1]:
-            if year not in allLabels:
-                allLabels.append(year)
-            if (year % 10) == 1:
-                year += 1
-            else:
-                year += 9
-        allLabels.sort()
-
-    # We then fill the series with null values to match the labels in length
-    data = {'labels': allLabels, 'series': []}
-    for row in rowData:
-        fullRow = []
-        for label in allLabels:
-            if label in rowData[row]['labels']:
-                fullRow.append(rowData[row]['series'][rowData[row]['labels'].index(label)])
-            else:
-                fullRow.append(None)
-        data['series'].append(fullRow)
-
-    return json.dumps(data)
-
-@application.route('/getChartData', methods=['POST'])
-@login_required
-def getChartData():
-    """
-    Receives request for data, parses the type of view and routes to the correct function.
-    """
-    if not all(x in request.json for x in ["chartId", "requestParams"]):
-        flash("Parameter error", "error")
-        return ""
-    chartId = request.json['chartId']
-    requestParams = request.json['requestParams']
-
-    if chartId in ["enrollment", "enrollment-2"]:
-        return getEnrollmentData(requestParams)
-    elif chartId in ["cancellation"]:
-        return getCancellationData(requestParams)
-    elif chartId in ["avg-grade"]:
-        return getAverageGradeData(requestParams)
-    else:
-        flash("Unknown visualization type.", "error")
-        return ""
-
-@application.route('/savedQueries', methods=['POST'])
-@login_required
-def savedQueries():
-    """
-    Testing custom plotting via ajax.
-    :return: 
-    """
-    data_list = {}
-    id = request.json['view_id']
-
-    queries =  Query.query.filter_by(user_id = current_user.id, visualization_id = id).all()
-    for query in queries:
-        data = {}
-        data['name'] = query.name
-        data['query_data'] = query.query_data
-        data_list[query.id] = data
-
-    return json.dumps(data_list)
-
-@application.route('/renameQuery', methods=['POST'])
-@login_required
-def renameQuery():
-    try:
-        queryName = request.json['query_name']
-        queryId = request.json['query_id']
-    except:
-        flash("Parameter error.", "error")
-        return ""
-    try:
-        query = Query.query.filter_by(id = queryId).first()
-        if query.user_id != current_user.id:
-            flash("You don't have permissions to alter this query", "error")
-            return ""
-        query.name = queryName
-        db.session.commit()
-    except:
-        flash("DB error.", "error")
-        return ""
-    return "success"
-
-@application.route('/saveQuery', methods=['POST'])
-@login_required
-def saveQuery():
-    try:
-        visualizationId = request.json['view_id']
-        queryName = request.json['query_name']
-        queryData = request.json['query_data']
-    except:
-        flash("Parameter error.", "error")
-        return ""
-    try:
-        query = Query(user_id= current_user.id, visualization_id = visualizationId, name = queryName, query_data = queryData)
-        db.session.add(query)
-        db.session.commit()
-    except:
-        flash("DB error.", "error")
-        return ""
-    return json.dumps(query.id)
-
-@application.route('/deleteQuery', methods=['POST'])
-@login_required
-def deleteQuery():
-    try:
-        queryId = request.json['query_id']
-    except:
-        # Parameter not found. Bad request.
-        flash("Parameter error.", "error")
-        return ""
-    try:
-        query = Query.query.filter_by(id=queryId).first()
-        db.session.delete(query)
-        db.session.commit()
-    except:
-        # Error when trying to delete from db
-        flash("DB error.", "error")
-        return ""
-    return "success"
-
 @application.route('/user/manageUsers')
 @login_required
 @roles_required((ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE))
@@ -783,16 +507,6 @@ def editUser():
 
     return redirect(url_for("manageUsers"))
 
-@application.route('/getProfessors', methods=['POST'])
-@login_required
-def getProfessors():
-    data = getUserAllowedData()
-    data = data[data['course'] == request.json['course']]
-    data = data[pd.notnull(data['professor'])]
-    professors = data['professor'].unique().tolist()
-    professors.sort()
-    return json.dumps(professors)
-
 @application.route('/user/accountInformation')
 @login_required
 def accountInformation():
@@ -827,3 +541,336 @@ def updateProfile():
     flash("Profile successfully updated!", "success")
 
     return redirect(url_for("accountInformation"))
+
+# Data providers
+
+def getUserAllowedData():
+    data = getStudentAcademicData()
+    if not current_user.has_roles((ADMIN_ROLE, COORDINATOR_ROLE)):
+        department = Department.query.filter_by(id = str(current_user.departments[0])).first().code
+        data = data[data['course'].str.contains(department)]
+    return data
+
+@application.route('/getChartData', methods=['POST'])
+@login_required
+def getChartData():
+    """
+    Receives request for data, parses the type of view and routes to the correct function.
+    """
+    if not all(x in request.json for x in ["chartId", "requestParams"]):
+        flash("Parameter error", "error")
+        return ""
+    chartId = request.json['chartId']
+    requestParams = request.json['requestParams']
+
+    if chartId in ["enrollment", "enrollment-2"]:
+        return getEnrollmentData(requestParams)
+    elif chartId in ["cancellation"]:
+        return getCancellationData(requestParams)
+    elif chartId in ["avg-grade"]:
+        return getAverageGradeData(requestParams)
+    elif chartId in ["semester-count"]:
+        return getStudentSemesterCount(requestParams)
+    else:
+        flash("Unknown visualization type.", "error")
+        return ""
+
+@application.route('/getEnrollmentData', methods=['POST'])
+@login_required
+def getEnrollmentData(requestParams):
+    DATA = getUserAllowedData()
+
+    rowData = {}
+    allLabels = []
+    for row in requestParams:
+        rowData[row] = {}
+        filtered = DATA
+        # Applies all filters from the request to our data
+        rowParams = requestParams[row]
+        for key in rowParams:
+            if rowParams[key] != "":
+                filtered = filtered[filtered[key] == rowParams[key]]
+
+        # Counts number of rows per semester. Outputs in asc order.
+        filtered = filtered.groupby('semester').size()
+
+        # Formats the data to return in a dict and converts to json
+
+        rowData[row]['labels'] = filtered.index.values.tolist()
+
+        rowData[row]['series'] = filtered.values.tolist()
+        allLabels += list(set(rowData[row]['labels']) - set(allLabels))
+
+    if len(allLabels) != 0:
+        allLabels.sort()
+
+        # Now we have to fill in the data with all semesters between the first and last so the year looks full.
+        year =  allLabels[0]
+        while year <= allLabels[-1]:
+            if year not in allLabels:
+                allLabels.append(year)
+            if (year % 10) == 1:
+                year += 1
+            else:
+                year += 9
+        allLabels.sort()
+
+    # We then fill the series with null values to match the labels in length
+    data = {'labels' : allLabels, 'series' : []}
+    for row in rowData:
+        fullRow = []
+        for label in allLabels:
+            if label in rowData[row]['labels']:
+                fullRow.append(rowData[row]['series'][rowData[row]['labels'].index(label)])
+            else:
+                fullRow.append(None)
+        data['series'].append(fullRow)
+
+    return json.dumps(data)
+
+@application.route('/getCancellationData', methods=['POST'])
+@login_required
+def getCancellationData(requestParams):
+    DATA = getUserAllowedData()
+    filtered = DATA
+    onlyRow = requestParams['row0']
+    if("sort" not in onlyRow):
+        flash("Parameter error.", "error")
+        return ""
+
+    cancellation = filtered[filtered['situation'].isin(['CA', 'CD', 'CL', 'DT', 'LT'])]
+    course_count = DATA.groupby('course').size()
+    cancellation = cancellation.groupby('course').size()
+    canc_rate = (cancellation / course_count).dropna()
+
+    return canc_rate.sort_values(ascending=(onlyRow['sort'] == "smallest")).head(10).to_json()
+
+@application.route('/getCancellationData', methods=['POST'])
+@login_required
+def getAverageGradeData(requestParams):
+    DATA = getUserAllowedData()
+
+    rowData = {}
+    allLabels = []
+    for row in requestParams:
+        filtered = DATA
+        # Applies all filters from the request to our data
+        rowParams = requestParams[row]
+        has_filter = False
+        for key in rowParams:
+            if rowParams[key] != "" and rowParams[key] != None:
+                filtered = filtered[filtered[key] == rowParams[key]]
+                has_filter = True
+
+        if has_filter == False:
+            continue
+
+        # Counts number of rows per semester. Outputs in asc order.
+        filtered = filtered[filtered['situation'].isin(['AP', 'RM'])]
+        filtered = filtered[['semester', 'grade']]
+        filtered = filtered.groupby('semester').mean()
+
+        # Formats the data to return in a dict and converts to json
+        rowData[row] = {}
+        rowData[row]['labels'] = filtered.index.values.tolist()
+        rowData[row]['series'] = filtered.values.flatten().tolist()
+        allLabels += list(set(rowData[row]['labels']) - set(allLabels))
+
+    if len(allLabels) != 0:
+        allLabels.sort()
+
+        # Now we have to fill in the data with all semesters between the first and last so the year looks full.
+        year = allLabels[0]
+        while year <= allLabels[-1]:
+            if year not in allLabels:
+                allLabels.append(year)
+            if (year % 10) == 1:
+                year += 1
+            else:
+                year += 9
+        allLabels.sort()
+
+    # We then fill the series with null values to match the labels in length
+    data = {'labels': allLabels, 'series': []}
+    for row in rowData:
+        fullRow = []
+        for label in allLabels:
+            if label in rowData[row]['labels']:
+                fullRow.append(rowData[row]['series'][rowData[row]['labels'].index(label)])
+            else:
+                fullRow.append(None)
+        data['series'].append(fullRow)
+
+    return json.dumps(data)
+
+@application.route('/getProfessors', methods=['POST'])
+@login_required
+def getProfessors():
+    data = getUserAllowedData()
+    data = data[data['course'] == request.json['course']]
+    data = data[pd.notnull(data['professor'])]
+    professors = data['professor'].unique().tolist()
+    professors.sort()
+    return json.dumps(professors)
+
+@application.route('/getStudentDataTable')
+@roles_required((ADMIN_ROLE, COORDINATOR_ROLE))
+@login_required
+def getStudentDataTable():
+    data = getUserAllowedData()
+    response = {}
+    response['draw'] = request.args.get('draw', None)
+    response['recordsTotal'] = len(data)
+    response['recordsFiltered'] =len(data)
+    start =  int(request.args.get('start', None))
+    length = int(request.args.get('length', None))
+    end = start + length
+    listData = []
+    for index, row in data[start:end].iterrows():
+        listRow = []
+        for item in row:
+            listRow.append(str(item))
+        listData.append(listRow)
+    response['data'] = listData
+    return json.dumps(response)
+
+@application.route('/getInstructorDataTable')
+@roles_required((ADMIN_ROLE, COORDINATOR_ROLE))
+@login_required
+def getInstructorDataTable():
+    data = getInstructorEvaluationData()
+    response = {}
+    response['draw'] = request.args.get('draw', None)
+    response['recordsTotal'] = len(data)
+    response['recordsFiltered'] = len(data)
+    start =  int(request.args.get('start', None))
+    length = int(request.args.get('length', None))
+    end = start + length
+    listData = []
+    for index, row in data[start:end].iterrows():
+        listRow = []
+        for item in row:
+            listRow.append(str(item))
+        listData.append(listRow)
+    response['data'] = listData
+    return json.dumps(response)
+
+@application.route('/getStudentSemesterCount')
+@roles_required((ADMIN_ROLE, COORDINATOR_ROLE))
+@login_required
+def getStudentSemesterCount(requestParams):
+    try:
+        semester = requestParams['row0']['semester']
+    except:
+        flash("Parameter error.", "error")
+        return ""
+    data = getStudentAcademicData()
+    currentStudents = data[(data['semester'] == int(semester)) & ~(data['situation'].isin(['MT', 'CL', 'DT']))]['student_id'].unique()
+
+    # get only records that have activity (enrolled students) and limit to prior than the selected semester
+    activeSemesters = data[~(data['situation'].isin(['MT', 'CL', 'DT'])) & (data['semester'] <= int(semester))]
+
+    uniqueSemesters = activeSemesters.groupby('student_id')['semester'].unique()
+    semesterCount = pd.DataFrame(columns=('Mat', 'Count'))
+    for index, row in uniqueSemesters.iteritems():
+        if index in currentStudents:
+            aux = pd.DataFrame([[index, len(row)]], columns=('Mat', 'Count'))
+            semesterCount = semesterCount.append(aux)
+            print aux
+
+    new = semesterCount.groupby('Count').count()
+    for index, row in new.iterrows():
+        print row
+
+    data = {'labels': new.index.get_level_values(0).tolist(), 'series': [new['Mat'].tolist()]}
+
+
+
+
+
+
+    return json.dumps(data)
+
+
+
+# Saved queries mechanism
+
+@application.route('/savedQueries', methods=['POST'])
+@login_required
+def savedQueries():
+    """
+    Returns a user's saved queries and their parameters for that specific visualization
+    """
+    data_list = {}
+    id = request.json['view_id']
+
+    queries =  Query.query.filter_by(user_id = current_user.id, visualization_id = id).all()
+    for query in queries:
+        data = {}
+        data['name'] = query.name
+        data['query_data'] = query.query_data
+        data_list[query.id] = data
+
+    return json.dumps(data_list)
+
+@application.route('/renameQuery', methods=['POST'])
+@login_required
+def renameQuery():
+    try:
+        queryName = request.json['query_name']
+        queryId = request.json['query_id']
+    except:
+        flash("Parameter error.", "error")
+        return ""
+    try:
+        query = Query.query.filter_by(id = queryId).first()
+        if query.user_id != current_user.id:
+            flash("You don't have permissions to alter this query", "error")
+            return ""
+        query.name = queryName
+        db.session.commit()
+    except:
+        flash("DB error.", "error")
+        return ""
+    return "success"
+
+@application.route('/saveQuery', methods=['POST'])
+@login_required
+def saveQuery():
+    try:
+        visualizationId = request.json['view_id']
+        queryName = request.json['query_name']
+        queryData = request.json['query_data']
+    except:
+        flash("Parameter error.", "error")
+        return ""
+    try:
+        query = Query(user_id= current_user.id, visualization_id = visualizationId, name = queryName, query_data = queryData)
+        db.session.add(query)
+        db.session.commit()
+    except:
+        flash("DB error.", "error")
+        return ""
+    return json.dumps(query.id)
+
+@application.route('/deleteQuery', methods=['POST'])
+@login_required
+def deleteQuery():
+    try:
+        queryId = request.json['query_id']
+    except:
+        # Parameter not found. Bad request.
+        flash("Parameter error.", "error")
+        return ""
+    try:
+        query = Query.query.filter_by(id=queryId).first()
+        db.session.delete(query)
+        db.session.commit()
+    except:
+        # Error when trying to delete from db
+        flash("DB error.", "error")
+        return ""
+    return "success"
+
+
+
