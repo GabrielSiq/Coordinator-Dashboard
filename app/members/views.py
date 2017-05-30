@@ -25,6 +25,9 @@ def dashboard():
     Our main dashboard. Does some data processing and renders dashboard view.
     """
     DATA = getUserAllowedData()
+    mappingData = getStudentMappingData()
+
+    majorList = mappingData['major'].unique()
 
     courseCodes = DATA['course'].unique()
     courseCodes.sort()
@@ -35,7 +38,7 @@ def dashboard():
     previousSemesters = DATA['semester'].unique()
     previousSemesters.sort()
 
-    return render_template('dashboard.html', df = DATA.head(10).to_dict(), course_codes=courseCodes, situation_codes=situationCodes, previous_semesters = previousSemesters)
+    return render_template('dashboard.html', df = DATA.head(10).to_dict(), course_codes=courseCodes, situation_codes=situationCodes, previous_semesters = previousSemesters, major_list = majorList)
 
 @application.route('/table')
 @roles_required((ADMIN_ROLE, COORDINATOR_ROLE))
@@ -606,7 +609,8 @@ def getEnrollmentData(requestParams):
 
         # Now we have to fill in the data with all semesters between the first and last so the year looks full.
         year =  allLabels[0]
-        while year <= allLabels[-1]:
+        lastYear = allLabels[-1]
+        while year <= lastYear:
             if year not in allLabels:
                 allLabels.append(year)
             if (year % 10) == 1:
@@ -759,39 +763,69 @@ def getInstructorDataTable():
 @roles_required((ADMIN_ROLE, COORDINATOR_ROLE))
 @login_required
 def getStudentSemesterCount(requestParams):
-    try:
-        semester = requestParams['row0']['semester']
-    except:
-        flash("Parameter error.", "error")
-        return ""
-    data = getStudentAcademicData()
-    currentStudents = data[(data['semester'] == int(semester)) & ~(data['situation'].isin(['MT', 'CL', 'DT']))]['student_id'].unique()
+    rowData = {}
+    allLabels = []
 
-    # get only records that have activity (enrolled students) and limit to prior than the selected semester
-    activeSemesters = data[~(data['situation'].isin(['MT', 'CL', 'DT'])) & (data['semester'] <= int(semester))]
+    academicData = getStudentAcademicData()
+    majorMapping = getStudentMappingData()
+    mergedData = pd.merge(academicData, majorMapping, how='inner', on='student_id')
 
-    uniqueSemesters = activeSemesters.groupby('student_id')['semester'].unique()
-    semesterCount = pd.DataFrame(columns=('Mat', 'Count'))
-    for index, row in uniqueSemesters.iteritems():
-        if index in currentStudents:
-            aux = pd.DataFrame([[index, len(row)]], columns=('Mat', 'Count'))
-            semesterCount = semesterCount.append(aux)
-            print aux
+    for row in requestParams:
+        rowData[row] = {}
+        # Applies all filters from the request to our data
+        rowParams = requestParams[row]
+        try:
+            semester = rowParams['semester']
+        except:
+            flash('Parameter error', " error")
+            return ""
 
-    new = semesterCount.groupby('Count').count()
-    for index, row in new.iterrows():
-        print row
+        if rowParams['major'] != "":
+            data = mergedData[mergedData['major'] == rowParams['major']]
+        else:
+            data = mergedData
 
-    data = {'labels': new.index.get_level_values(0).tolist(), 'series': [new['Mat'].tolist()]}
+        currentStudents = data[(data['semester'] == int(semester)) & ~(data['situation'].isin(['MT', 'CL', 'DT']))][
+            'student_id'].unique()
+        # get only records that have activity (enrolled students) and limit to prior than the selected semester
+        activeSemesters = data[~(data['situation'].isin(['MT', 'CL', 'DT'])) & (data['semester'] <= int(semester))]
 
+        uniqueSemesters = activeSemesters.groupby('student_id')['semester'].unique()
+        semesterCount = pd.DataFrame(columns=('Mat', 'Count'))
+        for index, semRow in uniqueSemesters.iteritems():
+            if index in currentStudents:
+                aux = pd.DataFrame([[index, len(semRow)]], columns=('Mat', 'Count'))
+                semesterCount = semesterCount.append(aux)
 
+        new = semesterCount.groupby('Count').count()
+        rowData[row]['labels'] = new.index.values.tolist()
+        rowData[row]['series'] = new['Mat'].tolist()
 
+        allLabels += list(set(rowData[row]['labels']) - set(allLabels))
 
+    if len(allLabels) != 0:
+        allLabels.sort()
+        # Now we have to fill in the data with all semesters between the first and last so the year looks full.
+        count = allLabels[0]
+        highestCount = allLabels[-1]
+        while count <= highestCount:
+            if count not in allLabels:
+                allLabels.append(count)
+            count += 1
+        allLabels.sort()
 
+    # We then fill the series with null values to match the labels in length
+    returnData = {'labels': allLabels, 'series': []}
+    for row in rowData:
+        fullRow = []
+        for label in allLabels:
+            if label in rowData[row]['labels']:
+                fullRow.append(rowData[row]['series'][rowData[row]['labels'].index(label)])
+            else:
+                fullRow.append(None)
+        returnData['series'].append(fullRow)
 
-    return json.dumps(data)
-
-
+    return json.dumps(returnData)
 
 # Saved queries mechanism
 

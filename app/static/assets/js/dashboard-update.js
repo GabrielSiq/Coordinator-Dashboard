@@ -63,16 +63,20 @@ function updateTable(content) {
 function updateBar(content) {
     var paramSet = {};
     var hasAny = false;
+    var labels = [];
     content.find(".row.param").each(function () {
+        var label = "";
         var params = {};
         $(this).find("select.form-control").each(function () {
             var value = $(this).val();
             params[$(this).attr("id")] = value;
+            label += label === "" ? value : (" " + value);
             if(hasAny === false && value !== ""){
                 hasAny = true;
             }
         });
         paramSet[$(this).attr("id")] = params;
+        labels.push(label);
     });
     var requestJSON = {"chartId" : content.closest('.card').attr("id"), "requestParams" : paramSet};
     var chart = content.find(".ct-chart.bar");
@@ -90,7 +94,12 @@ function updateBar(content) {
                         series: result['series']
                     };
                     var options = {
-
+                        plugins: [
+                            Chartist.plugins.legend({
+                                legendNames: labels
+                            }),
+                            Chartist.plugins.tooltip()
+                        ]
                     };
                     if (result['labels'].length !== 0) {
                         chart.html("");

@@ -42,17 +42,35 @@
 
 {% block content %}
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-12">
             <div class="card" type="bar-chart-view" id="semester-count">
                 <div class="header">
                     <h4 class="title">Student Semester Count</h4>
                     <p class="category">Histogram of student semester count for the selected semester</p>
                 </div>
+                <div class="query-controls">
+                    <form>
+                        <div class="row">
+                            <div class="form-group col-md-5">
+                                <label for="queryName">Saved Query</label>
+                                <select name="queryName" class="form-control">
+                                </select>
+                            </div>
+                            <div class="form-group button col-md-3">
+                                <button type="button" class="btn btn-warning btn-sq-sm rename-query" data-toggle="modal" data-target="#renameQuery"><span class="glyphicon glyphicon-pencil"></span></button>
+                                <button type="button" class="btn btn-danger btn-sq-sm delete-query"><span>&times;</span></button>
+                            </div>
+                            <div class="form-group button col-md-4">
+                                <button type="button" class="btn btn-success save-query" data-toggle="modal" data-target="#saveQuery">Save Config.</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
                 <div class="content">
                     <form>
                         <div class="row param" id="row0">
                             <div class="form-group col-md-2">
-                                <label for="semester">Course</label>
+                                <label for="semester">Semester</label>
                                 <select id="semester" class="form-control combobox">
                                     <option value=""></option>
                                     {% for semester in previous_semesters %}
@@ -60,6 +78,23 @@
                                         <option value={{ semester }}>{{ semString[:4] + "." +  semString[4] }}</option>
                                     {% endfor %}
                                 </select>
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label for="major">Major</label>
+                                <select id="major" class="form-control combobox">
+                                    <option value=""></option>
+                                    {% for major in major_list %}
+                                        <option value={{ major }}>{{ major }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group button">
+                                <button type="button" class="btn btn-danger clear" style="vertical-align: bottom;">Clear</button>
+                            </div>
+                        </div>
+                        <div class="row add">
+                            <div class="form-group">
+                                <button type="button" class="btn btn-warning add" style="vertical-align: bottom;">Add</button>
                             </div>
                         </div>
                     </form>

@@ -38,6 +38,8 @@ with application.app_context():
 
 #TODO: Move these aux functions to a different file
 
+# Initialization
+
 @application.before_first_request
 def initialize():
     """
@@ -50,18 +52,6 @@ def initialize():
     scheduler = BackgroundScheduler()
     scheduler.start()
     scheduler.add_job(updateData, trigger = "interval", days = 1)
-
-def getStudentAcademicData():
-    global STUDENT_ACADEMIC_DATA
-    return STUDENT_ACADEMIC_DATA
-
-def getStudentMappingData():
-    global STUDENT_MAPPING_DATA
-    return STUDENT_MAPPING_DATA
-
-def getInstructorEvaluationData():
-    global INSTRUCTOR_EVALUATION_DATA
-    return INSTRUCTOR_EVALUATION_DATA
 
 def createDummyUsers():
     # Test creation of users
@@ -148,10 +138,43 @@ def createDummyUsers():
     row['situation'] = ''
     data['row0'] = row.copy()
     queries.append(Query(user_id=1, visualization_id="enrollment-2", query_data=json.dumps(data), name="Logics - All"))
+    data = {}
+    row = {}
+    row['semester'] = "20142"
+    data['row0'] = row.copy()
+    row['semester'] = "20141"
+    data['row1'] = row.copy()
+    queries.append(
+        Query(user_id=1, visualization_id="semester-count", query_data=json.dumps(data), name="Last 2 Semesters"))
+    row['semester'] = "20142"
+    row['major'] = "CEG"
+    data['row0'] = row.copy()
+    row['semester'] = "20142"
+    row['major'] = "CCP"
+    data['row1'] = row.copy()
+    row['semester'] = "20142"
+    row['major'] = "CSI"
+    data['row2'] = row.copy()
+    queries.append(
+        Query(user_id=1, visualization_id="semester-count", query_data=json.dumps(data), name="Last Semester by Major"))
 
     for query in queries:
         db.session.add(query)
     db.session.commit()
+
+# Data providers
+
+def getStudentAcademicData():
+    global STUDENT_ACADEMIC_DATA
+    return STUDENT_ACADEMIC_DATA
+
+def getStudentMappingData():
+    global STUDENT_MAPPING_DATA
+    return STUDENT_MAPPING_DATA
+
+def getInstructorEvaluationData():
+    global INSTRUCTOR_EVALUATION_DATA
+    return INSTRUCTOR_EVALUATION_DATA
 
 def is_safe_url(target):
     """
@@ -193,6 +216,11 @@ def getUpdatedAcademicData(fromDb = False):
             raise
     STUDENT_ACADEMIC_DATA.columns = ['student_id', 'semester', 'course', 'units', 'section', 'grade',
                                              'situation', 'professor']
+    for index, row in STUDENT_ACADEMIC_DATA.iterrows():
+        if str(row.student_id)[3] == "0":
+            STUDENT_ACADEMIC_DATA.set_value(index, 'curriculum', "0")
+        else:
+            STUDENT_ACADEMIC_DATA.set_value(index, 'curriculum', "1")
     #TODO: LOG UPDATE SUCCESSFUL
 
 def persistAcademicData():
@@ -317,6 +345,11 @@ def loadData(dbOption = False):
                                   row.professor, row.grade)
             db.session.add(db_row)
         db.session.commit()
+
+    csv_url = os.path.join(SITE_ROOT, 'static', 'assets', 'data', 'student_major_mapping.csv')
+    global STUDENT_MAPPING_DATA
+    STUDENT_MAPPING_DATA = pd.read_csv(csv_url)
+    STUDENT_MAPPING_DATA.columns = ['student_id', 'major']
 
 @application.context_processor
 def injectDataTable():
