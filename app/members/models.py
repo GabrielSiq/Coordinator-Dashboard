@@ -205,7 +205,7 @@ class ExtraInfo(FlaskForm):
 
 class CustomRegisterForm(FlaskForm):
     password_validator_added = False
-
+    next = HiddenField()
     reg_next = HiddenField()    # for register.html
 
     username = StringField('Username', validators=[
