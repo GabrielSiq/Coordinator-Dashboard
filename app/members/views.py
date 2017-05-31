@@ -332,7 +332,10 @@ def customInvite():
 
         try:
             # Send 'invite' email
-            emails.send_invite_email(user_invite, accept_invite_link)
+            inviter = User.query.filter_by(id=user_invite.invited_by_user_id).first()
+            inviterName = inviter.first_name + " " + inviter.last_name
+            inviteData = {'inviter_name': inviterName, 'invite_link': accept_invite_link}
+            emails.send_invite_email(user_invite, inviteData)
         except Exception as e:
             # delete new User object if send fails
             db_adapter.delete_object(user_invite)
