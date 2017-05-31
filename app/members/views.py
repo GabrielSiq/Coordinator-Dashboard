@@ -46,7 +46,22 @@ def dashboard():
     previousSemesters = DATA['semester'].unique()
     previousSemesters.sort()
 
-    return render_template('dashboard.html', df = DATA.head(10).to_dict(), course_codes=courseCodes, situation_codes=situationCodes, previous_semesters = previousSemesters, major_list = majorList, department_list = departmentList)
+    # TODO: In the future, each class of user would have its own, custom dashboard. I'll leave the structure here but all dashboards point to the same view for now.
+
+    if current_user.has_role(ADMIN_ROLE):
+        return render_template('dashboard.html', df=DATA.head(10).to_dict(), course_codes=courseCodes,
+                               situation_codes=situationCodes, previous_semesters=previousSemesters,
+                               major_list=majorList, department_list=departmentList)
+    elif current_user.has_role(COORDINATOR_ROLE):
+        return render_template('dashboard.html', df=DATA.head(10).to_dict(), course_codes=courseCodes,
+                               situation_codes=situationCodes, previous_semesters=previousSemesters,
+                               major_list=majorList, department_list=departmentList)
+    elif current_user.has_role(PROFESSOR_ROLE):
+        return render_template('dashboard.html', df=DATA.head(10).to_dict(), course_codes=courseCodes,
+                               situation_codes=situationCodes, previous_semesters=previousSemesters,
+                               major_list=majorList, department_list=departmentList)
+    elif current_user.has_role(STUDENT_ROLE):
+        return render_template('dashboard.html', df = DATA.head(10).to_dict(), course_codes=courseCodes, situation_codes=situationCodes, previous_semesters = previousSemesters, major_list = majorList, department_list = departmentList)
 
 @application.route('/table')
 @roles_required((ADMIN_ROLE, COORDINATOR_ROLE))
