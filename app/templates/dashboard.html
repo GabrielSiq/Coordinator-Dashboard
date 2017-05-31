@@ -42,7 +42,7 @@
 
 {% block content %}
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-8">
             <div class="card" type="bar-chart-view" id="semester-count">
                 <div class="header">
                     <h4 class="title">Student Semester Count</h4>
@@ -98,7 +98,45 @@
                             </div>
                         </div>
                     </form>
-                    <div id="chartBar" class="ct-chart bar"></div>
+                    <div id="semester-count-chart" class="ct-chart bar"></div>
+                </div>
+            </div>
+        </div>
+         <div class="col-md-4">
+            <div class="card" type="pie-chart-view" id="department-breakdown">
+                <div class="header">
+                    <h4 class="title">Student Breakdown</h4>
+                    <p class="category">Breakdown of students by major per department</p>
+                </div>
+                <div class="content">
+                    <form>
+                        <div class="row param" id="row0">
+                            <div class="form-group col-md-3">
+                                <label for="department">Department</label>
+                                <select id="department" class="form-control combobox">
+                                    <option value=""></option>
+                                    {% for department in department_list %}
+                                        {% for key, value in  department.items() %}
+                                            <option value={{ key }}>{{ value }}</option>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="semester">Semester</label>
+                                <select id="semester" class="form-control combobox">
+                                    <option value=""></option>
+                                    {% for semester in previous_semesters %}
+                                        {% set semString = semester|string() %}
+                                        <option value={{ semester }}>{{ semString[:4] + "." +  semString[4] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="department-breakdown-chart" class="ct-chart pie">
+
+                    </div>
                 </div>
             </div>
         </div>
@@ -362,32 +400,6 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-4">
-            <div class="card">
-                <div class="header">
-                    <h4 class="title">Sample Pie Chart</h4>
-                    <p class="category">This uses <a target="_blank" href="https://gionkunz.github.io/chartist-js/">Chartist.js</a></p>
-                </div>
-                <div class="content">
-                    <div id="chartPreferences" class="ct-chart ct-perfect-fourth">
-
-                    </div>
-
-                    <div class="footer">
-                        <div class="legend">
-                            <i class="fa fa-circle text-info"></i> Slice 1
-                            <i class="fa fa-circle text-danger"></i> Slice 2
-                            <i class="fa fa-circle text-warning"></i> Slice 3
-                        </div>
-                        <hr>
-                        <div class="stats">
-                            <i class="fa fa-clock-o"></i> Timestamp for graph update info
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div class="col-md-8">
             <div class="card">
                 <div class="header">
@@ -407,33 +419,6 @@
                         <hr>
                         <div class="stats">
                             <i class="fa fa-history"></i> Same thing...
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card ">
-                <div class="header">
-                    <h4 class="title">Sample Bar Chart</h4>
-                    <p class="category">Chartist is good for simple, good looking, responsive charts. We can use others also...</p>
-                </div>
-                <div class="content">
-                    <div id="chartActivity" class="ct-chart">
-
-                    </div>
-
-                    <div class="footer">
-                        <div class="legend">
-                            <i class="fa fa-circle text-info"></i> Category 1
-                            <i class="fa fa-circle text-danger"></i> Category 2
-                        </div>
-                        <hr>
-                        <div class="stats">
-                            <i class="fa fa-check"></i> Same thing...
                         </div>
                     </div>
                 </div>

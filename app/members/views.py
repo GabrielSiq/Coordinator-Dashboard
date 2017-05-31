@@ -27,6 +27,14 @@ def dashboard():
     DATA = getUserAllowedData()
     mappingData = getStudentMappingData()
 
+    departments = Department.query.all()
+
+    departmentList = []
+    for department in departments:
+        entry = {}
+        entry[department.id] = department.code
+        departmentList.append(entry.copy())
+
     majorList = mappingData['major'].unique()
 
     courseCodes = DATA['course'].unique()
@@ -38,7 +46,7 @@ def dashboard():
     previousSemesters = DATA['semester'].unique()
     previousSemesters.sort()
 
-    return render_template('dashboard.html', df = DATA.head(10).to_dict(), course_codes=courseCodes, situation_codes=situationCodes, previous_semesters = previousSemesters, major_list = majorList)
+    return render_template('dashboard.html', df = DATA.head(10).to_dict(), course_codes=courseCodes, situation_codes=situationCodes, previous_semesters = previousSemesters, major_list = majorList, department_list = departmentList)
 
 @application.route('/table')
 @roles_required((ADMIN_ROLE, COORDINATOR_ROLE))
@@ -574,6 +582,8 @@ def getChartData():
         return getAverageGradeData(requestParams)
     elif chartId in ["semester-count"]:
         return getStudentSemesterCount(requestParams)
+    elif chartId in ["department-breakdown"]:
+        return getDepartmentBreakdown(requestParams)
     else:
         flash("Unknown visualization type.", "error")
         return ""
@@ -826,6 +836,45 @@ def getStudentSemesterCount(requestParams):
         returnData['series'].append(fullRow)
 
     return json.dumps(returnData)
+
+@application.route('/getMajorsInDepartment')
+@login_required
+def getMajorsInDepartment(departmentId):
+    #TODO: this function won't be implemented for the first MVP. The stubs here are only for demo purposes.
+
+    # This dict should be replaced by a method for obtaining the majors in all departments
+    departmentCourses = {"1" : ["CCP", "CEG", "CSI"]}
+    try:
+        return departmentCourses[departmentId]
+    except:
+        raise
+
+@application.route('/getDepartmentBreakdown')
+@login_required
+def getDepartmentBreakdown(requestParams):
+    try:
+        departmentId = requestParams['row0']['department']
+        semester = requestParams['row0']['semester']
+        majors = getMajorsInDepartment(departmentId)
+    except:
+        flash("Parameter error", "error")
+        return ""
+
+    if semester != "":
+        academicData = getStudentAcademicData()
+        majorMapping = getStudentMappingData()
+
+        currentStudents = academicData[(academicData['semester'] == int(semester)) & ~(academicData['situation'].isin(['MT', 'CL', 'DT']))]['student_id'].unique()
+
+        result = majorMapping[majorMapping['student_id'].isin(currentStudents)]
+
+        data = {'labels':[],'series':[]}
+        for major in majors:
+            data['labels'].append(major)
+            data['series'].append(result[result['major'] == major].shape[0])
+        return json.dumps(data)
+    else:
+        return ""
 
 # Saved queries mechanism
 

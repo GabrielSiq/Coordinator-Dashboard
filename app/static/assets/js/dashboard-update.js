@@ -195,6 +195,73 @@ function updateChart(content) {
     }
 }
 
+function updatePie(content) {
+    var paramSet = {};
+    var hasAny = false;
+    content.find(".row.param").each(function () {
+        var params = {};
+        $(this).find("select.form-control").each(function () {
+            var value = $(this).val();
+            params[$(this).attr("id")] = value;
+            if(hasAny === false && value !== ""){
+                hasAny = true;
+            }
+        });
+        paramSet[$(this).attr("id")] = params;
+    });
+    var requestJSON = {"chartId" : content.closest('.card').attr("id"), "requestParams" : paramSet};
+    var chart = content.find(".ct-chart.pie");
+    if(hasAny){
+        $.ajax({
+            type: "POST",
+            url: "/getChartData",
+            contentType:"application/json",
+            data : JSON.stringify(requestJSON),
+            success: function(resultJSON) {
+                if($.trim(resultJSON)) {
+                    var result = JSON.parse(resultJSON);
+                    var total = 0;
+                    for(var i =0; i < result['labels'].length; i++){
+                        total += result['series'][i]
+                    }
+                    var labels = [];
+                    for(var i =0; i < result['labels'].length; i++){
+                        labels[i] = (Math.round(result['series'][i]*10000/total)/100).toString() + '%';
+                    }
+                    var data = {
+                        labels: labels,
+                        series: result['series']
+                    };
+                    var options = {
+                        plugins: [
+                            Chartist.plugins.legend({
+                                legendNames: result['labels']
+                            }),
+                            Chartist.plugins.tooltip()
+                        ]
+                    };
+                    if (result['labels'].length !== 0) {
+                        chart.html("");
+                        new Chartist.Pie('#' + chart.attr("id"),data, options);
+                    }
+                    else {
+                        chart.html("<p style='text-align:center; vertical-align:middle'>No data found for given parameters.</p>");
+                    }
+                }
+                else {
+                    chart.html("<p style='text-align:center; vertical-align:middle'>Query submission error.</p>");
+                }
+            },
+            error: function() {
+                alert('error');
+            }
+        });
+    }
+    else{
+        chart.html("");
+    }
+}
+
 function updateView(viewType, content){
     switch(viewType){
         case "line-chart-view":
@@ -205,6 +272,9 @@ function updateView(viewType, content){
             break;
         case "bar-chart-view":
             updateBar(content);
+            break;
+        case "pie-chart-view":
+            updatePie(content);
             break;
         default:
         //
