@@ -417,7 +417,7 @@ def manageInvites():
             userInfo['email'] = invite.email
             userInfo['department'] = Department.query.filter_by(id=invite.department_id).first().code
             userInfo['role'] = Role.query.filter_by(id=invite.role_id).first().name
-            userInfo['date'] = User.query.filter_by(email=invite.email).first().confirmed_at
+            userInfo['date'] = User.query.filter_by(email=invite.email).first().confirmed_at.date()
             convertedList.append(userInfo.copy())
         else:
             is_valid, has_expired, user_id = user_manager.verify_token(
@@ -429,7 +429,7 @@ def manageInvites():
                 userInfo['email'] = invite.email
                 userInfo['department'] = Department.query.filter_by(id=invite.department_id).first().code
                 userInfo['role'] = Role.query.filter_by(id=invite.role_id).first().name
-                userInfo['date'] = invite.date
+                userInfo['date'] = invite.date.date()
                 invitedList.append(userInfo.copy())
 
 
