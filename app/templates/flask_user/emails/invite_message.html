@@ -78,12 +78,12 @@ Sizes: [
 			#emailBody{background-color:#FFFFFF;}
 			#emailFooter{background-color:#E1E1E1;}
 			.nestedContainer{background-color:#F8F8F8; border:1px solid #CCCCCC;}
-			.emailButton{background-color:#4091ff; border-collapse:separate;}
+			.emailButton{background-color: #4091FF !important; border-collapse:separate;}
 			.buttonContent{color:#FFFFFF; font-family:Helvetica; font-size:18px; font-weight:bold; line-height:100%; padding:15px; text-align:center;}
 			.buttonContent a{color:#FFFFFF; display:block; text-decoration:none!important; border:0!important;}
 			.emailCalendar{background-color:#FFFFFF; border:1px solid #CCCCCC;}
-			.emailCalendarMonth{background-color:#4091ff; color:#FFFFFF; font-family:Helvetica, Arial, sans-serif; font-size:16px; font-weight:bold; padding-top:10px; padding-bottom:10px; text-align:center;}
-			.emailCalendarDay{color:#4091ff; font-family:Helvetica, Arial, sans-serif; font-size:60px; font-weight:bold; line-height:100%; padding-top:20px; padding-bottom:20px; text-align:center;}
+			.emailCalendarMonth{background-color:#4091ff !important; color:#FFFFFF; font-family:Helvetica, Arial, sans-serif; font-size:16px; font-weight:bold; padding-top:10px; padding-bottom:10px; text-align:center;}
+			.emailCalendarDay{color:#4091ff !important; font-family:Helvetica, Arial, sans-serif; font-size:60px; font-weight:bold; line-height:100%; padding-top:20px; padding-bottom:20px; text-align:center;}
 			.imageContentText {margin-top: 10px;line-height:0;}
 			.imageContentText a {line-height:0;}
 			#invisibleIntroduction {display:none !important;} /* Removing the introduction text from the view */
@@ -305,7 +305,7 @@ Sizes: [
 										tables centered in the emailBody table,
 										in case its width is set to 100%.
 									-->
-									<table border="0" cellpadding="0" cellspacing="0" width="100%" style="color:#FFFFFF;" bgcolor="#3498db">
+									<table border="0" cellpadding="0" cellspacing="0" width="100%" style="color:#FFFFFF;" bgcolor="#4091ff">
 										<tr>
 											<td align="center" valign="top">
 												<!-- FLEXIBLE CONTAINER // -->
@@ -328,8 +328,9 @@ Sizes: [
 															<table border="0" cellpadding="30" cellspacing="0" width="100%">
 																<tr>
 																	<td align="center" valign="top" class="textContent">
-																		<h1 style="color:#FFFFFF;line-height:100%;font-family:Helvetica,Arial,sans-serif;font-size:35px;font-weight:normal;margin-bottom:5px;text-align:center;">Invitation</h1>
-																		<h2 style="text-align:center;font-weight:normal;font-family:Helvetica,Arial,sans-serif;font-size:23px;margin-bottom:10px;color:#205478;line-height:135%;">PUC-Rio Academic Monitoring System</h2>
+																		<img src="http://i.imgur.com/oSwGSH3.png" width="120" class="flexibleImage" style="max-width:100%;" alt="Text" title="Text" />
+                                                                        <br>
+																		<h2 style="text-align:center;font-weight:normal;font-family:Helvetica,Arial,sans-serif;font-size:20px;margin-bottom:10px;color:#205478;line-height:135%;">PUC-Rio Academic Monitoring System</h2>
 																		<div style="text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;color:#FFFFFF;line-height:135%;">A new platform for obtaining quick academic insights about PUC-Rio.</div>
 																	</td>
 																</tr>
@@ -374,8 +375,10 @@ Sizes: [
                                                                             you to edit certain row. It makes it easy for you to quickly edit row sections.
                                                                             http://kb.mailchimp.com/templates/code/create-editable-content-areas-with-mailchimps-template-language
                                                                         -->
-                                                                        <h3 style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:normal;margin-top:0;margin-bottom:3px;text-align:left;">Hello and welcome!</h3>
+                                                                        <h1 style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:24px;font-weight:bold;margin-top:0;margin-bottom:3px;text-align:left;">Invitation</h1>
                                                                         <br>
+                                                                        <h3 style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:normal;margin-top:0;margin-bottom:3px;text-align:left;">Hello and welcome!</h3>
+
                                                                         <div style="text-align:left;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;color:#5F5F5F;line-height:135%;">{{ accept_invite_link.inviter_name }} has invited you to join the PUC-Rio Academic Monitoring System. To accept this invitation, register an account and start exploring, click the button below.</div>
                                                                         <br>
                                                                         <div style="text-align:left;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;color:#5F5F5F;line-height:135%;">Best,</div>
