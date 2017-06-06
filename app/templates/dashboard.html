@@ -3,7 +3,6 @@
 {% block css %}
     <link href="{{ url_for('static', filename='assets/bower_components/chartist-plugin-legend/chartist-plugin-legend.css')}}" rel="stylesheet" type='text/css'/>
     <link href="{{ url_for('static', filename='assets/bower_components/chartist-plugin-tooltip/dist/chartist-plugin-tooltip.css')}}" rel="stylesheet" type='text/css'/>
-
     <style>
         .form-group{
             padding: 5px 15px 0;
@@ -41,6 +40,21 @@
 {% endblock css %}
 
 {% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="header">
+                    <h4 class="title">Average Evaluation Grade vs Class Average</h4>
+                    <p class="category">By question</p>
+                </div>
+                <div class="content">
+                    <div id="chartHours" class="ct-chart scatter">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-8">
             <div class="card" type="bar-chart-view" id="semester-count">
@@ -482,5 +496,6 @@
     <script src="{{ url_for('static', filename='assets/bower_components/chartist-plugin-legend/chartist-plugin-legend.js')}}"></script>
     <script src="{{ url_for('static', filename='assets/bower_components/chartist-plugin-tooltip/dist/chartist-plugin-tooltip.min.js')}}"></script>
     <script src="{{ url_for('static', filename='assets/js/dashboard-update.js')}}"></script>
+
 {% endblock scripts %}
 

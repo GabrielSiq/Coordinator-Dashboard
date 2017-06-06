@@ -15,6 +15,7 @@ from wtforms import ValidationError
 from members.roles import ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE, STUDENT_ROLE
 import math
 from flask_mail import Mail
+from flask_cache import Cache
 
 # Initializes application
 application = Flask(__name__)
@@ -22,6 +23,8 @@ application.config.from_object("app.config.Config")
 
 # Initializes db
 db.init_app(application)
+
+application.cache = Cache(application)
 
 # Defines some global variables
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
@@ -316,6 +319,8 @@ def updateData():
         persistEvaluationData()
     except URLError:
         getUpdatedEvaluationData(fromDb = True)
+
+    application.cache.clear()
 
 def loadData(dbOption = False):
     """

@@ -51,3 +51,5 @@ class Config(object):
     MAIL_PASSWORD = "ProjetoFinal"
     MAIL_DEFAULT_SENDER = "puc-rio.ams@outlook.com"
 
+    CACHE_TYPE = 'simple'
+

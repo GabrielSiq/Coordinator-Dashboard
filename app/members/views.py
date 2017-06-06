@@ -24,7 +24,7 @@ def dashboard():
     """
     Our main dashboard. Does some data processing and renders dashboard view.
     """
-    DATA = getUserAllowedData()
+    DATA = getUserAllowedData('academic')
     mappingData = getStudentMappingData()
 
     departments = Department.query.all()
@@ -70,12 +70,11 @@ def table():
     """
     Big table with our academic data. Won't be present in the final product.
     """
-    studentData = getUserAllowedData()
+    studentData = getUserAllowedData('academic')
     df = pd.DataFrame(columns=studentData.columns)
 
     instructorData = getInstructorEvaluationData()
     df2 = pd.DataFrame(columns=instructorData.columns)
-
 
     return render_template('table.html', df = df, df2=df2)
 
@@ -573,11 +572,12 @@ def updateProfile():
 
 # Data providers
 
-def getUserAllowedData():
-    data = getStudentAcademicData()
-    if not current_user.has_roles((ADMIN_ROLE, COORDINATOR_ROLE)):
-        department = Department.query.filter_by(id = str(current_user.departments[0])).first().code
-        data = data[data['course'].str.contains(department)]
+def getUserAllowedData(type):
+    if type == 'academic':
+        data = getStudentAcademicData()
+        if not current_user.has_roles((ADMIN_ROLE, COORDINATOR_ROLE)):
+            department = Department.query.filter_by(id = str(current_user.departments[0])).first().code
+            data = data[data['course'].str.contains(department)]
     return data
 
 @application.route('/getChartData', methods=['POST'])
@@ -609,7 +609,7 @@ def getChartData():
 @application.route('/getEnrollmentData', methods=['POST'])
 @login_required
 def getEnrollmentData(requestParams):
-    DATA = getUserAllowedData()
+    DATA = getUserAllowedData('academic')
 
     rowData = {}
     allLabels = []
@@ -663,7 +663,7 @@ def getEnrollmentData(requestParams):
 @application.route('/getCancellationData', methods=['POST'])
 @login_required
 def getCancellationData(requestParams):
-    DATA = getUserAllowedData()
+    DATA = getUserAllowedData('academic')
     filtered = DATA
     onlyRow = requestParams['row0']
     if("sort" not in onlyRow):
@@ -680,7 +680,7 @@ def getCancellationData(requestParams):
 @application.route('/getCancellationData', methods=['POST'])
 @login_required
 def getAverageGradeData(requestParams):
-    DATA = getUserAllowedData()
+    DATA = getUserAllowedData('academic')
 
     rowData = {}
     allLabels = []
@@ -738,7 +738,7 @@ def getAverageGradeData(requestParams):
 @application.route('/getProfessors', methods=['POST'])
 @login_required
 def getProfessors():
-    data = getUserAllowedData()
+    data = getUserAllowedData('academic')
     data = data[data['course'] == request.json['course']]
     data = data[pd.notnull(data['professor'])]
     professors = data['professor'].unique().tolist()
@@ -749,7 +749,7 @@ def getProfessors():
 @roles_required((ADMIN_ROLE, COORDINATOR_ROLE))
 @login_required
 def getStudentDataTable():
-    data = getUserAllowedData()
+    data = getUserAllowedData('academic')
     response = {}
     response['draw'] = request.args.get('draw', None)
     response['recordsTotal'] = len(data)
@@ -794,7 +794,7 @@ def getStudentSemesterCount(requestParams):
     rowData = {}
     allLabels = []
 
-    academicData = getStudentAcademicData()
+    academicData = getUserAllowedData('academic')
     majorMapping = getStudentMappingData()
     mergedData = pd.merge(academicData, majorMapping, how='inner', on='student_id')
 
@@ -879,7 +879,7 @@ def getDepartmentBreakdown(requestParams):
         return ""
 
     if semester != "":
-        academicData = getStudentAcademicData()
+        academicData = getUserAllowedData('academic')
         majorMapping = getStudentMappingData()
 
         currentStudents = academicData[(academicData['semester'] == int(semester)) & ~(academicData['situation'].isin(['MT', 'CL', 'DT']))]['student_id'].unique()
@@ -895,18 +895,28 @@ def getDepartmentBreakdown(requestParams):
         return ""
 
 
-@application.route('/getEvaluationsScatter')
+@application.route('/getEvaluationsScatter', methods=['POST'])
+@application.cache.cached(timeout=86400)
 @login_required
 def getEvaluationsScatter():
     data = getInstructorEvaluationData()
+    academicData = getUserAllowedData('academic')
     questions = data['question_text'].unique()
-
+    returnData = {'labels' : [], 'series' : []}
     for question in questions:
+        series = []
         filtered = data[data['question_text'] == question]
-        for row in filtered.iterrows():
-            print row
+        for index, row in filtered.iterrows():
+            matchingRecords = academicData[(academicData['course'] == row['course']) & (academicData['semester'] == row['semester']) & (academicData['section'] == row['section']) & (academicData['professor'] == row['professor']) &(academicData['situation'].isin(['AP', 'RM']))]
+            evaluations = row['grade_1'] + row['grade_2']+ row['grade_3'] + row['grade_4'] + row['grade_5']
+            if evaluations != 0 and not matchingRecords.empty:
+                avgProfGrade = (row['grade_1'] * 1 + row['grade_2'] * 2 + row['grade_3'] * 3 + row['grade_4'] * 4 + row['grade_5'] * 5) / float(evaluations)
+                avgStudentGrade = matchingRecords['grade'].mean()
+                series.append({'x':avgProfGrade, 'y': avgStudentGrade})
+        returnData['labels'].append(str(question))
+        returnData['series'].append(series)
 
-    return ""
+    return json.dumps(returnData)
 
 
 
