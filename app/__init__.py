@@ -336,8 +336,13 @@ def loadData(dbOption = False):
     global INSTRUCTOR_EVALUATION_DATA
     INSTRUCTOR_EVALUATION_DATA = pd.read_csv(csv_url)
     INSTRUCTOR_EVALUATION_DATA.columns = ["semester", "course", "section", "professor", "student_count", "question_text", "grade_1", "grade_2", "grade_3", "grade_4", "grade_5", "grade_na", "average", "standard_deviation", "total"]
+    questions = INSTRUCTOR_EVALUATION_DATA['question_text'].unique()
+    i = 1
+    for question in questions:
+        INSTRUCTOR_EVALUATION_DATA.replace(question, i, inplace=True)
+        i += 1
     del INSTRUCTOR_EVALUATION_DATA['total']
-    del INSTRUCTOR_EVALUATION_DATA['question_text']
+    # del INSTRUCTOR_EVALUATION_DATA['question_text']
 
     if(dbOption == True):
         for index, row in STUDENT_ACADEMIC_DATA.iterrows():

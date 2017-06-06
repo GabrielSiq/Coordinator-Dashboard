@@ -894,6 +894,23 @@ def getDepartmentBreakdown(requestParams):
     else:
         return ""
 
+
+@application.route('/getEvaluationsScatter')
+@login_required
+def getEvaluationsScatter():
+    data = getInstructorEvaluationData()
+    questions = data['question_text'].unique()
+
+    for question in questions:
+        filtered = data[data['question_text'] == question]
+        for row in filtered.iterrows():
+            print row
+
+    return ""
+
+
+
+
 # Saved queries mechanism
 
 @application.route('/savedQueries', methods=['POST'])
