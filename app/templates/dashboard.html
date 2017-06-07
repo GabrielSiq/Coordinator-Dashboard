@@ -42,7 +42,35 @@
 {% block content %}
     <div class="row">
         <div class="col-md-12">
-            <div class="card">
+            <div class="card" type="area-chart-view" id="enrollment-history">
+                <div class="header">
+                    <h4 class="title">Enrollment History</h4>
+                    <p class="category">By course</p>
+                </div>
+                <div class="content">
+                    <form>
+                        <div class="row param" id="row0">
+                            <div class="form-group col-sm-3">
+                                <label for="course">Course</label>
+                                <select id="course" class="form-control combobox">
+                                    <option value=""></option>
+                                    {% for course_code in course_codes %}
+                                        <option value={{ course_code }}>{{ course_code }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="enrollment-history-chart" class="ct-chart area">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card" type="scatter-plot-view" id="evaluations-average">
                 <div class="header">
                     <h4 class="title">Average Evaluation Grade vs Class Average</h4>
                     <p class="category">By question</p>

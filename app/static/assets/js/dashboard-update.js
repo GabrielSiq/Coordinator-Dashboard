@@ -59,7 +59,6 @@ function updateTable(content) {
     }
 }
 
-
 function updateBar(content) {
     var paramSet = {};
     var hasAny = false;
@@ -123,6 +122,71 @@ function updateBar(content) {
     }
 }
 
+function updateArea(content) {
+    var paramSet = {};
+    var hasAny = false;
+    content.find(".row.param").each(function () {
+        var params = {};
+        $(this).find("select.form-control").each(function () {
+            var value = $(this).val();
+            params[$(this).attr("id")] = value;
+            if(hasAny === false && value !== ""){
+                hasAny = true;
+            }
+        });
+        paramSet[$(this).attr("id")] = params;
+    });
+    var requestJSON = {"chartId" : content.closest('.card').attr("id"), "requestParams" : paramSet};
+    var chart = content.find(".ct-chart.area");
+    if(hasAny){
+        $.ajax({
+            type: "POST",
+            url: "/getChartData",
+            contentType:"application/json",
+            data : JSON.stringify(requestJSON),
+            success: function(resultJSON) {
+                if($.trim(resultJSON)) {
+                    var result = JSON.parse(resultJSON);
+                    for(var i in result['labels']){
+                        var labelString = result['labels'][i].toString();
+                        var len = labelString.length;
+                        result['labels'][i] = labelString.slice(len-3, len-1)+"."+labelString.slice(len-1, len)
+                    }
+                    var data = {
+                        labels: result['labels'],
+                        series: result['series']
+                    };
+                    var options = {
+                        showArea: true,
+                        lineSmooth: Chartist.Interpolation.none({
+                            fillHoles: true
+                        }),
+                        plugins: [
+                            Chartist.plugins.tooltip()
+                        ]
+                    };
+                    if (result['labels'].length !== 0) {
+                        chart.html("");
+                        new Chartist.Line('#' + chart.attr("id"),data, options);
+                    }
+                    else {
+                        chart.html("<p style='text-align:center; vertical-align:middle'>No data found for given parameters.</p>");
+                    }
+                }
+                else {
+                    chart.html("<p style='text-align:center; vertical-align:middle'>Query submission error.</p>");
+                }
+            },
+            error: function() {
+                alert('error');
+            }
+        });
+    }
+    else{
+        chart.html("");
+    }
+}
+
 // Updates a line chart based on the currently selected filters
 function updateChart(content) {
     var paramSet = {};
@@ -135,7 +199,7 @@ function updateChart(content) {
             var value = $(this).val();
             params[$(this).attr("id")] = value;
             label += label === "" ? value : (" " + value);
-            if(hasAny === false && $(this).val() !== ""){
+            if(hasAny === false && value !== ""){
                 hasAny = true;
             }
         });
@@ -275,6 +339,9 @@ function updateView(viewType, content){
             break;
         case "pie-chart-view":
             updatePie(content);
+            break;
+        case "area-chart-view":
+            updateArea(content);
             break;
         default:
         //
@@ -605,51 +672,50 @@ $(document).ready(function(){
         });
     });
 
-    $.ajax({
-            type: "POST",
-            url: "/getEvaluationsScatter",
-            contentType:"application/json",
-            data : "",
-            success: function(resultJSON) {
-                if($.trim(resultJSON)) {
-                    var result = JSON.parse(resultJSON);
-                    var data = {
-                        labels: result['labels'],
-                        series: result['series']
-                    };
-                    var options = {
-                        showLine: false,
-                        axisX: {
-                            type: Chartist.FixedScaleAxis,
-                            high: 5,
-                            low: 0,
-                            divisor: 5,
-                            onlyInteger: false
-                        },
-                        plugins: [
-                            Chartist.plugins.legend({
-                                legendNames: ["1", "2", "3", "4", "5"]
-                            }),
-                            Chartist.plugins.tooltip()
-                        ]
-                    };
-                    if (result['labels'].length !== 0) {
-                        //chart.html("");
-                        new Chartist.Line('#chartHours',data, options);
-                    }
-                    else {
-                        chart.html("<p style='text-align:center; vertical-align:middle'>No data found for given parameters.</p>");
-                    }
-                }
-                else {
-                    chart.html("<p style='text-align:center; vertical-align:middle'>Query submission error.</p>");
-                }
-            },
-            error: function() {
-                alert('error');
-            }
-        });
-
+    // $.ajax({
+    //         type: "POST",
+    //         url: "/getEvaluationsScatter",
+    //         contentType:"application/json",
+    //         data : "",
+    //         success: function(resultJSON) {
+    //             if($.trim(resultJSON)) {
+    //                 var result = JSON.parse(resultJSON);
+    //                 var data = {
+    //                     labels: result['labels'],
+    //                     series: result['series']
+    //                 };
+    //                 var options = {
+    //                     showLine: false,
+    //                     axisX: {
+    //                         type: Chartist.FixedScaleAxis,
+    //                         high: 5,
+    //                         low: 0,
+    //                         divisor: 5,
+    //                         onlyInteger: false
+    //                     },
+    //                     plugins: [
+    //                         Chartist.plugins.legend({
+    //                             legendNames: ["1", "2", "3", "4", "5"]
+    //                         }),
+    //                         Chartist.plugins.tooltip()
+    //                     ]
+    //                 };
+    //                 if (result['labels'].length !== 0) {
+    //                     //chart.html("");
+    //                     new Chartist.Line('#chartHours',data, options);
+    //                 }
+    //                 else {
+    //                     chart.html("<p style='text-align:center; vertical-align:middle'>No data found for given parameters.</p>");
+    //                 }
+    //             }
+    //             else {
+    //                 chart.html("<p style='text-align:center; vertical-align:middle'>Query submission error.</p>");
+    //             }
+    //         },
+    //         error: function() {
+    //             alert('error');
+    //         }
+    //     });
 });
 
 

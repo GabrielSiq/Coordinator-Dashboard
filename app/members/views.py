@@ -602,6 +602,8 @@ def getChartData():
         return getStudentSemesterCount(requestParams)
     elif chartId in ["department-breakdown"]:
         return getDepartmentBreakdown(requestParams)
+    elif chartId in ["enrollment-history"]:
+        return getSingleSeriesEnrollment(requestParams)
     else:
         flash("Unknown visualization type.", "error")
         return ""
@@ -918,8 +920,58 @@ def getEvaluationsScatter():
 
     return json.dumps(returnData)
 
+@application.route('/getSingleSeriesEnrollment')
+@roles_required((ADMIN_ROLE, COORDINATOR_ROLE))
+@login_required
+def getSingleSeriesEnrollment(requestParams):
+    data = getUserAllowedData('academic')
+
+    situationData = {}
+    allLabels = []
+
+    #
+    course = requestParams['row0']['course']
+
+    filtered = data[data['course'] == course]
+    situations = filtered['situation'].unique()
 
 
+    for situation in situations:
+        situationData[situation] = {}
+        sample = filtered[filtered['situation'] == situation]
+        count = sample.groupby('semester').size()
+        situationData[situation]['labels'] = count.index.values.tolist()
+        situationData[situation]['series'] = count.values.tolist()
+        allLabels += list(set(situationData[situation]['labels']) - set(allLabels))
+
+    # Formats the data to return in a dict and converts to json
+    if len(allLabels) != 0:
+        allLabels.sort()
+
+        # Now we have to fill in the data with all semesters between the first and last so the year looks full.
+        year = allLabels[0]
+        lastYear = allLabels[-1]
+        while year <= lastYear:
+            if year not in allLabels:
+                allLabels.append(year)
+            if (year % 10) == 1:
+                year += 1
+            else:
+                year += 9
+        allLabels.sort()
+
+    # We then fill the series with null values to match the labels in length
+    data = {'labels': allLabels, 'series': []}
+    for situation in situationData:
+        fullRow = []
+        for label in allLabels:
+            if label in situationData[situation]['labels']:
+                fullRow.append(situationData[situation]['series'][situationData[situation]['labels'].index(label)])
+            else:
+                fullRow.append(None)
+        data['series'].append(fullRow)
+
+    return json.dumps(data)
 
 # Saved queries mechanism
 
