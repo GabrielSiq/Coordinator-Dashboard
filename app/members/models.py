@@ -3,6 +3,7 @@ from flask_user import UserMixin, current_app
 from flask_wtf import FlaskForm
 from wtforms import SelectField, StringField, HiddenField, validators, PasswordField, SubmitField
 from wtforms.validators import DataRequired, ValidationError
+from roles import ADMIN_ROLE
 
 # Initializes SQLALchemy
 db = SQLAlchemy()
@@ -111,13 +112,20 @@ class User(db.Model, UserMixin):
     # dataRows = db.relationship('AcademicData')
     # major = db.relationship('StudentMajorMapping')
 
+    @property
+    def full_name(self):
+        return self.first_name + " " + self.last_name
+
+    @property
+    def is_admin(self):
+        return self.has_role(ADMIN_ROLE)
 
     def is_active(self):
       return self.is_enabled
 
 class Query(db.Model):
     """
-    First draft model for saving query preferences. Currently links the preferences in json form to a user and a specific element on the dashboard.
+    Model for saving query preferences. Links the preferences in JSON format to a user and a specific element on the dashboard.
     """
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
@@ -125,7 +133,7 @@ class Query(db.Model):
     query_data = db.Column(db.JSON, nullable=False)
     name = db.Column(db.String(50), nullable=False)
 
-    # Unique names for saved queries from a certain user in a certain visualization
+    # Unique names for saved queries from a given user in a given visualization
     __table_args__ = (db.UniqueConstraint('user_id', 'visualization_id', 'name', name="_query_uc"),)
 
 class Role(db.Model):
