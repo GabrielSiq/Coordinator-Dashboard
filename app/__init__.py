@@ -165,6 +165,29 @@ def createDummyUsers():
         db.session.add(query)
     db.session.commit()
 
+    invite = UserInvitation(email='gabrielsiq@msn.com', invited_by_user_id='3', enrollment_number='1237',
+                            department_id='1', role_id='4', date=datetime.datetime.now() - datetime.timedelta(days=6), user_registered=True)
+
+    db.session.add(invite)
+    db.session.commit()
+
+    invite = UserInvitation(email='abraposo@tecgraf.puc-rio.br', invited_by_user_id='3', enrollment_number='1236',
+                            department_id='1', role_id='3', date=datetime.datetime.now() - datetime.timedelta(days=4))
+
+    db.session.add(invite)
+    db.session.commit()
+
+    invite = UserInvitation(email='ivan@inf.puc-rio.br', invited_by_user_id='1', enrollment_number='1235',
+                            department_id='1', role_id='2', date=datetime.datetime.now() - datetime.timedelta(days=2))
+
+    db.session.add(invite)
+    db.session.commit()
+
+    invite = UserInvitation(email='simone@inf.puc-rio.br', invited_by_user_id = '3', enrollment_number='1234', department_id='1', role_id= '3', date=datetime.datetime.now())
+
+    db.session.add(invite)
+    db.session.commit()
+
 # Data providers
 
 def getStudentAcademicData():

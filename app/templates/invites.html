@@ -45,6 +45,9 @@
                             <th>Role</th>
                             <th>Department</th>
                             <th>Date Sent</th>
+                            {% if current_user.is_admin %}
+                                <th>Invited By</th>
+                            {% endif %}
                             <th>Delete</th>
                         </tr>
                         {% for invitation in invitedUsers %}
@@ -54,6 +57,9 @@
                                 <td name="role">{{ invitation.role }}</td>
                                 <td name="department">{{ invitation.department }}</td>
                                 <td name="date">{{ invitation.date }}</td>
+                                {% if current_user.is_admin %}
+                                    <td>{{ invitation.invitedBy }}</td>
+                                {% endif %}
                                 <td>
                                     <div><button type="button" class="btn btn-danger btn-sq-sm delete-query"><span class="glyphicon glyphicon-remove" data-toggle="modal" data-target="#deleteInvite"></span></button></div>
                                 </td>
@@ -79,6 +85,9 @@
                             <th>Role</th>
                             <th>Department</th>
                             <th>Date Registered</th>
+                             {% if current_user.is_admin %}
+                                <th>Invited By</th>
+                            {% endif %}
                         </tr>
                         {% for invitation in convertedUsers %}
                             <tr>
@@ -86,6 +95,9 @@
                                 <td>{{ invitation.role }}</td>
                                 <td>{{ invitation.department }}</td>
                                 <td>{{ invitation.date }}</td>
+                                {% if current_user.is_admin %}
+                                    <td>{{ invitation.invitedBy }}</td>
+                                {% endif %}
                             </tr>
                         {% endfor %}
                         </tbody>

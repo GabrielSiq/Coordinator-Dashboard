@@ -407,15 +407,20 @@ def manageUsers():
 @roles_required((ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE))
 def manageInvites():
     user_manager = current_app.user_manager
-    invitedUsers = UserInvitation.query.filter_by(invited_by_user_id = current_user.id).all()
+    if current_user.is_admin:
+        invitedUsers = UserInvitation.query.all()
+    else:
+        invitedUsers = UserInvitation.query.filter_by(invited_by_user_id = current_user.id).all()
     invitedList = []
     convertedList = []
     for invite in invitedUsers:
+        userInfo = {}
+        userInfo['email'] = invite.email
+        userInfo['department'] = Department.query.filter_by(id=invite.department_id).first().code
+        userInfo['role'] = Role.query.filter_by(id=invite.role_id).first().name
+        if(current_user.is_admin):
+            userInfo['invitedBy'] = User.query.filter_by(id=invite.invited_by_user_id).first().full_name
         if invite.user_registered:
-            userInfo = {}
-            userInfo['email'] = invite.email
-            userInfo['department'] = Department.query.filter_by(id=invite.department_id).first().code
-            userInfo['role'] = Role.query.filter_by(id=invite.role_id).first().name
             userInfo['date'] = User.query.filter_by(email=invite.email).first().confirmed_at.date()
             convertedList.append(userInfo.copy())
         else:
@@ -423,11 +428,7 @@ def manageInvites():
                 invite.token,
                 user_manager.invite_expiration)
             if not has_expired:
-                userInfo = {}
                 userInfo['id'] = invite.id
-                userInfo['email'] = invite.email
-                userInfo['department'] = Department.query.filter_by(id=invite.department_id).first().code
-                userInfo['role'] = Role.query.filter_by(id=invite.role_id).first().name
                 userInfo['date'] = invite.date.date()
                 invitedList.append(userInfo.copy())
 
