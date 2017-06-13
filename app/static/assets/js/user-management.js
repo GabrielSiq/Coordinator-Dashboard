@@ -34,6 +34,12 @@ $(document).ready(function () {
     });
      editModal.find(".btn-primary").on('click', function () {
         editModal.find("form").submit();
-    })
+    });
+
+    var filter = $('#filter');
+     filter.find(".btn").on('click', function () {
+         filter.find('form').submit();
+     });
+
 
 });

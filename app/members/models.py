@@ -120,6 +120,10 @@ class User(db.Model, UserMixin):
     def is_admin(self):
         return self.has_role(ADMIN_ROLE)
 
+    @property
+    def invited_by(self):
+        return User.query.filter_by(id = UserInvitation.query.filter_by(email=self.email).first().invited_by_user_id).first().full_name
+
     def is_active(self):
       return self.is_enabled
 

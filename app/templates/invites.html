@@ -85,9 +85,6 @@
                             <th>Role</th>
                             <th>Department</th>
                             <th>Date Registered</th>
-                             {% if current_user.is_admin %}
-                                <th>Invited By</th>
-                            {% endif %}
                         </tr>
                         {% for invitation in convertedUsers %}
                             <tr>
@@ -95,9 +92,6 @@
                                 <td>{{ invitation.role }}</td>
                                 <td>{{ invitation.department }}</td>
                                 <td>{{ invitation.date }}</td>
-                                {% if current_user.is_admin %}
-                                    <td>{{ invitation.invitedBy }}</td>
-                                {% endif %}
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -106,6 +100,7 @@
             </div>
         </div>
     </div>
+
 {% endblock content %}
 
 {% block modals %}

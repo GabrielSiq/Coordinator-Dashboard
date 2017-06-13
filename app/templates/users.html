@@ -20,10 +20,59 @@
         .query-controls .btn{
             margin-left: 10px;
         }
+        #filter .content{
+            margin-left: 10px;
+        }
     </style>
 {% endblock css %}
 
 {% block content %}
+    {% if current_user.is_admin %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card" id="filter">
+                    <div class="content">
+                        <div class="row">
+                            <form method="POST" action="{{ url_for('manageUsers') }}">
+                                <div class="row param" id="row0">
+                                    <div class="form-group col-md-3">
+                                        <label for="role">Role</label>
+                                        <select name="role" class="form-control combobox">
+                                            <option value=""></option>
+                                            {% for role in role_list %}
+                                                <option value={{ role.id }}>{{ role.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label for="department">Department</label>
+                                        <select name="department" class="form-control combobox">
+                                            <option value=""></option>
+                                            {% for department in department_list %}
+                                                <option value={{ department.code }}>{{ department.code }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label for="invited_by">Invited By</label>
+                                        <select name="invited_by" class="form-control combobox">
+                                            <option value=""></option>
+                                            {% for user in inviters_list %}
+                                                <option value={{ user.id }}>{{ user.full_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group button" style="padding-top: 29.5px;">
+                                        <button type="button" class="btn btn-submit" style="vertical-align: bottom;">Filter</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
     <div class="row">
         <div class="col-md-12">
             <div class="card" type="table-view" id="userList">
@@ -32,49 +81,55 @@
                         <h4 class="title">Users</h4>
                     </div>
                     <div class="query-controls">
-                    <div class="row">
-                        <a href="{{ url_for("user.invite") }}" class="btn btn-primary"><i class="pe-7s-add-user"></i><span> Invite User</span></a>
-                        <a href="{{ url_for("manageInvites") }}" class="btn btn-success"><i class="pe-7s-mail"></i><span> Manage Invitations</span></a>
+                        <div class="row">
+                            <a href="{{ url_for("user.invite") }}" class="btn btn-primary"><i class="pe-7s-add-user"></i><span> Invite User</span></a>
+                            <a href="{{ url_for("manageInvites") }}" class="btn btn-success"><i class="pe-7s-mail"></i><span> Manage Invitations</span></a>
+                        </div>
                     </div>
-                </div>
                 </div>
                 <div class="content table-responsive table-full-width">
                     <table class="table table-hover table-striped">
                         <tbody>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th>Departments</th>
+                            {% if current_user.is_admin %}
+                                <th>Invited By</th>
+                            {% endif %}
+                            <th>Edit</th>
+                            <th>Delete</th>
+                        </tr>
+                        {% for user in users %}
                             <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Role</th>
-                                <th>Departments</th>
-                                <th>Edit</th>
-                                <th>Delete</th>
+                                <input type="hidden" name="_firstName" value="{{ user.first_name }}">
+                                <input type="hidden" name="_lastName" value="{{ user.last_name }}">
+                                <input type="hidden" name="_email" value="{{ user.email }}">
+                                <input type="hidden" name="_roleId" value="{{ user.role_id }}">
+                                <input type="hidden" name="_userId" value="{{ user.id }}">
+                                <td name="enrollmentId">{{ user.enrollment_number }}</td>
+                                <td name="userName">{{ user.full_name }}</td>
+                                <td name="userRole">{{ user.role }}</td>
+                                <td name="userDepartments">
+                                    {% for department in user.departments %}
+                                        <p>{{ department.code }}</p>
+                                        <input type="hidden" name="_department" value="{{ department.id }}">
+                                    {% endfor %}
+                                </td>
+                                {% if current_user.is_admin %}
+                                    <td name="invitedBy">{{ user.invited_by }}</td>
+                                {% endif %}
+                                <td>
+                                    <div><button type="button" class="btn btn-warning btn-sq-sm delete-query" data-toggle="modal" data-target="#editUser"><span class="glyphicon glyphicon-pencil"></span></button></div>
+                                </td>
+                                <td>
+                                    {% if user.id != current_user.id %}
+                                        <div><button type="button" class="btn btn-danger btn-sq-sm delete-query"><span class="glyphicon glyphicon-remove" data-toggle="modal" data-target="#deleteUser"></span></button></div>
+                                    {% endif %}
+                                </td>
                             </tr>
-                            {% for user in users %}
-                                <tr>
-                                    <input type="hidden" name="_firstName" value="{{ user.first_name }}">
-                                    <input type="hidden" name="_lastName" value="{{ user.last_name }}">
-                                    <input type="hidden" name="_email" value="{{ user.email }}">
-                                    <input type="hidden" name="_roleId" value="{{ user.role_id }}">
-                                    <input type="hidden" name="_userId" value="{{ user.id }}">
-                                    <td name="enrollmentId">{{ user.enrollment_number }}</td>
-                                    <td name="userName">{{ user.first_name + " " + user.last_name }}</td>
-                                    <td>{{ user.role }}</td>
-                                    <td>
-                                        {% for department in user.departments %}
-                                            <p>{{ department.code }}</p>
-                                            <input type="hidden" name="_department" value="{{ department.id }}">
-                                        {% endfor %}
-                                    </td>
-                                    <td>
-                                        <div><button type="button" class="btn btn-warning btn-sq-sm delete-query" data-toggle="modal" data-target="#editUser"><span class="glyphicon glyphicon-pencil"></span></button></div>
-                                    </td>
-                                    <td>
-                                        {% if user.id != current_user.id %}
-                                            <div><button type="button" class="btn btn-danger btn-sq-sm delete-query"><span class="glyphicon glyphicon-remove" data-toggle="modal" data-target="#deleteUser"></span></button></div>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>

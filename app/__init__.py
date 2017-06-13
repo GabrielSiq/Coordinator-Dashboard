@@ -165,8 +165,29 @@ def createDummyUsers():
         db.session.add(query)
     db.session.commit()
 
-    invite = UserInvitation(email='gabrielsiq@msn.com', invited_by_user_id='3', enrollment_number='1237',
+    invite = UserInvitation(email='gabrielsiq@msn.com', invited_by_user_id='3', enrollment_number='1234567',
                             department_id='1', role_id='4', date=datetime.datetime.now() - datetime.timedelta(days=6), user_registered=True)
+
+    db.session.add(invite)
+    db.session.commit()
+
+    invite = UserInvitation(email='gdssiqueira@gmail.com', invited_by_user_id='3', enrollment_number='1234568',
+                            department_id='1', role_id='4', date=datetime.datetime.now() - datetime.timedelta(days=6),
+                            user_registered=True)
+
+    db.session.add(invite)
+    db.session.commit()
+
+    invite = UserInvitation(email='gdssiqueira@umail.ucsb.edu', invited_by_user_id='3', enrollment_number='1234569',
+                            department_id='1', role_id='4', date=datetime.datetime.now() - datetime.timedelta(days=6),
+                            user_registered=True)
+
+    db.session.add(invite)
+    db.session.commit()
+
+    invite = UserInvitation(email='gdssiqueira@cs.ucsb.edu', invited_by_user_id='3', enrollment_number='1234560',
+                            department_id='1', role_id='4', date=datetime.datetime.now() - datetime.timedelta(days=6),
+                            user_registered=True)
 
     db.session.add(invite)
     db.session.commit()

@@ -352,13 +352,15 @@ def customInvite():
 
     return render(user_manager.invite_template, form=invite_form, extraForm = extraForm)
 
-@application.route('/user/manageUsers')
+@application.route('/user/manageUsers',  methods=['POST', 'GET'])
 @login_required
 @roles_required((ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE))
 def manageUsers():
 
     # Gets roles in advance to avoid querying too many times
     allRoles = Role.query.all()
+    roleList = []
+    inviters_list = []
 
     # Prepares form for editing users
     extraForm = ExtraInfo()
@@ -371,36 +373,58 @@ def manageUsers():
 
     # If user is admin, than he's got access to all users of all departments
     # If user is not admin, he's only got access to users who are members the same departments
-    isAdmin = current_user.has_roles(ADMIN_ROLE)
 
-    if isAdmin:
-        userDepartments = Department.query.all()
-        allUsers = User.query.order_by(User.id.asc()).all()
+    if request.method == "POST":
+        allUsers = User.query
+
+        role = str(request.form.get('role', ""))
+        if role is not "":
+            allUsers = allUsers.filter(User.roles.any(Role.id == role))
+
+        department = str(request.form.get('department', ""))
+        if department is not "":
+            allUsers = allUsers.filter(User.departments.any(Department.code == department))
+
+        invited_by = str(request.form.get('invited_by', ""))
+        if invited_by is not "":
+            invited_by = User().query.filter_by(id=invited_by).first().full_name
+            allUsers = allUsers.filter_by(invited_by=invited_by)
+
+        allUsers = allUsers.order_by(User.id.asc()).all()
     else:
-        userDepartments = current_user.departments
-        allUsers = User.query.filter(User.departments.any(Department.id.in_([department.id for department in userDepartments]))).all()
+        if current_user.is_admin:
+            allUsers = User.query.order_by(User.id.asc()).all()
+        else:
+            userDepartments = current_user.departments
+            allUsers = User.query.filter(User.departments.any(Department.id.in_([department.id for department in userDepartments]))).all()
 
+    if current_user.is_admin:
+        userDepartments = Department.query.all()
+        roleList = Role.query.all()
+        inviters_list = db.session.query(User).filter(User.id.in_(o.invited_by_user_id for o in UserInvitation.query.all())).all()
+        inviters_list.sort(key= lambda x: x.full_name)
 
     extraForm.department.choices = [(department.id, department.code) for department in userDepartments]
 
     userAccessLevel = max(role.access_level for role in current_user.roles)
 
+
     usersList = []
     for user in allUsers:
         targetAccessLevel = max(role.access_level for role in user.roles)
-        if isAdmin or userAccessLevel <= targetAccessLevel:
+        if current_user.is_admin or userAccessLevel <= targetAccessLevel:
             users = {}
             users['id'] = user.id
-            users['first_name'] = user.first_name
-            users['last_name'] = user.last_name
+            users['full_name'] = user.full_name
             users['email'] = user.email
             role = UserRoles.query.filter_by(user_id=user.id).first().role_id
             users['role'] = roleNames[role]
             users['role_id'] = role
             users['departments'] = user.departments
             users['enrollment_number'] = user.enrollment_number
+            users['invited_by'] = user.invited_by
             usersList.append(users.copy())
-    return render_template("users.html", users = usersList, extraForm = extraForm)
+    return render_template("users.html", users = usersList, extraForm = extraForm, department_list = userDepartments, role_list = roleList, inviters_list=inviters_list)
 
 @application.route('/user/manageInvites')
 @login_required
@@ -422,7 +446,8 @@ def manageInvites():
             userInfo['invitedBy'] = User.query.filter_by(id=invite.invited_by_user_id).first().full_name
         if invite.user_registered:
             userInfo['date'] = User.query.filter_by(email=invite.email).first().confirmed_at.date()
-            convertedList.append(userInfo.copy())
+            if not current_user.is_admin or invite.invited_by_user_id == current_user.id:
+                convertedList.append(userInfo.copy())
         else:
             is_valid, has_expired, user_id = user_manager.verify_token(
                 invite.token,
