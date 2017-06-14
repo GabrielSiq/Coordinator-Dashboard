@@ -128,15 +128,21 @@ def createDummyUsers():
     row['situation'] = 'RM'
     data['row1'] = row.copy()
     queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Prog 2 - Approved + Failed"))
+    data = {}
+    row = {}
     row['course'] = "INF1005"
     row['situation'] = 'RM'
     data['row0'] = row.copy()
     queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="Prog 1 - Failed (grade)"))
+    data = {}
+    row = {}
     row['course'] = "INF1403"
     row['situation'] = 'RF'
     data['row0'] = row.copy()
     queries.append(Query(user_id=1, visualization_id="enrollment", query_data=json.dumps(data), name="HCI - Failed (attendance)"))
     queries.append(Query(user_id=1, visualization_id="enrollment-2", query_data=json.dumps(data), name="HCI - Failed (attendance)"))
+    data = {}
+    row = {}
     row['course'] = "INF1009"
     row['situation'] = ''
     data['row0'] = row.copy()

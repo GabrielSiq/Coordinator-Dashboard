@@ -415,6 +415,8 @@ def manageUsers():
         if current_user.is_admin or userAccessLevel <= targetAccessLevel:
             users = {}
             users['id'] = user.id
+            users['first_name'] = user.first_name
+            users['last_name'] = user.last_name
             users['full_name'] = user.full_name
             users['email'] = user.email
             role = UserRoles.query.filter_by(user_id=user.id).first().role_id
@@ -691,15 +693,16 @@ def getEnrollmentData(requestParams):
 @application.route('/getCancellationData', methods=['POST'])
 @login_required
 def getCancellationData(requestParams):
-    DATA = getUserAllowedData('academic')
-    filtered = DATA
+    filtered = getUserAllowedData('academic')
     onlyRow = requestParams['row0']
     if("sort" not in onlyRow):
         flash("Parameter error.", "error")
         return ""
+    if "semester" in onlyRow and onlyRow['semester'] != "":
+        filtered = filtered[filtered['semester'] == int(onlyRow['semester'])]
 
     cancellation = filtered[filtered['situation'].isin(['CA', 'CD', 'CL', 'DT', 'LT'])]
-    course_count = DATA.groupby('course').size()
+    course_count = filtered.groupby('course').size()
     cancellation = cancellation.groupby('course').size()
     canc_rate = (cancellation / course_count).dropna()
 

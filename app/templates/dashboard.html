@@ -188,29 +188,21 @@
             <div class="card" type="table-view" id="cancellation">
                 <div class="header">
                     <h4 class="title">Drop Rate <span class="glyphicon"/></h4>
-                    <p class="category">Courses with <span style="font-weight: bold">< ></span> drop rate. (Client-side rendering)</p>
-                </div>
-                <div class="query-controls">
-                    <form>
-                        <div class="row">
-                            <div class="form-group col-md-5">
-                                <label for="queryName">Saved Query</label>
-                                <select name="queryName" class="form-control">
-                                </select>
-                            </div>
-                            <div class="form-group button col-md-3">
-                                <button type="button" class="btn btn-warning btn-sq-sm rename-query" data-toggle="modal" data-target="#renameQuery"><span class="glyphicon glyphicon-pencil"></span></button>
-                                <button type="button" class="btn btn-danger btn-sq-sm delete-query"><span>&times;</span></button>
-                            </div>
-                            <div class="form-group button col-md-4">
-                                <button type="button" class="btn btn-success save-query" data-toggle="modal" data-target="#saveQuery">Save Config.</button>
-                            </div>
-                        </div>
-                    </form>
+                    <p class="category">Courses with <span style="font-weight: bold">< ></span> drop rate.</p>
                 </div>
                 <div class="content table-responsive table-full-width">
                     <form>
                         <div class="row param" id="row0">
+                            <div class="form-group col-sm-4">
+                                <label for="semester">Semester</label>
+                                <select id="semester" class="form-control combobox">
+                                    <option value=""></option>
+                                    {% for semester in previous_semesters %}
+                                        {% set semString = semester|string() %}
+                                        <option value={{ semester }}>{{ semString[:4] + "." +  semString[4] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
                             <div class="form-group col-sm-4">
                                 <label for="sort">Sort by:</label>
                                 <select id="sort" class="form-control combobox">
