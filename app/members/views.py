@@ -8,7 +8,6 @@ import pandas as pd
 from models import *
 from datetime import datetime
 from roles import ADMIN_ROLE, COORDINATOR_ROLE, PROFESSOR_ROLE, STUDENT_ROLE
-import numpy as np
 
 @application.route('/')
 def index():
@@ -962,16 +961,15 @@ def getSingleSeriesEnrollment(requestParams):
     course = requestParams['row0']['course']
 
     filtered = data[data['course'] == course]
-    situations = filtered['situation'].unique()
 
 
-    for situation in situations:
+    for situation in ['CD', 'CA', 'CL']:
         situationData[situation] = {}
         sample = filtered[filtered['situation'] == situation]
         count = sample.groupby('semester').size()
-        situationData[situation]['labels'] = count.index.values.tolist()
-        situationData[situation]['series'] = count.values.tolist()
-        allLabels += list(set(situationData[situation]['labels']) - set(allLabels))
+        situationData[situation]['x'] = count.index.values.tolist()
+        situationData[situation]['y'] = count.values.tolist()
+        allLabels += list(set(situationData[situation]['x']) - set(allLabels))
 
     # Formats the data to return in a dict and converts to json
     if len(allLabels) != 0:
@@ -990,15 +988,21 @@ def getSingleSeriesEnrollment(requestParams):
         allLabels.sort()
 
     # We then fill the series with null values to match the labels in length
-    data = {'labels': allLabels, 'series': []}
+    data = {'x': allLabels, 'y': [], 'labels': []}
     for situation in situationData:
         fullRow = []
         for label in allLabels:
-            if label in situationData[situation]['labels']:
-                fullRow.append(situationData[situation]['series'][situationData[situation]['labels'].index(label)])
+            if label in situationData[situation]['x']:
+                fullRow.append(situationData[situation]['y'][situationData[situation]['x'].index(label)])
             else:
-                fullRow.append(None)
-        data['series'].append(fullRow)
+                fullRow.append(0)
+        data['y'].append(fullRow)
+        data['labels'].append(situation)
+
+    acc = [0] * len(data['x'])
+    for i, series in enumerate(data['y']):
+        data['y'][i] = [sum(x) for x in zip(data['y'][i], acc)]
+        acc = data['y'][i]
 
     return json.dumps(data)
 

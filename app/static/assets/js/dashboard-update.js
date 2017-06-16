@@ -147,14 +147,14 @@ function updateArea(content) {
             success: function(resultJSON) {
                 if($.trim(resultJSON)) {
                     var result = JSON.parse(resultJSON);
-                    for(var i in result['labels']){
-                        var labelString = result['labels'][i].toString();
+                    for(var i in result['x']){
+                        var labelString = result['x'][i].toString();
                         var len = labelString.length;
-                        result['labels'][i] = labelString.slice(len-3, len-1)+"."+labelString.slice(len-1, len)
+                        result['x'][i] = labelString.slice(len-3, len-1)+"."+labelString.slice(len-1, len)
                     }
                     var data = {
-                        labels: result['labels'],
-                        series: result['series']
+                        labels: result['x'],
+                        series: result['y']
                     };
                     var options = {
                         showArea: true,
@@ -162,10 +162,13 @@ function updateArea(content) {
                             fillHoles: true
                         }),
                         plugins: [
+                            Chartist.plugins.legend({
+                                legendNames: result['labels']
+                            }),
                             Chartist.plugins.tooltip()
                         ]
                     };
-                    if (result['labels'].length !== 0) {
+                    if (result['x'].length !== 0) {
                         chart.html("");
                         new Chartist.Line('#' + chart.attr("id"),data, options);
                     }
@@ -689,8 +692,8 @@ $(document).ready(function(){
     //                     axisX: {
     //                         type: Chartist.FixedScaleAxis,
     //                         high: 5,
-    //                         low: 0,
-    //                         divisor: 5,
+    //                         low: 1,
+    //                         divisor: 4,
     //                         onlyInteger: false
     //                     },
     //                     plugins: [

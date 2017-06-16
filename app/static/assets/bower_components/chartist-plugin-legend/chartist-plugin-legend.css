@@ -26,7 +26,7 @@
 }
  
 .ct-legend li.inactive:before {
-    background: transparent;
+    background: transparent !important;
 }
  
 .ct-legend li.ct-legend-inside {

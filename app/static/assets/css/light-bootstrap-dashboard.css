@@ -2196,7 +2196,7 @@ body > .navbar-collapse[data-color="purple"]:after {
 
 .ct-area {
   stroke: none;
-  fill-opacity: 0.8;
+  fill-opacity: 1;
 }
 
 .ct-bar {

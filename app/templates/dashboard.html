@@ -40,49 +40,7 @@
 {% endblock css %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card" type="area-chart-view" id="enrollment-history">
-                <div class="header">
-                    <h4 class="title">Enrollment History</h4>
-                    <p class="category">By course</p>
-                </div>
-                <div class="content">
-                    <form>
-                        <div class="row param" id="row0">
-                            <div class="form-group col-sm-3">
-                                <label for="course">Course</label>
-                                <select id="course" class="form-control combobox">
-                                    <option value=""></option>
-                                    {% for course_code in course_codes %}
-                                        <option value={{ course_code }}>{{ course_code }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                    </form>
-                    <div id="enrollment-history-chart" class="ct-chart area">
 
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card" type="scatter-plot-view" id="evaluations-average">
-                <div class="header">
-                    <h4 class="title">Average Evaluation Grade vs Class Average</h4>
-                    <p class="category">By question</p>
-                </div>
-                <div class="content">
-                    <div id="chartHours" class="ct-chart scatter">
-
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
     <div class="row">
         <div class="col-md-8">
             <div class="card" type="bar-chart-view" id="semester-count">
@@ -372,6 +330,49 @@
         </div>
     </div>
     <div class="row">
+        <div class="col-md-12">
+            <div class="card" type="area-chart-view" id="enrollment-history">
+                <div class="header">
+                    <h4 class="title">Enrollment History</h4>
+                    <p class="category">By course</p>
+                </div>
+                <div class="content">
+                    <form>
+                        <div class="row param" id="row0">
+                            <div class="form-group col-sm-3">
+                                <label for="course">Course</label>
+                                <select id="course" class="form-control combobox">
+                                    <option value=""></option>
+                                    {% for course_code in course_codes %}
+                                        <option value={{ course_code }}>{{ course_code }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="enrollment-history-chart" class="ct-chart area">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card" type="scatter-plot-view" id="evaluations-average">
+                <div class="header">
+                    <h4 class="title">Average Evaluation Grade vs Class Average</h4>
+                    <p class="category">By question</p>
+                </div>
+                <div class="content">
+                    <div id="chartHours" class="ct-chart scatter">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
         <div class="col-md-10">
             <div class="card" type="line-chart-view" id="enrollment-2">
                 <div class="header">
@@ -429,32 +430,6 @@
                     </form>
 
                     <div id="chartLine2" class="ct-chart line"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="header">
-                    <h4 class="title">Sample Area Chart</h4>
-                    <p class="category">Also using <a target="_blank" href="https://gionkunz.github.io/chartist-js/">Chartist.js</a></p>
-                </div>
-                <div class="content">
-                    <div id="chartHours" class="ct-chart">
-
-                    </div>
-                    <div class="footer">
-                        <div class="legend">
-                            <i class="fa fa-circle text-info"></i> Line 1
-                            <i class="fa fa-circle text-danger"></i> Line 2
-                            <i class="fa fa-circle text-warning"></i> Line 3
-                        </div>
-                        <hr>
-                        <div class="stats">
-                            <i class="fa fa-history"></i> Same thing...
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
