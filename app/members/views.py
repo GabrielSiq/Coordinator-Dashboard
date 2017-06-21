@@ -435,7 +435,7 @@ def manageInvites():
     if current_user.is_admin:
         invitedUsers = UserInvitation.query.all()
     else:
-        invitedUsers = UserInvitation.query.filter_by(invited_by_user_id = current_user.id).all()
+        invitedUsers = current_user.invitations
     invitedList = []
     convertedList = []
     for invite in invitedUsers:
@@ -638,13 +638,13 @@ def getChartData():
 @application.route('/getEnrollmentData', methods=['POST'])
 @login_required
 def getEnrollmentData(requestParams):
-    DATA = getUserAllowedData('academic')
+    data = getUserAllowedData('academic')
 
     rowData = {}
     allLabels = []
     for row in requestParams:
         rowData[row] = {}
-        filtered = DATA
+        filtered = data
         # Applies all filters from the request to our data
         rowParams = requestParams[row]
         for key in rowParams:
@@ -942,7 +942,7 @@ def getEvaluationsScatter():
             if evaluations != 0 and not matchingRecords.empty:
                 avgProfGrade = (row['grade_1'] * 1 + row['grade_2'] * 2 + row['grade_3'] * 3 + row['grade_4'] * 4 + row['grade_5'] * 5) / float(evaluations)
                 avgStudentGrade = matchingRecords['grade'].mean()
-                series.append({'x':avgProfGrade, 'y': avgStudentGrade})
+                series.append({'x':round(avgProfGrade,3), 'y': round(avgStudentGrade,3)})
         returnData['labels'].append(str(question))
         returnData['series'].append(series)
 

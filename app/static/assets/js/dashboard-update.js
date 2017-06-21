@@ -675,50 +675,57 @@ $(document).ready(function(){
         });
     });
 
-    // $.ajax({
-    //         type: "POST",
-    //         url: "/getEvaluationsScatter",
-    //         contentType:"application/json",
-    //         data : "",
-    //         success: function(resultJSON) {
-    //             if($.trim(resultJSON)) {
-    //                 var result = JSON.parse(resultJSON);
-    //                 var data = {
-    //                     labels: result['labels'],
-    //                     series: result['series']
-    //                 };
-    //                 var options = {
-    //                     showLine: false,
-    //                     axisX: {
-    //                         type: Chartist.FixedScaleAxis,
-    //                         high: 5,
-    //                         low: 1,
-    //                         divisor: 4,
-    //                         onlyInteger: false
-    //                     },
-    //                     plugins: [
-    //                         Chartist.plugins.legend({
-    //                             legendNames: ["1", "2", "3", "4", "5"]
-    //                         }),
-    //                         Chartist.plugins.tooltip()
-    //                     ]
-    //                 };
-    //                 if (result['labels'].length !== 0) {
-    //                     //chart.html("");
-    //                     new Chartist.Line('#chartHours',data, options);
-    //                 }
-    //                 else {
-    //                     chart.html("<p style='text-align:center; vertical-align:middle'>No data found for given parameters.</p>");
-    //                 }
-    //             }
-    //             else {
-    //                 chart.html("<p style='text-align:center; vertical-align:middle'>Query submission error.</p>");
-    //             }
-    //         },
-    //         error: function() {
-    //             alert('error');
-    //         }
-    //     });
+    $.ajax({
+            type: "POST",
+            url: "/getEvaluationsScatter",
+            contentType:"application/json",
+            data : "",
+            success: function(resultJSON) {
+                if($.trim(resultJSON)) {
+                    var result = JSON.parse(resultJSON);
+                    var data = {
+                        labels: result['labels'],
+                        series: result['series']
+                    };
+                    var options = {
+                        showLine: false,
+                        axisX: {
+                            type: Chartist.FixedScaleAxis,
+                            high: 5,
+                            low: 1,
+                            divisor: 4,
+                            onlyInteger: false
+                        },
+                        axisY: {
+                            type: Chartist.FixedScaleAxis,
+                            high: 12,
+                            low: 0,
+                            divisor: 6,
+                            onlyInteger: false
+                        },
+                        plugins: [
+                            Chartist.plugins.legend({
+                                legendNames: ["1", "2", "3", "4", "5"]
+                            }),
+                            Chartist.plugins.tooltip()
+                        ]
+                    };
+                    if (result['labels'].length !== 0) {
+                        //chart.html("");
+                        new Chartist.Line('#chartHours',data, options);
+                    }
+                    else {
+                        chart.html("<p style='text-align:center; vertical-align:middle'>No data found for given parameters.</p>");
+                    }
+                }
+                else {
+                    chart.html("<p style='text-align:center; vertical-align:middle'>Query submission error.</p>");
+                }
+            },
+            error: function() {
+                alert('error');
+            }
+        });
 });
 
 

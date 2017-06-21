@@ -25,7 +25,14 @@ class AcademicData(db.Model):
     situation = db.Column(db.String(2), primary_key=True)
     professor = db.Column(db.String(50))
 
-    # Relationships
+    @property
+    def major(self):
+        studentMajor = StudentMajorMapping.query.filter_by(student_id = self.student_id).first()
+        if studentMajor is not None:
+            return studentMajor.major
+        else:
+            return None
+
     # evaluations = db.relationship('InstructorEvaluationData')
 
     def __init__(self, student_id, semester, course, units, section, situation, professor, grade = None):
@@ -42,6 +49,8 @@ class AcademicData(db.Model):
         return '<matr {} peri{} disc {} turm {}>'.format(self.student_id, self.semester, self.course, self.section)
 
 class StudentMajorMapping(db.Model):
+    __tablename__ = 'student_major_mapping'
+
     student_id = db.Column(db.String(10), primary_key=True)
     major = db.Column(db.String(3))
 
@@ -107,6 +116,7 @@ class User(db.Model, UserMixin):
     departments = db.relationship('Department', secondary='user_departments',
                             backref=db.backref('users', lazy='dynamic'))
     queries = db.relationship('Query', cascade='delete')
+    invitations =  db.relationship('UserInvitation')
 
     #TODO: MODEL RELATIONSHIP BETWEEN OUR DATASETS
     # dataRows = db.relationship('AcademicData')
