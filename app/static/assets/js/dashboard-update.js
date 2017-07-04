@@ -453,23 +453,25 @@ $(document).ready(function(){
                             contentType: "application/json",
                             select : select,
                             key : key,
+                            rowData : rowData,
+                            async: false,
                             data: JSON.stringify({[field]: value}),
                             success: function(response) {
                                 if($.trim(response)) {
                                     var optionsList = JSON.parse(response);
-                                    this.select.find('option').remove();
-                                    this.select.append($('<option>', {
+                                    select.find('option').remove();
+                                    select.append($('<option>', {
                                         value: "",
                                         text: ""
                                     }));
                                     for (var i in optionsList) {
-                                        this.select.append($('<option>', {
+                                        select.append($('<option>', {
                                             value: optionsList[i],
                                             text: optionsList[i]
                                         }));
                                     }
                                 }
-                                this.select.val(rowData[this.key]);
+                                select.val(rowData[key]);
                             },
                             error: function(){
                                 //
@@ -504,7 +506,10 @@ $(document).ready(function(){
                 $(this).val("");
             });
         }
-        form.closest(".card").find("select[name='queryName']").val("");
+        card = form.closest(".card");
+        card.find("select[name='queryName']").val("");
+        card.find(".query-controls .delete-query").css('visibility','hidden');
+        card.find(".query-controls .rename-query").css('visibility','hidden');
         updateView(form.closest(".card").attr("type"), form.closest('.content'));
     });
 
@@ -571,11 +576,13 @@ $(document).ready(function(){
         sort.text($(this).val());
         if($(this).val() === "largest"){
             sort.css('color', 'red');
-            arrow.addClass('glyphicon-triangle-bottom');
+            arrow.removeClass();
+            arrow.addClass('glyphicon glyphicon-triangle-bottom');
         }
         else{
             sort.css('color', 'green');
-            arrow.addClass('glyphicon-triangle-top');
+            arrow.removeClass();
+            arrow.addClass('glyphicon glyphicon-triangle-top');
         }
 
     });
@@ -675,57 +682,57 @@ $(document).ready(function(){
         });
     });
 
-    $.ajax({
-            type: "POST",
-            url: "/getEvaluationsScatter",
-            contentType:"application/json",
-            data : "",
-            success: function(resultJSON) {
-                if($.trim(resultJSON)) {
-                    var result = JSON.parse(resultJSON);
-                    var data = {
-                        labels: result['labels'],
-                        series: result['series']
-                    };
-                    var options = {
-                        showLine: false,
-                        axisX: {
-                            type: Chartist.FixedScaleAxis,
-                            high: 5,
-                            low: 1,
-                            divisor: 4,
-                            onlyInteger: false
-                        },
-                        axisY: {
-                            type: Chartist.FixedScaleAxis,
-                            high: 12,
-                            low: 0,
-                            divisor: 6,
-                            onlyInteger: false
-                        },
-                        plugins: [
-                            Chartist.plugins.legend({
-                                legendNames: ["1", "2", "3", "4", "5"]
-                            }),
-                            Chartist.plugins.tooltip()
-                        ]
-                    };
-                    if (result['labels'].length !== 0) {
-                        //chart.html("");
-                        new Chartist.Line('#chartHours',data, options);
-                    }
-                    else {
-                        chart.html("<p style='text-align:center; vertical-align:middle'>No data found for given parameters.</p>");
-                    }
-                }
-                else {
-                    chart.html("<p style='text-align:center; vertical-align:middle'>Query submission error.</p>");
-                }
-            },
-            error: function() {
-                alert('error');
-            }
-        });
+    // $.ajax({
+    //     type: "POST",
+    //     url: "/getEvaluationsScatter",
+    //     contentType:"application/json",
+    //     data : "",
+    //     success: function(resultJSON) {
+    //         if($.trim(resultJSON)) {
+    //             var result = JSON.parse(resultJSON);
+    //             var data = {
+    //                 labels: result['labels'],
+    //                 series: result['series']
+    //             };
+    //             var options = {
+    //                 showLine: false,
+    //                 axisX: {
+    //                     type: Chartist.FixedScaleAxis,
+    //                     high: 5,
+    //                     low: 1,
+    //                     divisor: 4,
+    //                     onlyInteger: false
+    //                 },
+    //                 axisY: {
+    //                     type: Chartist.FixedScaleAxis,
+    //                     high: 12,
+    //                     low: 0,
+    //                     divisor: 6,
+    //                     onlyInteger: false
+    //                 },
+    //                 plugins: [
+    //                     Chartist.plugins.legend({
+    //                         legendNames: ["1", "2", "3", "4", "5"]
+    //                     }),
+    //                     Chartist.plugins.tooltip()
+    //                 ]
+    //             };
+    //             if (result['labels'].length !== 0) {
+    //                 //chart.html("");
+    //                 new Chartist.Line('#chartHours',data, options);
+    //             }
+    //             else {
+    //                 chart.html("<p style='text-align:center; vertical-align:middle'>No data found for given parameters.</p>");
+    //             }
+    //         }
+    //         else {
+    //             chart.html("<p style='text-align:center; vertical-align:middle'>Query submission error.</p>");
+    //         }
+    //     },
+    //     error: function() {
+    //         alert('error');
+    //     }
+    // });
 });
 
 

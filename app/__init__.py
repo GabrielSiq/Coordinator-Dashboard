@@ -59,15 +59,18 @@ def initialize():
 def createDummyUsers():
     # Test creation of users
     users = list()
-    users.append(User(username="admin", password=bcrypt.hash("password"), email="gabrielsiq@msn.com",
-                      confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="Gabriel",
-                      last_name="Siqueira", enrollment_number="1234567"))
-    users.append(User(username="simone", password=bcrypt.hash("password"), email="gdssiqueira@gmail.com",
+    users.append(User(username="hercules", password=bcrypt.hash("password"), email="gabrielsiq@msn.com",
+                      confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="Hércules",
+                      last_name="Panhellenios", enrollment_number="1234567"))
+    users.append(User(username="simone", password=bcrypt.hash("password"), email="simone@inf.puc-rio.br",
                       confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="Simone", last_name="Barbosa", enrollment_number="1234568"))
-    users.append(User(username="noemi", password=bcrypt.hash("password"), email="gdssiqueira@umail.ucsb.edu",
+    users.append(User(username="noemi", password=bcrypt.hash("password"), email="noemi@inf.puc-rio.br",
                       confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="Noemi", last_name="Rodriguez", enrollment_number="1234569"))
     users.append(User(username="johndoe", password=bcrypt.hash("password"), email="gdssiqueira@cs.ucsb.edu",
                       confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="John", last_name="Doe", enrollment_number="1234560"))
+    users.append(User(username="gabrielsiq", password=bcrypt.hash("password"), email="gabriel.siqueira@aluno.puc-rio.br",
+                      confirmed_at=datetime.datetime.now(), is_enabled=True, first_name="Gabriel",
+                      last_name="Siqueira", enrollment_number="1210689"))
     for user in users:
         db.session.add(user)
 
@@ -96,6 +99,7 @@ def createDummyUsers():
     user_roles.append(UserRoles(user_id=2, role_id=3))
     user_roles.append(UserRoles(user_id=3, role_id=2))
     user_roles.append(UserRoles(user_id=4, role_id=4))
+    user_roles.append(UserRoles(user_id=5, role_id=4))
     for user_role in user_roles:
         db.session.add(user_role)
 
@@ -103,6 +107,7 @@ def createDummyUsers():
     user_departments.append(UserDepartments(user_id=2, department_id = 1))
     user_departments.append(UserDepartments(user_id=3, department_id=2))
     user_departments.append(UserDepartments(user_id=4, department_id=1))
+    user_departments.append(UserDepartments(user_id=5, department_id=3))
     for user_department in user_departments:
         db.session.add(user_department)
 
@@ -177,7 +182,7 @@ def createDummyUsers():
     db.session.add(invite)
     db.session.commit()
 
-    invite = UserInvitation(email='gdssiqueira@gmail.com', invited_by_user_id='3', enrollment_number='1234568',
+    invite = UserInvitation(email='noemi@inf.puc-rio.br', invited_by_user_id='3', enrollment_number='1234568',
                             department_id='1', role_id='4', date=datetime.datetime.now() - datetime.timedelta(days=6),
                             user_registered=True)
 
@@ -214,6 +219,13 @@ def createDummyUsers():
 
     db.session.add(invite)
     db.session.commit()
+
+    invite = UserInvitation(email='gabriel.siqueira@aluno.puc-rio.br', invited_by_user_id='1', enrollment_number='1210689',
+                            department_id='3', role_id='4', date=datetime.datetime.now(), user_registered= True)
+
+    db.session.add(invite)
+    db.session.commit()
+
 
 # Data providers
 

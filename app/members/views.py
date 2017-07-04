@@ -84,11 +84,12 @@ def not_found(error):
 
 @application.errorhandler(500)
 @application.errorhandler(503)
+@application.route('/503') # for demo
 def server_error(error):
     return render_template('503.html')
 
 
-# Registration and User Management
+# User management controller
 
 def customRegister():
     """ Display registration form and create new User."""
@@ -303,8 +304,15 @@ def customInvite():
         }
 
         user, user_email = user_manager.find_user_by_email(email)
+        last_invite = UserInvitation.query.filter_by(enrollment_number = enrollmentNumber).order_by(UserInvitation.date.desc()).first()
+        if last_invite:
+            is_valid, has_expired, user_id = user_manager.verify_token(last_invite.token, user_manager.invite_expiration)
+            if is_valid:
+                flash("User with that enrollment number has already registered.", "error")
+                return redirect(url_for('user.invite'))
+
         if user:
-            flash("User with that email has already registered", "error")
+            flash("User with that email has already registered.", "error")
             return redirect(url_for('user.invite'))
         else:
             user_invite = db_adapter \
@@ -597,7 +605,7 @@ def updateProfile():
 
     return redirect(url_for("accountInformation"))
 
-# Data providers
+# Data provider controller
 
 def getUserAllowedData(type):
     if type == 'academic':
@@ -888,14 +896,14 @@ def getStudentSemesterCount(requestParams):
 @application.route('/getMajorsInDepartment')
 @login_required
 def getMajorsInDepartment(departmentId):
-    #TODO: this function won't be implemented for the first MVP. The stubs here are only for demo purposes.
+    #TODO: this function won't be implemented for the first prototype. The stubs here are only for demo purposes.
 
     # This dict should be replaced by a method for obtaining the majors in all departments
     departmentCourses = {"1" : ["CCP", "CEG", "CSI"]}
-    try:
+    if departmentId in departmentCourses.keys():
         return departmentCourses[departmentId]
-    except:
-        raise
+    else:
+        return ""
 
 @application.route('/getDepartmentBreakdown')
 @login_required
@@ -903,27 +911,27 @@ def getDepartmentBreakdown(requestParams):
     try:
         departmentId = requestParams['row0']['department']
         semester = requestParams['row0']['semester']
-        majors = getMajorsInDepartment(departmentId)
     except:
         flash("Parameter error", "error")
         return ""
 
-    if semester != "":
-        academicData = getUserAllowedData('academic')
-        majorMapping = getStudentMappingData()
+    majors = getMajorsInDepartment(departmentId)
 
-        currentStudents = academicData[(academicData['semester'] == int(semester)) & ~(academicData['situation'].isin(['MT', 'CL', 'DT']))]['student_id'].unique()
+    academicData = getUserAllowedData('academic')
+    if semester == "":
+        semester = academicData['semester'].max()
 
-        result = majorMapping[majorMapping['student_id'].isin(currentStudents)]
+    majorMapping = getStudentMappingData()
 
-        data = {'labels':[],'series':[]}
-        for major in majors:
-            data['labels'].append(major)
-            data['series'].append(result[result['major'] == major].shape[0])
-        return json.dumps(data)
-    else:
-        return ""
+    currentStudents = academicData[(academicData['semester'] == int(semester)) & ~(academicData['situation'].isin(['MT', 'CL', 'DT']))]['student_id'].unique()
 
+    result = majorMapping[majorMapping['student_id'].isin(currentStudents)]
+
+    data = {'labels':[],'series':[]}
+    for major in majors:
+        data['labels'].append(major)
+        data['series'].append(result[result['major'] == major].shape[0])
+    return json.dumps(data)
 
 @application.route('/getEvaluationsScatter', methods=['POST'])
 @application.cache.cached(timeout=86400)
@@ -1006,7 +1014,7 @@ def getSingleSeriesEnrollment(requestParams):
 
     return json.dumps(data)
 
-# Saved queries mechanism
+# Saved queries controller
 
 @application.route('/savedQueries', methods=['POST'])
 @login_required

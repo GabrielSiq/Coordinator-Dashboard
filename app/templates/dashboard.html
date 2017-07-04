@@ -42,7 +42,7 @@
 {% block content %}
 
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="card" type="bar-chart-view" id="semester-count">
                 <div class="header">
                     <h4 class="title">Student Semester Count</h4>
@@ -51,16 +51,16 @@
                 <div class="query-controls">
                     <form>
                         <div class="row">
-                            <div class="form-group col-md-5">
+                            <div class="form-group col-md-3">
                                 <label for="queryName">Saved Query</label>
                                 <select name="queryName" class="form-control">
                                 </select>
                             </div>
-                            <div class="form-group button col-md-3">
+                            <div class="form-group button col-md-1">
                                 <button type="button" class="btn btn-warning btn-sq-sm rename-query" data-toggle="modal" data-target="#renameQuery"><span class="glyphicon glyphicon-pencil"></span></button>
                                 <button type="button" class="btn btn-danger btn-sq-sm delete-query"><span>&times;</span></button>
                             </div>
-                            <div class="form-group button col-md-4">
+                            <div class="form-group button col-md-2">
                                 <button type="button" class="btn btn-success save-query" data-toggle="modal" data-target="#saveQuery">Save Config.</button>
                             </div>
                         </div>
@@ -70,7 +70,7 @@
                     <form>
                         <div class="row param" id="row0">
                             <div class="form-group col-md-2">
-                                <label for="semester">Semester</label>
+                                <label>Semester</label>
                                 <select id="semester" class="form-control combobox">
                                     <option value=""></option>
                                     {% for semester in previous_semesters %}
@@ -102,51 +102,13 @@
                 </div>
             </div>
         </div>
-         <div class="col-md-4">
-            <div class="card" type="pie-chart-view" id="department-breakdown">
-                <div class="header">
-                    <h4 class="title">Student Breakdown</h4>
-                    <p class="category">Breakdown of students by major per department</p>
-                </div>
-                <div class="content">
-                    <form>
-                        <div class="row param" id="row0">
-                            <div class="form-group col-md-3">
-                                <label for="department">Department</label>
-                                <select id="department" class="form-control combobox">
-                                    <option value=""></option>
-                                    {% for department in department_list %}
-                                        {% for key, value in  department.items() %}
-                                            <option value={{ key }}>{{ value }}</option>
-                                        {% endfor %}
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="form-group col-md-3">
-                                <label for="semester">Semester</label>
-                                <select id="semester" class="form-control combobox">
-                                    <option value=""></option>
-                                    {% for semester in previous_semesters %}
-                                        {% set semString = semester|string() %}
-                                        <option value={{ semester }}>{{ semString[:4] + "." +  semString[4] }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                    </form>
-                    <div id="department-breakdown-chart" class="ct-chart pie">
-
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
     <div class="row">
         <div class="col-md-6">
             <div class="card" type="table-view" id="cancellation">
                 <div class="header">
                     <h4 class="title">Drop Rate <span class="glyphicon"/></h4>
-                    <p class="category">Courses with <span style="font-weight: bold">< ></span> drop rate.</p>
+                    <p class="category">Courses with <span style="font-weight: bold"></span> drop rate.</p>
                 </div>
                 <div class="content table-responsive table-full-width">
                     <form>
@@ -181,25 +143,40 @@
             </div>
         </div>
         <div class="col-md-6">
-            {% set canc3 = getDataTable("cancellation") %}
-            <div class="card">
+            <div class="card" type="pie-chart-view" id="department-breakdown">
                 <div class="header">
-                    <h4 class="title">Drop Rate <span class="glyphicon glyphicon-triangle-top"/></h4>
-                    <p class="category">Courses with <span id="{{ canc3.sort }}">{{ canc3.sort }}</span> drop rate. (Server-side rendering)</p>
+                    <h4 class="title">Student Breakdown</h4>
+                    <p class="category">Breakdown of students by major per department</p>
                 </div>
-                <div class="content table-responsive table-full-width">
-                    <table class="table table-hover table-striped">
-                        <tbody>
-                        {% if canc3 is not none %}
-                            {% for row in canc3['data'].iteritems() %}
-                                <tr>
-                                    <td>{{ row[0] }}</td>
-                                    <td>{{ (row[1] * 100)|round(1) }}%</td>
-                                </tr>
-                            {% endfor %}
-                        {% endif %}
-                        </tbody>
-                    </table>
+                <div class="content">
+                    <form>
+                        <div class="row param" id="row0">
+                            <div class="form-group col-md-3">
+                                <label for="department">Department</label>
+                                <select id="department" class="form-control combobox">
+                                    <option value=""></option>
+                                    {% for department in department_list %}
+                                        {% for key, value in  department.items() %}
+                                            <option value={{ key }}>{{ value }}</option>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="semester">Semester</label>
+                                <select id="semester" class="form-control combobox">
+                                    <option value=""></option>
+                                    {% for semester in previous_semesters %}
+                                        {% set semString = semester|string() %}
+                                        <option value={{ semester }}>{{ semString[:4] + "." +  semString[4] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="department-breakdown-chart" class="ct-chart pie">
+
+                    </div>
                 </div>
             </div>
         </div>
