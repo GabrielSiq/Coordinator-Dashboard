@@ -1,4 +1,4 @@
-# Dashboard Prototype
+# Coordinator Dashboard
 Development repository for the Coordinator's Dashboard project.
 
 ## Quick structure overview
