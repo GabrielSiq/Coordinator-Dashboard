@@ -1,5 +1,6 @@
 # Coordinator Dashboard
 Development repository for the Coordinator's Dashboard project.
+![Bilby Stampede](https://i.imgur.com/uHN4RJv.png)
 
 ## Quick structure overview
 * `.ebextensions` and `.elasticbeanstalk` contain AWS deployment-specific information
